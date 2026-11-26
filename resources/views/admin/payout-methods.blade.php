@@ -1,0 +1,37 @@
+@extends('layouts.admin')
+@section('title', 'Receive Methods')
+@section('heading', 'Receive Methods')
+
+@section('content')
+<div class="alert alert-info"><b>Receive methods</b> are the ways clients can get paid when they <b>sell</b> USDT (UPI, bank account, mobile wallet). Clients only see the methods for their own currency and country when adding a payout account.</div>
+
+<div class="box">
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Currency</th><th>Countries</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    @forelse ($methods as $m)
+      <tr>
+        <td><b>{{ $m->title }}</b><span class="sub">{{ \App\Models\PayoutMethod::TYPES[$m->type] ?? $m->type }}{{ $m->instructions ? ' · ' . $m->instructions : '' }}</span></td>
+        <td class="mono">{{ $m->currency }}</td>
+        <td style="max-width:260px">{{ $m->countriesLabel() }}</td>
+        <td><span class="badge {{ $m->is_active ? 'ok' : 'bad' }}">{{ $m->is_active ? 'Active' : 'Disabled' }}</span></td>
+        <td class="actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-toggle="pm{{ $m->id }}">Edit</button>
+          <form method="POST" action="{{ route('admin.payout-methods.destroy', $m) }}" data-confirm="Delete this receive method? Saved client accounts stay but can't be added again.">@csrf @method('DELETE')<button class="btn btn-danger btn-sm">Delete</button></form>
+        </td>
+      </tr>
+      <tr id="pm{{ $m->id }}" hidden><td colspan="5">
+        @include('admin.partials.payout-form', ['m' => $m])
+      </td></tr>
+    @empty
+      <tr><td colspan="5" class="empty">No receive methods yet.</td></tr>
+    @endforelse
+    </tbody>
+  </table></div>
+</div>
+
+<div class="box">
+  <h3 style="margin-bottom:12px">Add receive method</h3>
+  @include('admin.partials.payout-form', ['m' => new \App\Models\PayoutMethod(['currency' => 'INR', 'type' => 'bank', 'is_active' => true])])
+</div>
+@endsection

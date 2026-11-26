@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P2P USDT Desk | Buy & Sell USDT with INR | SRM Fintech Solutions</title>
+<meta name="description" content="Buy and sell USDT with INR through SRM Fintech Solutions' KYC-verified P2P desk. UPI, IMPS, NEFT and bank transfer. TRC20, BEP20, ERC20 and Polygon networks.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="p2p">
+
+<!-- TRADE -->
+<section class="hero" id="trade">
+  <div class="container hero-grid">
+    <div>
+      <p class="crumb"><a href="index.html">Home</a> / P2P USDT Desk</p>
+      <span class="pill" style="margin-top:14px"><span class="dot"></span> <span data-rate="mode">Desk rate</span></span>
+      <h1>P2P <span>USDT ⇄ INR</span> Desk</h1>
+      <p class="lead">Buy USDT with Indian Rupees or sell USDT for INR directly with SRM Fintech Solutions. See the exact rate, fee and final amount upfront — then confirm with our desk.</p>
+      <div class="grid-2" style="margin-top:30px;gap:14px">
+        <div class="card" style="padding:20px"><p class="muted" style="font-size:13px">We sell at (you buy)</p><h3 class="green" style="margin:6px 0 0;font-size:28px" data-rate="buy">—</h3></div>
+        <div class="card" style="padding:20px"><p class="muted" style="font-size:13px">We buy at (you sell)</p><h3 class="red" style="margin:6px 0 0;font-size:28px" data-rate="sell">—</h3></div>
+      </div>
+      <div class="trust-row" style="margin-top:26px">
+        <div><b data-cfg="min">—</b>Minimum order</div>
+        <div><b data-cfg="max">—</b>Maximum / order</div>
+        <div><b data-cfg="completion">—</b>Avg. completion</div>
+      </div>
+    </div>
+    <div data-p2p-widget></div>
+  </div>
+</section>
+
+<!-- RATES -->
+<section class="section-alt" id="rates">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Rates &amp; limits</span>
+      <h2>Today's USDT rates</h2>
+      <p>Rates are indicative and confirmed by our desk at the time of order. Network fees are charged by the blockchain, not by us.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Asset / Network</th><th>Buy rate</th><th>Sell rate</th><th>Network fee</th><th>Order limit</th><th>Status</th></tr></thead>
+        <tbody id="rateTable"></tbody>
+      </table>
+    </div>
+    <div class="grid-3" style="margin-top:22px">
+      <div class="card reveal"><div class="icon">₹</div><h3>Payment methods</h3><ul><li>UPI</li><li>IMPS</li><li>NEFT / RTGS</li><li>Bank transfer</li></ul></div>
+      <div class="card reveal"><div class="icon blue">⛓</div><h3>Supported networks</h3><ul><li>Tron (TRC20)</li><li>BNB Chain (BEP20)</li><li>Ethereum (ERC20)</li><li>Polygon</li></ul></div>
+      <div class="card reveal"><div class="icon gold">⏱</div><h3>Desk hours</h3><p data-cfg="hours"></p><p style="margin-top:10px">Orders received outside hours are processed on the next working session.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how">
+  <div class="container">
+    <div class="grid-2" style="gap:50px;align-items:start">
+      <div class="reveal">
+        <span class="eyebrow green">Buying USDT</span>
+        <h2 style="font-size:32px;margin:10px 0 24px">How to buy USDT</h2>
+        <div class="steps" style="grid-template-columns:1fr">
+          <div class="step"><h4>Enter amount &amp; network</h4><p>Type how much INR you want to spend and choose TRC20, BEP20, ERC20 or Polygon.</p></div>
+          <div class="step"><h4>Complete KYC &amp; wallet</h4><p>Share your name, PAN and your own receiving wallet address.</p></div>
+          <div class="step"><h4>Pay from your own account</h4><p>Pay via UPI / IMPS / bank transfer to the details our desk confirms on WhatsApp.</p></div>
+          <div class="step"><h4>Receive USDT</h4><p>USDT is sent to your wallet and the transaction hash is shared with you.</p></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <span class="eyebrow red">Selling USDT</span>
+        <h2 style="font-size:32px;margin:10px 0 24px">How to sell USDT</h2>
+        <div class="steps" style="grid-template-columns:1fr">
+          <div class="step"><h4>Enter USDT &amp; network</h4><p>Type how much USDT you want to sell and select the network you'll send on.</p></div>
+          <div class="step"><h4>Complete KYC &amp; payout</h4><p>Share your name, PAN and your own UPI ID or bank account.</p></div>
+          <div class="step"><h4>Send USDT</h4><p>Send USDT only to the wallet address our desk confirms from the official number.</p></div>
+          <div class="step"><h4>Receive INR</h4><p>After blockchain confirmation, INR is credited to your account (net of applicable TDS).</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KYC -->
+<section class="section-alt" id="kyc">
+  <div class="container">
+    <div class="grid-2" style="gap:50px;align-items:center">
+      <div class="reveal">
+        <span class="eyebrow">KYC &amp; compliance</span>
+        <h2 style="font-size:clamp(28px,3.4vw,40px);margin:10px 0 16px">Verified customers. Clean funds. Clear records.</h2>
+        <p class="muted">To keep every transaction safe and compliant, we follow customer due diligence procedures before processing any order. All services are subject to applicable Indian laws, eligibility and operational availability.</p>
+        <div class="notice" style="margin-top:24px"><b>Tax note:</b> Transfers of virtual digital assets in India may attract 1% TDS under Section 194S and tax on gains under Section 115BBH of the Income-tax Act. Where applicable, TDS is deducted on sell orders and reflected in your quote.</div>
+      </div>
+      <div class="card reveal">
+        <h3 style="margin-top:0">What you'll need</h3>
+        <ul>
+          <li>PAN card (mandatory)</li>
+          <li>Aadhaar or other valid government photo ID</li>
+          <li>Bank account / UPI in your own name</li>
+          <li>Your own crypto wallet address (for buy orders)</li>
+          <li>Live selfie / video verification if requested</li>
+        </ul>
+        <h3>What we don't accept</h3>
+        <ul class="no">
+          <li>Third-party payments or payouts</li>
+          <li>Cash deposits</li>
+          <li>Funds from unverified or suspicious sources</li>
+          <li>Customers below 18 years of age</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<section>
+  <div class="container">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Stay safe</span>
+      <h2>Protect yourself from scams</h2>
+      <p>Fraudsters may impersonate P2P merchants. Follow these rules on every order.</p>
+    </div>
+    <div class="grid-4">
+      <div class="card reveal"><div class="icon">☎</div><h3>Official number only</h3><p>We only confirm payment or wallet details from <b data-cfg="phone"></b>.</p></div>
+      <div class="card reveal"><div class="icon blue">🔑</div><h3>Never share keys</h3><p>We will never ask for your seed phrase, private key, OTP or UPI PIN.</p></div>
+      <div class="card reveal"><div class="icon gold">⚠</div><h3>No "guaranteed returns"</h3><p>We never offer investment schemes, double-your-money or fixed returns.</p></div>
+      <div class="card reveal"><div class="icon">✔</div><h3>Check the address</h3><p>Always double-check the wallet address and network before sending USDT.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MY ORDERS -->
+<section class="section-alt" id="orders">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="eyebrow">My orders</span>
+      <h2>Your recent orders</h2>
+      <p>Orders created from this device. Tap “Check status” to ask our desk for an update.</p>
+    </div>
+    <div class="orders" id="myOrders"></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="sec-head center reveal"><span class="eyebrow">FAQ</span><h2>P2P questions, answered</h2></div>
+    <div class="faq reveal">
+      <details><summary>What is P2P USDT trading?</summary><p>Peer-to-peer (P2P) means you transact directly with a counterparty — in this case, SRM Fintech Solutions' merchant desk — instead of placing orders on an exchange order book. You pay INR and receive USDT, or send USDT and receive INR.</p></details>
+      <details><summary>How is the rate decided?</summary><p>Our desk sets buy and sell rates based on prevailing market conditions. The rate shown in the calculator is indicative and is locked when our desk confirms your order on WhatsApp.</p></details>
+      <details><summary>How long does an order take?</summary><p>Most orders complete within the stated average completion time after payment (or USDT) is received and KYC is verified. First-time customers may take longer due to verification.</p></details>
+      <details><summary>Why is TDS deducted on sell orders?</summary><p>Under Section 194S of the Income-tax Act, 1% TDS may apply on the transfer of virtual digital assets. Where applicable, we deduct it and it is reflected in your quote. Please consult a tax professional for your specific situation.</p></details>
+      <details><summary>Can someone else pay on my behalf?</summary><p>No. Payments and payouts must be from / to a bank account or UPI ID in the verified customer's own name. Third-party transactions will be refunded to source and the order cancelled.</p></details>
+      <details><summary>What if I sent USDT on the wrong network?</summary><p>Transactions on the wrong network may be permanently lost. Always confirm the network with our desk before sending. Contact us immediately if a mistake occurs and we will try to help, but recovery cannot be guaranteed.</p></details>
+      <details><summary>Is SRM Fintech Solutions an exchange?</summary><p>No. SRM Fintech Solutions is a sole proprietorship offering eligible digital asset transaction services. We do not claim to be an RBI-authorised bank, stock exchange, cryptocurrency exchange or investment adviser.</p></details>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div><h2>Need a bulk / OTC quote?</h2><p class="muted">For orders above <span data-cfg="max"></span>, talk to our desk directly.</p></div>
+      <a data-wa="Hi, I need a bulk / OTC quote for USDT." target="_blank" rel="noopener" class="btn btn-primary">Request OTC quote</a>
+    </div>
+  </div>
+</section>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

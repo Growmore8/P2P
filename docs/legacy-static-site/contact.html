@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Us | SRM Fintech Solutions</title>
+<meta name="description" content="Contact SRM Fintech Solutions for P2P USDT, digital marketing or market insights enquiries.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="contact">
+
+<div class="page-hero">
+  <div class="container">
+    <p class="crumb"><a href="index.html">Home</a> / Contact</p>
+    <h1>Let's connect. Let's explore opportunities.</h1>
+    <p>Whether you're looking to buy or sell USDT, need digital marketing services or want market insights — we welcome your enquiry.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container grid-2" style="gap:40px;align-items:start">
+    <div class="card reveal">
+      <h3 style="margin-top:0">Send an enquiry</h3>
+      <p style="margin-bottom:20px">Your enquiry opens in WhatsApp so our team can reply fast.</p>
+      <form class="form" id="contactForm" novalidate>
+        <div><label>Full name</label><input class="input" name="name" required></div>
+        <div class="form-row">
+          <div><label>Email address</label><input class="input" type="email" name="email" required></div>
+          <div><label>Phone number</label><input class="input" name="phone" inputmode="tel" required></div>
+        </div>
+        <div><label>Service interested in</label>
+          <select name="service">
+            <option>P2P USDT – Buy</option>
+            <option>P2P USDT – Sell</option>
+            <option>Bulk / OTC USDT</option>
+            <option>Digital Marketing Services</option>
+            <option>Trading &amp; Market Insights</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div><label>Message</label><textarea name="message" required></textarea></div>
+        <p id="contactMsg"></p>
+        <button class="btn btn-primary btn-block">Submit enquiry</button>
+      </form>
+    </div>
+
+    <div class="reveal">
+      <h3 style="font-size:24px;margin-bottom:22px">Business information</h3>
+      <ul class="info-list">
+        <li><span class="icon">🏢</span><div><small>Business name</small>SRM FINTECH SOLUTIONS</div></li>
+        <li><span class="icon blue">📄</span><div><small>Business type</small>Sole Proprietorship</div></li>
+        <li><span class="icon gold">👤</span><div><small>Founder &amp; Proprietor</small>Sanmugam M</div></li>
+        <li><span class="icon">📍</span><div><small>Location</small><span data-cfg="location"></span></div></li>
+        <li><span class="icon blue">✉</span><div><small>Email</small><a data-mail><span data-cfg="email"></span></a></div></li>
+        <li><span class="icon">☎</span><div><small>Phone / WhatsApp</small><a data-wa target="_blank" rel="noopener"><span data-cfg="phone"></span></a></div></li>
+        <li><span class="icon gold">◎</span><div><small>Instagram</small><a data-ig target="_blank" rel="noopener">Follow us on Instagram</a></div></li>
+        <li><span class="icon blue">⏱</span><div><small>P2P desk hours</small><span data-cfg="hours"></span></div></li>
+      </ul>
+      <div class="notice" style="margin-top:26px"><b>Beware of impersonators.</b> We only transact through the official contact details listed on this page. We never ask for OTPs, UPI PINs, private keys or seed phrases.</div>
+    </div>
+  </div>
+</section>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

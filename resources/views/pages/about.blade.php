@@ -1,0 +1,64 @@
+@extends('layouts.site')
+@section('title', 'About Us')
+
+@section('content')
+<div class="page-hero">
+  <div class="container">
+    <p class="crumb"><a href="{{ route('home') }}">Home</a> / About Us</p>
+    <h1>Who we are</h1>
+    <p>SRM Fintech Solutions is a proprietorship business focused on digital asset services, financial market insights and digital marketing.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container grid-2" style="gap:50px">
+    <div class="reveal">
+      <span class="eyebrow">Our story</span>
+      <h2 style="font-size:34px;margin:10px 0 16px">Creating value through professional service.</h2>
+      <p class="muted">We aim to create value through professional service delivery, practical digital solutions and a responsible approach to evolving financial technologies.</p>
+      <p class="muted" style="margin-top:14px">Our objective is to establish a reliable business presence by maintaining transparency, clear communication and long-term professional relationships.</p>
+    </div>
+    <div class="grid-2" style="gap:16px">
+      <div class="card reveal"><div class="icon">◎</div><h3>Our Vision</h3><p>To establish SRM Fintech Solutions as a recognised and trusted global digital business brand connecting digital marketing, financial market knowledge and digital asset services.</p></div>
+      <div class="card reveal"><div class="icon blue">➤</div><h3>Our Mission</h3><p>To deliver professional digital marketing solutions, share meaningful financial market insights and provide eligible digital asset-related services through responsible and transparent business practices.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="sec-head center reveal"><span class="eyebrow">Core values</span><h2>What we stand for</h2></div>
+    <div class="grid-3">
+      <div class="card reveal"><h3>Professionalism</h3><p>Structured, reliable delivery in every interaction.</p></div>
+      <div class="card reveal"><h3>Transparency</h3><p>Clear rates, clear terms, clear communication.</p></div>
+      <div class="card reveal"><h3>Customer Commitment</h3><p>We put customer needs at the centre of our work.</p></div>
+      <div class="card reveal"><h3>Innovation</h3><p>Embracing technology to deliver practical solutions.</p></div>
+      <div class="card reveal"><h3>Responsible Business Practices</h3><p>Compliance, verification and ethical conduct.</p></div>
+      <div class="card reveal"><h3>Continuous Improvement</h3><p>Always learning, always refining.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="founder">
+  <div class="container founder">
+    <div class="avatar reveal">SM</div>
+    <div class="reveal">
+      <span class="eyebrow">Founder &amp; Proprietor</span>
+      <h2 style="font-size:40px;margin:10px 0 4px">SANMUGAM M</h2>
+      <p class="green" style="font-weight:600">Founder &amp; Proprietor, SRM FINTECH SOLUTIONS</p>
+      <p class="muted" style="margin-top:18px">SRM Fintech Solutions was established with a vision to build a professional digital business connecting digital marketing, financial market knowledge and digital asset services.</p>
+      <p class="muted" style="margin-top:14px">With an interest in digital advertising, financial markets and business development, the founder focuses on building a customer-oriented business based on professionalism, continuous learning and responsible business practices.</p>
+      <p style="margin-top:20px;font-family:'Space Grotesk';font-size:20px">“Building a professional brand with a global vision.”</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div><h2>Let's work together</h2><p class="muted">Questions about P2P, marketing or market insights? We're here.</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a href="{{ route('p2p') }}" class="btn btn-primary">P2P Desk</a><a href="{{ route('contact') }}" class="btn btn-ghost">Contact us</a></div>
+    </div>
+  </div>
+</section>
+@endsection
