@@ -42,13 +42,21 @@
 
   // Ticker with BTC/ETH prices
   const track = $("#tickerTrack");
-  function renderTicker(btc, eth) {
+  // Market reference prices for USDT in many currencies (public CoinGecko data — not our desk rates).
+  const MARKET_CUR = ["usd", "eur", "gbp", "aed", "sar", "sgd", "myr", "aud", "cad", "jpy", "thb", "php", "ngn", "pkr", "bdt"];
+  const MARKET_SYM = { usd: "$", eur: "€", gbp: "£", aed: "AED ", sar: "SAR ", sgd: "S$", myr: "RM", aud: "A$", cad: "C$", jpy: "¥", thb: "฿", php: "₱", ngn: "₦", pkr: "Rs ", bdt: "৳" };
+  function renderTicker(market) {
     if (!track || !S.pricing) return;
+    market = market || {};
     const curs = Object.values(S.pricing.currencies || {});
+    const btc = market.bitcoin && market.bitcoin.usd, eth = market.ethereum && market.ethereum.usd, usdt = market.tether || {};
+    const desk = curs.map((c) => c.code.toLowerCase());
     const items = [
       ...curs.flatMap((c) => [`USDT/${c.code} Buy <b>${fiat(c.buy_rate, c)}</b>`, `USDT/${c.code} Sell <b>${fiat(c.sell_rate, c)}</b>`]),
       `BTC/USD <b>${btc ? "$" + Number(btc).toLocaleString("en-US") : "—"}</b>`,
       `ETH/USD <b>${eth ? "$" + Number(eth).toLocaleString("en-US") : "—"}</b>`,
+      ...MARKET_CUR.filter((k) => usdt[k] && !desk.includes(k)).map((k) =>
+        `USDT/${k.toUpperCase()} <small class="tk-mkt">market</small> <b>${MARKET_SYM[k] || ""}${Number(usdt[k]).toLocaleString("en-US", { maximumFractionDigits: usdt[k] < 10 ? 3 : 2 })}</b>`),
       `Avg. completion <b>${S.completion || ""}</b>`,
       `Networks <b>${S.pricing.networks.map((n) => n.code).join(" · ")}</b>`,
       `Desk hours <b>${S.hours || ""}</b>`
@@ -57,8 +65,30 @@
   }
   if (track) {
     renderTicker();
-    fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd")
-      .then((r) => r.json()).then((d) => renderTicker(d.bitcoin && d.bitcoin.usd, d.ethereum && d.ethereum.usd)).catch(() => {});
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=" + MARKET_CUR.join(","))
+      .then((r) => r.json()).then(renderTicker).catch(() => {});
+  }
+
+  // Recent-orders feed: show 3 at a time and rotate through the latest real completed orders.
+  const feed = document.getElementById("activityFeed");
+  if (feed && Array.isArray(window.SRM_ACTIVITY) && window.SRM_ACTIVITY.length > 3) {
+    const all = window.SRM_ACTIVITY;
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const row = (a) => `<img src="https://flagcdn.com/w40/${esc(a.cc)}.png" alt=""><div>Someone from ${esc(a.country)} ${esc(a.verb)} <b>${esc(a.usdt)} USDT</b><small>${esc(a.ago)}</small></div>`;
+    let next = 3;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setInterval(() => {
+      if (document.hidden) return;
+      const item = document.createElement("div");
+      item.className = "activity-item act-in";
+      item.innerHTML = row(all[next % all.length]);
+      next++;
+      const last = feed.lastElementChild;
+      feed.insertBefore(item, feed.firstElementChild);
+      if (reduce) { last.remove(); return; }
+      last.classList.add("act-out");
+      setTimeout(() => last.remove(), 450);
+    }, 4000);
   }
 
   /* ---------- Calculator (public widget + trade page) ---------- */

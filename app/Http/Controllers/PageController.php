@@ -10,11 +10,19 @@ class PageController extends Controller
 {
     public function home()
     {
-        // Real, anonymised recent completed orders (no names, no exact amounts in INR).
+        // Real, anonymised recent completed orders (country + rounded USDT only — never names or fiat amounts).
+        // The page shows 3 at a time and rotates through these.
         $activity = Order::with('user:id,country')->where('status', Order::COMPLETED)
-            ->latest('completed_at')->limit(3)->get(['id', 'user_id', 'side', 'usdt_amount', 'completed_at']);
+            ->latest('completed_at')->limit(20)->get(['id', 'user_id', 'side', 'usdt_amount', 'completed_at'])
+            ->map(fn ($o) => [
+                'cc' => strtolower($o->user->country ?? 'in'),
+                'country' => config('countries.' . ($o->user->country ?? 'IN') . '.0', 'India'),
+                'verb' => $o->side === 'buy' ? 'bought' : 'sold',
+                'usdt' => number_format((float) $o->usdt_amount, 0),
+                'ago' => $o->completed_at?->diffForHumans() ?? '',
+            ]);
 
-        return view('pages.home', ['pricing' => Pricing::config(), 'activity' => $activity]);
+        return view('pages.home', ['pricing' => Pricing::config(), 'activity' => $activity, 'strip' => \App\Support\BrandStrip::build()]);
     }
 
     public function p2p()

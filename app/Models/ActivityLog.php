@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** Audit trail of admin actions (who did what, when, from which IP). */
 class ActivityLog extends Model
 {
+    use SetsCreatedAt;
+
     public $timestamps = false;
 
     protected $fillable = ['actor_id', 'action', 'subject_type', 'subject_id', 'description', 'ip', 'created_at'];

@@ -22,15 +22,17 @@
     <div>
       @include('partials.calc', ['mode' => 'widget'])
       @if ($activity->isNotEmpty())
-        <div class="activity">
-          @foreach ($activity as $a)
+        <div class="activity" id="activityFeed" aria-live="polite" aria-label="Recent completed orders">
+          @foreach ($activity->take(3) as $a)
             <div class="activity-item">
-              <img src="https://flagcdn.com/w40/{{ strtolower($a->user->country ?? 'in') }}.png" alt="">
-              <div>Someone from {{ config('countries.' . ($a->user->country ?? 'IN') . '.0') }} {{ $a->side === 'buy' ? 'bought' : 'sold' }} <b>{{ number_format($a->usdt_amount, 0) }} USDT</b>
-                <small>{{ $a->completed_at?->diffForHumans() }}</small></div>
+              <img src="https://flagcdn.com/w40/{{ $a['cc'] }}.png" alt="">
+              <div>Someone from {{ $a['country'] }} {{ $a['verb'] }} <b>{{ $a['usdt'] }} USDT</b><small>{{ $a['ago'] }}</small></div>
             </div>
           @endforeach
         </div>
+        @if ($activity->count() > 3)
+          <script>window.SRM_ACTIVITY = {!! json_encode($activity->values(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};</script>
+        @endif
       @endif
     </div>
   </div>
@@ -51,6 +53,8 @@
     </div>
   </div>
 </section>
+
+@include('partials.brand-strip')
 
 <section>
   <div class="container">

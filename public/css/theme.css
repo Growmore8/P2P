@@ -444,3 +444,71 @@ a.stat:hover{border-color:var(--brand)}
 
 /* KYC review list on the "In review" screen / admin */
 .kv-static .kv-item{opacity:1}
+
+/* ===================== Homepage logo strip (marquee) ===================== */
+.brand-strip{padding:80px 0 70px;overflow:hidden}
+.marquee{position:relative;display:flex;align-items:center;gap:0;margin:0 0 16px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12%,#000 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 12%,#000 88%,transparent 100%)}
+.marquee-label{position:absolute;left:50%;top:-22px;transform:translateX(-50%);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted);white-space:nowrap}
+.marquee{padding-top:24px}
+.marquee-track{display:flex;width:max-content;animation:marquee 38s linear infinite}
+.marquee.reverse .marquee-track{animation-direction:reverse;animation-duration:32s}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-group{display:flex;gap:14px;padding-right:14px}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.bchip{display:inline-flex;align-items:center;gap:10px;height:58px;padding:0 22px;border-radius:16px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:15.5px;color:var(--text);white-space:nowrap;transition:.2s;box-shadow:0 6px 18px -14px rgba(15,23,42,.35)}
+.bchip:hover{border-color:var(--bc);transform:translateY(-2px)}
+.bmask{width:26px;height:26px;flex-shrink:0;background-color:var(--bc);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;-webkit-mask-size:contain;mask-size:contain}
+:root[data-theme="dark"] .bchip .bmask{filter:brightness(1.6) saturate(.9)}
+.bchip img{width:26px;height:26px;object-fit:contain}
+.binit{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:14px;color:#fff;background:var(--bc)}
+.brand-note{text-align:center;color:var(--muted);font-size:12.5px;margin-top:22px;max-width:720px;margin-left:auto;margin-right:auto}
+@media (max-width:640px){.brand-strip{padding:56px 0 50px}.bchip{height:48px;padding:0 16px;font-size:14px}.bmask,.bchip img{width:22px;height:22px}}
+@media (prefers-reduced-motion:reduce){.marquee-track{animation:none;flex-wrap:wrap;width:auto;justify-content:center}.marquee-group[aria-hidden]{display:none}.marquee{-webkit-mask-image:none;mask-image:none}}
+.bchip.bk .binit{color:var(--card)}
+/* marquee v2: labels outside the faded area; inline SVG logos */
+.marquee{padding-top:0}
+.marquee-label{position:static;transform:none;text-align:center;margin:0 0 10px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.marquee + .marquee-label{margin-top:22px}
+.bchip .blogo{width:24px;height:24px;flex-shrink:0;color:var(--bc)}
+:root[data-theme="dark"] .bchip .blogo{filter:brightness(1.5)}
+.marquee{margin-bottom:0}
+.bchip img{width:26px;height:26px;object-fit:contain;border-radius:6px}
+.marquee-group > .bchip{flex-shrink:0}
+/* ticker market tag + feed rotation */
+.tk-mkt{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin:0 2px}
+.activity{overflow:hidden}
+.act-in{animation:actIn .45s ease}
+.act-out{animation:actOut .45s ease forwards}
+@keyframes actIn{from{opacity:0;transform:translateY(-14px)}}
+@keyframes actOut{to{opacity:0;transform:translateY(14px)}}
+
+/* ===================== Support tickets ===================== */
+.sup-hero{background:linear-gradient(160deg,var(--brand-soft),transparent 70%),var(--card-2);border:1px solid var(--line);border-radius:18px;padding:20px 18px}
+.sup-hero h3{font-size:19px;margin-bottom:4px}
+.sup-hero p{font-size:14px}
+.sup-topics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.sup-topic{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card-2);border:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--text)}
+.sup-topic:hover{border-color:var(--brand)}
+.sup-topic span{width:28px;height:28px;border-radius:8px;background:var(--card);display:grid;place-items:center;flex-shrink:0}
+.sup-contact{margin-top:20px}
+.sup-contact .lrow > span:first-child{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--card)}
+.cat-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.form label.cat-card{display:flex;align-items:center;gap:12px;margin:0;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card-2);cursor:pointer;color:var(--text);transition:.15s}
+.cat-card input{position:absolute;opacity:0;pointer-events:none}
+.cat-card:hover{border-color:var(--brand)}
+.cat-card:has(input:checked){border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px var(--brand-soft)}
+.cat-ico{width:36px;height:36px;border-radius:10px;background:var(--card);display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.cat-text b{display:block;font-size:14.5px}
+.cat-text small{display:block;color:var(--muted);font-size:12.5px}
+.tk-success{text-align:center;background:var(--card-2);border:1px solid var(--line);border-radius:18px;padding:22px 18px;margin-bottom:14px;animation:pop .35s ease}
+.tk-success h3{margin:12px 0 4px;font-size:18px}
+.tk-success p{color:var(--muted);font-size:14px;margin-top:4px}
+.tk-id{display:inline-flex;align-items:center;gap:8px;margin:8px 0;padding:8px 14px;border-radius:12px;background:var(--card);border:1px dashed var(--brand);font-size:17px;font-weight:800;color:var(--brand)}
+.thread{display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:88%;padding:11px 14px;border-radius:16px;font-size:14.5px;line-height:1.5;border:1px solid var(--line)}
+.bubble.me{align-self:flex-end;background:var(--brand-soft);border-color:rgba(31,86,224,.25);border-bottom-right-radius:4px}
+.bubble.staff{align-self:flex-start;background:var(--card-2);border-bottom-left-radius:4px}
+.bubble-head{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.bubble-body{white-space:pre-line;word-break:break-word}
+.bubble-file{display:inline-block;margin-top:8px;font-size:13px;font-weight:700;color:var(--brand)}

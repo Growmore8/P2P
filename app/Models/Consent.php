@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
@@ -9,6 +10,8 @@ use Illuminate\Http\Request;
 /** A record of an agreement a client accepted (legal evidence: what, which version, when, from where). */
 class Consent extends Model
 {
+    use SetsCreatedAt;
+
     public $timestamps = false;
 
     public const LABELS = [

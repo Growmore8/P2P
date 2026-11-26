@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DepositMethod;
 use App\Models\KycSubmission;
 use App\Models\Order;
+use App\Models\TicketMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,6 +28,13 @@ class FileController extends Controller
         abort_unless($request->user()->is_admin || $request->user()->id === $order->user_id, 403);
 
         return $this->serve($order->user_proof);
+    }
+
+    public function ticket(Request $request, TicketMessage $message)
+    {
+        abort_unless($request->user()->is_admin || $request->user()->id === $message->ticket->user_id, 403);
+
+        return $this->serve($message->attachment);
     }
 
     public function qr(DepositMethod $method)

@@ -20,7 +20,7 @@
       <a class="menu-item" href="{{ route('account') }}"><span class="mi">👤</span> Account</a>
       <a class="menu-item" href="{{ route('orders.index') }}"><span class="mi">🕘</span> Order History</a>
       <div class="menu-sep"></div>
-      <a class="menu-item" href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"><span class="mi">🎧</span> Support</a>
+      <a class="menu-item" href="{{ route('support.index') }}"><span class="mi">🎧</span> Support &amp; tickets</a>
       <a class="menu-item" href="{{ route('home') }}"><span class="mi">⌂</span> Website</a>
       <form method="POST" action="{{ route('logout') }}">@csrf<button class="menu-item"><span class="mi">⇥</span> Logout</button></form>
       <div class="drawer-foot"><a href="{{ route('legal') }}#terms">Terms &amp; Conditions</a> · <a href="{{ route('legal') }}#privacy">Privacy Policy</a></div>
@@ -30,7 +30,7 @@
       <button type="button" class="icon-btn" data-drawer-open aria-label="Open menu">☰</button>
       @include('partials.logo')
       <div class="right">
-        <a class="icon-btn" href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener" aria-label="Support" title="Support">🎧</a>
+        <a class="icon-btn" href="{{ route('support.index') }}" aria-label="Support" title="Support">🎧</a>
       </div>
     </div>
 

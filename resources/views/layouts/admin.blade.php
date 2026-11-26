@@ -12,6 +12,8 @@
 
   <div class="nav-title">Clients</div>
   <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><span class="ico">👥</span> Clients</a>
+  <a href="{{ route('admin.tickets.index') }}" class="{{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}"><span class="ico">🎧</span> Support Tickets
+    @if ($badge['tickets'])<span class="count">{{ $badge['tickets'] }}</span>@endif</a>
   <a href="{{ route('admin.kyc.index') }}" class="{{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}"><span class="ico">🛡</span> KYC Verification
     @if ($badge['kyc'])<span class="count">{{ $badge['kyc'] }}</span>@endif</a>
 

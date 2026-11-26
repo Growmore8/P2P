@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderLog extends Model
 {
+    use SetsCreatedAt;
+
     public $timestamps = false;
 
     protected $fillable = ['order_id', 'actor_id', 'status', 'note', 'created_at'];

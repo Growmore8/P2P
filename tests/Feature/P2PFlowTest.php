@@ -466,6 +466,54 @@ class P2PFlowTest extends TestCase
         $this->get('/forgot-password/new')->assertRedirect('/forgot-password');
     }
 
+    public function test_support_ticket_flow_with_emails_and_admin_reply(): void
+    {
+        $u = $this->customer();
+        $other = $this->customer();
+        $mine = $u->orders()->create(['order_no' => 'SRMTK1', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5, 'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::SUBMITTED]);
+        $theirs = $other->orders()->create(['order_no' => 'SRMTK2', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5, 'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::SUBMITTED]);
+
+        $this->actingAs($u)->get('/support')->assertOk()->assertSee('Raise a ticket');
+        $this->actingAs($u)->get('/support/new?category=funds&order=SRMTK1')->assertOk()->assertSee('Funds not received');
+        $this->actingAs($u)->post('/support', ['category' => 'funds', 'subject' => 'Hi', 'message' => 'short'])->assertSessionHasErrors(['subject', 'message']);
+
+        // linking someone else's order is ignored
+        $this->actingAs($u)->post('/support', ['category' => 'funds', 'order_id' => $theirs->id, 'subject' => 'Paid but no USDT', 'message' => 'I paid 9350 via UPI, UTR 412345678901.',
+            'attachment' => UploadedFile::fake()->createWithContent('pay.png', self::png())])->assertRedirect();
+        $t = \App\Models\Ticket::first();
+        $this->assertNull($t->order_id);
+        $this->assertMatchesRegularExpression('/^TKT-\d{6}-[A-Z0-9]{5}$/', $t->ticket_no);
+        $this->actingAs($u)->get("/support/{$t->ticket_no}")->assertOk()->assertSee('Ticket submitted successfully')->assertSee($t->ticket_no);
+        Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'created' && $m->hasTo($u->email));
+        Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'staff_new' && $m->hasTo(Setting::get('support_email')));
+
+        $this->actingAs($u)->post('/support', ['category' => 'buy', 'order_id' => $mine->id, 'subject' => 'Order delay', 'message' => 'My order is still processing.'])->assertRedirect();
+        $this->assertSame($mine->id, \App\Models\Ticket::latest('id')->first()->order_id);
+
+        // privacy: other clients can't see the ticket or its attachment
+        $msg = $t->messages()->first();
+        $this->actingAs($other)->get("/support/{$t->ticket_no}")->assertNotFound();
+        $this->actingAs($other)->get("/files/ticket/{$msg->id}")->assertForbidden();
+        $this->actingAs($u)->get("/files/ticket/{$msg->id}")->assertOk();
+
+        // admin sees it, replies → client gets an email with the reply
+        $this->actingAs($this->admin)->get('/admin/tickets')->assertOk()->assertSee($t->ticket_no);
+        $this->actingAs($this->admin)->get("/admin/tickets/{$t->ticket_no}")->assertOk()->assertSee('I paid 9350');
+        $this->actingAs($this->admin)->post("/admin/tickets/{$t->ticket_no}/reply", ['message' => 'We have verified your payment.', 'status' => 'answered'])->assertSessionHasNoErrors();
+        $this->assertSame('answered', $t->fresh()->status);
+        Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'reply' && $m->hasTo($u->email) && $m->msg?->body === 'We have verified your payment.');
+
+        // client replies → back to open, support inbox notified
+        $this->actingAs($u)->post("/support/{$t->ticket_no}/reply", ['message' => 'Thanks, received!'])->assertSessionHasNoErrors();
+        $this->assertSame('open', $t->fresh()->status);
+        Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'staff_reply');
+
+        // closed tickets accept no more replies
+        $this->actingAs($u)->post("/support/{$t->ticket_no}/close");
+        $this->actingAs($u)->post("/support/{$t->ticket_no}/reply", ['message' => 'one more'])->assertSessionHas('error');
+        $this->assertSame(3, $t->messages()->count());
+    }
+
     public function test_blocked_user_is_logged_out(): void
     {
         $u = $this->customer();

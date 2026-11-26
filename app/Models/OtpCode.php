@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use App\Mail\OtpMail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +17,8 @@ class OtpCode extends Model
     public const TTL_MINUTES = 10;
     public const MAX_ATTEMPTS = 5;
     public const RESEND_SECONDS = 60;
+
+    use SetsCreatedAt;
 
     public $timestamps = false;
 

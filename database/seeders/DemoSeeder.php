@@ -95,6 +95,43 @@ class DemoSeeder extends Seeder
             }
         }
 
+        // International demo clients (local testing only) so the homepage feed shows several countries.
+        $intl = [
+            ['AE', 'AED', 'Aisha Al Mansoori', 'uae.client@demo.test', '+971500000001', 'د.إ ', 3.72, 3.62],
+            ['GB', 'GBP', 'James Walker', 'uk.client@demo.test', '+447700000001', '£', 0.81, 0.77],
+            ['MY', 'MYR', 'Nur Aisyah', 'malaysia.client@demo.test', '+60120000001', 'RM', 4.55, 4.35],
+            ['SG', 'SGD', 'Wei Ling Tan', 'singapore.client@demo.test', '+6581000001', 'S$', 1.37, 1.31],
+            ['NG', 'NGN', 'Chinedu Okafor', 'nigeria.client@demo.test', '+2348030000001', '₦', 1580, 1530],
+            ['US', 'USD', 'Emily Carter', 'usa.client@demo.test', '+12025550101', '$', 1.01, 0.99],
+        ];
+        foreach ($intl as [$cc, $cur, $name, $email, $phone, $sym, $buyRate, $sellRate]) {
+            // Demo currencies stay inactive: they exist only so demo orders have a currency.
+            Currency::firstOrCreate(['code' => $cur], [
+                'name' => $cur, 'symbol' => $sym, 'buy_rate' => $buyRate, 'sell_rate' => $sellRate,
+                'min_amount' => 0, 'max_amount' => 0, 'tds_percent' => 0, 'is_active' => false, 'sort' => 50,
+            ]);
+            $u = $this->client($email, $name, $cc, $phone, 'approved');
+            if ($u->orders()->exists()) {
+                continue;
+            }
+            foreach (range(1, 2) as $k) {
+                $buy = $k === 1 || mt_rand(0, 1);
+                $usdt = mt_rand(80, 900);
+                $rate = $buy ? $buyRate : $sellRate;
+                $when = now()->subHours(mt_rand(1, 72));
+                $o = $u->orders()->create([
+                    'order_no' => 'SRM' . $when->format('ymd') . strtoupper(Str::random(5)),
+                    'side' => $buy ? 'buy' : 'sell', 'network' => 'TRC20', 'currency' => $cur, 'rate' => $rate,
+                    'fiat_amount' => round($usdt * $rate, 2), 'usdt_amount' => $usdt, 'fee_usdt' => $buy ? 1 : 0,
+                    'payout_fiat' => $buy ? 0 : round($usdt * $rate, 2), 'status' => Order::COMPLETED,
+                    'wallet_address' => $buy ? 'TXYZabcdefghijkmnopqrstuvwxyz12345' : null,
+                    'deposit_address' => $buy ? null : 'TXYZabcdefghijkmnopqrstuvwxyz12345',
+                    'paid_at' => $when, 'completed_at' => $when->copy()->addMinutes(15),
+                ]);
+                $o->forceFill(['created_at' => $when])->save();
+            }
+        }
+
         $this->command?->info('Demo clients ready — password for all: ' . self::PASSWORD);
     }
 

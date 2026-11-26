@@ -189,7 +189,7 @@
   </ul>
 </section>
 
-<a class="btn btn-ghost btn-block" target="_blank" rel="noopener" href="https://wa.me/{{ $whatsapp }}?text={{ rawurlencode('Hi, I need help with order ' . $order->order_no) }}">🎧 Need help with this order?</a>
+<a class="btn btn-ghost btn-block" href="{{ route('support.create', ['order' => $order->order_no, 'category' => $order->isBuy() ? 'buy' : 'sell']) }}">🎧 Need help with this order? Raise a ticket</a>
 @endsection
 
 @push('scripts')

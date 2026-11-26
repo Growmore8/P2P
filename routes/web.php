@@ -12,6 +12,7 @@ use App\Http\Controllers\KycController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 /* ---------- Public website ---------- */
@@ -79,6 +80,14 @@ Route::middleware(['auth', 'active', 'email.verified', 'consent'])->group(functi
     Route::get('/account/security', [AccountController::class, 'security'])->name('account.security');
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->middleware('throttle:6,1')->name('account.password');
 
+    Route::get('/support', [SupportController::class, 'index'])->name('support.index');
+    Route::get('/support/new', [SupportController::class, 'create'])->name('support.create');
+    Route::post('/support', [SupportController::class, 'store'])->middleware('throttle:6,1')->name('support.store');
+    Route::get('/support/{ticket}', [SupportController::class, 'show'])->name('support.show');
+    Route::post('/support/{ticket}/reply', [SupportController::class, 'reply'])->middleware('throttle:15,1')->name('support.reply');
+    Route::post('/support/{ticket}/close', [SupportController::class, 'close'])->name('support.close');
+    Route::get('/files/ticket/{message}', [FileController::class, 'ticket'])->name('files.ticket');
+
     Route::get('/files/kyc/{kyc}/{doc}', [FileController::class, 'kyc'])->name('files.kyc');
     Route::get('/files/proof/{order}', [FileController::class, 'proof'])->name('files.proof');
     Route::get('/files/order-qr/{order}', [FileController::class, 'orderQr'])->name('files.orderQr');
@@ -99,6 +108,11 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::delete('/payout-methods/{payoutMethod}', [Admin\PayoutMethodController::class, 'destroy'])->name('payout-methods.destroy');
 
     Route::get('/history', [Admin\ActivityController::class, 'index'])->name('history');
+
+    Route::get('/tickets', [Admin\TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{ticket}', [Admin\TicketController::class, 'show'])->name('tickets.show');
+    Route::post('/tickets/{ticket}/reply', [Admin\TicketController::class, 'reply'])->name('tickets.reply');
+    Route::post('/tickets/{ticket}/status', [Admin\TicketController::class, 'status'])->name('tickets.status');
 
     Route::get('/kyc', [Admin\KycController::class, 'index'])->name('kyc.index');
     Route::get('/kyc/{kyc}', [Admin\KycController::class, 'show'])->name('kyc.show');

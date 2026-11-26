@@ -39,6 +39,11 @@ class User extends Authenticatable
         return Currency::where('code', $this->currencyCode())->where('is_active', true)->first();
     }
 
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
     public function consents(): HasMany
     {
         return $this->hasMany(Consent::class);
