@@ -512,3 +512,6 @@ a.stat:hover{border-color:var(--brand)}
 .bubble-head{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:4px}
 .bubble-body{white-space:pre-line;word-break:break-word}
 .bubble-file{display:inline-block;margin-top:8px;font-size:13px;font-weight:700;color:var(--brand)}
+.activity{transition:opacity .3s}
+.activity.act-fade{opacity:0}
+.act-nick{font-weight:700}

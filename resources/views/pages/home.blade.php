@@ -22,17 +22,15 @@
     <div>
       @include('partials.calc', ['mode' => 'widget'])
       @if ($activity->isNotEmpty())
-        <div class="activity" id="activityFeed" aria-live="polite" aria-label="Recent completed orders">
+        <div class="activity" id="activityFeed" aria-live="polite" aria-label="Recent completed orders" data-src="{{ route('activity.feed') }}">
           @foreach ($activity->take(3) as $a)
             <div class="activity-item">
               <img src="https://flagcdn.com/w40/{{ $a['cc'] }}.png" alt="">
-              <div>Someone from {{ $a['country'] }} {{ $a['verb'] }} <b>{{ $a['usdt'] }} USDT</b><small>{{ $a['ago'] }}</small></div>
+              <div><b class="act-nick">{{ $a['nick'] }}</b> from {{ $a['country'] }} {{ $a['verb'] }} <b>{{ $a['usdt'] }} USDT</b><small data-ts="{{ $a['ts'] }}">{{ $a['ago'] }}</small></div>
             </div>
           @endforeach
         </div>
-        @if ($activity->count() > 3)
-          <script>window.SRM_ACTIVITY = {!! json_encode($activity->values(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};</script>
-        @endif
+        <script>window.SRM_ACTIVITY = {!! json_encode($activity, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};</script>
       @endif
     </div>
   </div>

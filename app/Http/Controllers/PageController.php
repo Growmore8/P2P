@@ -10,19 +10,49 @@ class PageController extends Controller
 {
     public function home()
     {
-        // Real, anonymised recent completed orders (country + rounded USDT only — never names or fiat amounts).
-        // The page shows 3 at a time and rotates through these.
-        $activity = Order::with('user:id,country')->where('status', Order::COMPLETED)
-            ->latest('completed_at')->limit(20)->get(['id', 'user_id', 'side', 'usdt_amount', 'completed_at'])
+        return view('pages.home', ['pricing' => Pricing::config(), 'activity' => self::activity(), 'strip' => \App\Support\BrandStrip::build()]);
+    }
+
+    /** JSON for the live feed (polled by the homepage). */
+    public function activityFeed()
+    {
+        return response()->json(self::activity())->header('Cache-Control', 'public, max-age=15');
+    }
+
+    /**
+     * Latest REAL completed orders, newest first. Shows a masked nickname of the actual client
+     * (e.g. "Ra*** K."), their country, rounded USDT and the real completion time — never fiat amounts.
+     */
+    private static function activity()
+    {
+        return Order::with('user:id,name,country')->where('status', Order::COMPLETED)->whereNotNull('completed_at')
+            ->latest('completed_at')->limit(18)->get(['id', 'user_id', 'side', 'usdt_amount', 'completed_at'])
             ->map(fn ($o) => [
+                'id' => $o->id,
+                'nick' => self::maskName($o->user->name ?? ''),
                 'cc' => strtolower($o->user->country ?? 'in'),
                 'country' => config('countries.' . ($o->user->country ?? 'IN') . '.0', 'India'),
                 'verb' => $o->side === 'buy' ? 'bought' : 'sold',
                 'usdt' => number_format((float) $o->usdt_amount, 0),
-                'ago' => $o->completed_at?->diffForHumans() ?? '',
-            ]);
+                'ts' => $o->completed_at->toIso8601String(),
+                'ago' => $o->completed_at->diffForHumans(),
+            ])->values();
+    }
 
-        return view('pages.home', ['pricing' => Pricing::config(), 'activity' => $activity, 'strip' => \App\Support\BrandStrip::build()]);
+    /** "Ravi Kumar" → "Ra*** K." · "Priya" → "Pr***" — enough to feel personal, not enough to identify. */
+    private static function maskName(string $name): string
+    {
+        $parts = preg_split('/\s+/u', trim($name)) ?: [];
+        $first = $parts[0] ?? '';
+        if ($first === '') {
+            return 'A client';
+        }
+        $nick = mb_substr($first, 0, 2) . '***';
+        if (count($parts) > 1) {
+            $nick .= ' ' . mb_strtoupper(mb_substr(end($parts), 0, 1)) . '.';
+        }
+
+        return $nick;
     }
 
     public function p2p()

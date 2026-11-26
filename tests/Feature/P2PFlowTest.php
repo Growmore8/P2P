@@ -514,6 +514,25 @@ class P2PFlowTest extends TestCase
         $this->assertSame(3, $t->messages()->count());
     }
 
+    public function test_activity_feed_shows_real_orders_with_masked_names_only(): void
+    {
+        $u = $this->customer();
+        $u->forceFill(['name' => 'Ravi Kumar', 'country' => 'IN'])->save();
+        $u->orders()->create(['order_no' => 'SRMFEED1', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
+            'fiat_amount' => 40579, 'usdt_amount' => 434, 'status' => Order::COMPLETED, 'completed_at' => now()->subSeconds(20)]);
+        $u->orders()->create(['order_no' => 'SRMFEED2', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
+            'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::SUBMITTED]); // not completed → never shown
+
+        $feed = $this->getJson('/activity.json')->assertOk()->json();
+        $this->assertCount(1, $feed);
+        $this->assertSame('Ra*** K.', $feed[0]['nick']);
+        $this->assertSame('434', $feed[0]['usdt']);
+        $raw = json_encode($feed);
+        $this->assertStringNotContainsString('Kumar', $raw);
+        $this->assertStringNotContainsString('40579', $raw);
+        $this->get('/')->assertOk()->assertSee('Ra*** K.');
+    }
+
     public function test_blocked_user_is_logged_out(): void
     {
         $u = $this->customer();

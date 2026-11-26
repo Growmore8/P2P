@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 /* ---------- Public website ---------- */
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/p2p', [PageController::class, 'p2p'])->name('p2p');
+Route::get('/activity.json', [PageController::class, 'activityFeed'])->middleware('throttle:60,1')->name('activity.feed');
 foreach (['services', 'about', 'insights', 'contact', 'legal'] as $p) {
     Route::get('/' . $p, [PageController::class, 'page'])->defaults('view', $p)->name($p);
 }

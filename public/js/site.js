@@ -69,26 +69,47 @@
       .then((r) => r.json()).then(renderTicker).catch(() => {});
   }
 
-  // Recent-orders feed: show 3 at a time and rotate through the latest real completed orders.
+  // Recent-orders feed — REAL completed orders only. Newest first, pages of 3, live relative times,
+  // and a poll every 30s so newly completed orders appear as "Just now".
   const feed = document.getElementById("activityFeed");
-  if (feed && Array.isArray(window.SRM_ACTIVITY) && window.SRM_ACTIVITY.length > 3) {
-    const all = window.SRM_ACTIVITY;
-    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    const row = (a) => `<img src="https://flagcdn.com/w40/${esc(a.cc)}.png" alt=""><div>Someone from ${esc(a.country)} ${esc(a.verb)} <b>${esc(a.usdt)} USDT</b><small>${esc(a.ago)}</small></div>`;
-    let next = 3;
+  if (feed && Array.isArray(window.SRM_ACTIVITY)) {
+    let all = window.SRM_ACTIVITY.slice();
+    let page = 0;
+    const PER = 3;
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setInterval(() => {
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const ago = (iso) => {
+      const s = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+      if (s < 10) return "Just now";
+      if (s < 60) return s + " sec ago";
+      const m = Math.floor(s / 60); if (m < 60) return m + (m === 1 ? " min ago" : " mins ago");
+      const h = Math.floor(m / 60); if (h < 24) return h + (h === 1 ? " hour ago" : " hours ago");
+      const d = Math.floor(h / 24); return d + (d === 1 ? " day ago" : " days ago");
+    };
+    const row = (a, fresh) => `<div class="activity-item${fresh ? " act-in" : ""}"><img src="https://flagcdn.com/w40/${esc(a.cc)}.png" alt="">` +
+      `<div><b class="act-nick">${esc(a.nick)}</b> from ${esc(a.country)} ${esc(a.verb)} <b>${esc(a.usdt)} USDT</b>` +
+      `<small data-ts="${esc(a.ts)}">${ago(a.ts)}</small></div></div>`;
+    const tick = () => feed.querySelectorAll("[data-ts]").forEach((el) => (el.textContent = ago(el.dataset.ts)));
+    const pages = () => Math.max(1, Math.ceil(all.length / PER));
+    function render(animate) {
+      const items = all.slice(page * PER, page * PER + PER);
+      if (!items.length) return;
+      const swap = () => { feed.innerHTML = items.map((a) => row(a, animate)).join(""); feed.classList.remove("act-fade"); };
+      if (animate && !reduce) { feed.classList.add("act-fade"); setTimeout(swap, 300); } else swap();
+    }
+    setInterval(tick, 5000);
+    if (all.length > PER) setInterval(() => { if (document.hidden) return; page = (page + 1) % pages(); render(true); }, 6000);
+    // live: fetch latest completed orders; if there's a new one, jump back to the newest page
+    const src = feed.dataset.src;
+    if (src) setInterval(() => {
       if (document.hidden) return;
-      const item = document.createElement("div");
-      item.className = "activity-item act-in";
-      item.innerHTML = row(all[next % all.length]);
-      next++;
-      const last = feed.lastElementChild;
-      feed.insertBefore(item, feed.firstElementChild);
-      if (reduce) { last.remove(); return; }
-      last.classList.add("act-out");
-      setTimeout(() => last.remove(), 450);
-    }, 4000);
+      fetch(src, { headers: { Accept: "application/json" } }).then((r) => r.json()).then((list) => {
+        if (!Array.isArray(list) || !list.length) return;
+        const isNew = !all.length || list[0].id !== all[0].id;
+        all = list;
+        if (isNew) { page = 0; render(true); }
+      }).catch(() => {});
+    }, 30000);
   }
 
   /* ---------- Calculator (public widget + trade page) ---------- */
