@@ -59,6 +59,7 @@
       <div class="box-head"><h3>Client</h3><a href="{{ route('admin.users.show', $u) }}" class="btn btn-ghost btn-sm">Profile</a></div>
       <dl class="kv" style="grid-template-columns:90px 1fr">
         <dt>Name</dt><dd>{{ $u->name }}</dd>
+        <dt>Client ID</dt><dd class="mono">{{ $u->client_id }}</dd>
         <dt>Email</dt><dd>{{ $u->email }}</dd>
         <dt>Phone</dt><dd>{{ $u->phone }} <a class="green" target="_blank" rel="noopener" href="https://wa.me/{{ $u->whatsappNumber() }}?text={{ rawurlencode('Regarding your SRM ticket ' . $ticket->ticket_no) }}">WhatsApp ↗</a></dd>
         <dt>Country</dt><dd>{{ $u->countryName() }}</dd>

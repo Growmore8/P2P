@@ -26,6 +26,7 @@
     <div class="box">
       <h3 style="margin-bottom:14px">Profile</h3>
       <dl class="kv" style="grid-template-columns:100px 1fr">
+        <dt>Client ID</dt><dd class="mono"><b>{{ $u->client_id }}</b></dd>
         <dt>Email</dt><dd>{{ $u->email }}</dd>
         <dt>Phone</dt><dd>{{ $u->phone }}</dd>
         <dt>Country</dt><dd><img src="https://flagcdn.com/w20/{{ strtolower($u->country) }}.png" alt="" width="18" height="13" style="vertical-align:middle"> {{ $u->countryName() }} · {{ $u->currencyCode() }}</dd>

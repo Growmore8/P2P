@@ -125,6 +125,7 @@
       <div class="box-head"><h3>Customer</h3><a href="{{ route('admin.users.show', $u) }}" class="btn btn-ghost btn-sm">Profile</a></div>
       <dl class="kv" style="grid-template-columns:100px 1fr">
         <dt>Name</dt><dd>{{ $u->name }}</dd>
+        <dt>Client ID</dt><dd class="mono">{{ $u->client_id }}</dd>
         <dt>KYC name</dt><dd>{{ $u->kyc?->full_name ?? '—' }}</dd>
         <dt>Country</dt><dd>{{ $u->countryName() }}</dd>
         <dt>ID</dt><dd class="mono">{{ $u->kyc ? $u->kyc->idTypeLabel() . ': ' . ($u->kyc->pan_number ?? $u->kyc->id_number) : '—' }}</dd>

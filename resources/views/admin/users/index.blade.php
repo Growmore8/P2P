@@ -11,7 +11,7 @@
 <div class="box">
   <form class="searchbar" method="GET" style="margin-bottom:16px">
     @if (request('kyc'))<input type="hidden" name="kyc" value="{{ request('kyc') }}">@endif
-    <input class="input" name="q" value="{{ request('q') }}" placeholder="Name, email, phone…">
+    <input class="input" name="q" value="{{ request('q') }}" placeholder="Name, email, phone or client ID…">
     <select class="input" name="country" style="max-width:200px" onchange="this.form.submit()">
       <option value="">All countries</option>
       @foreach (config('countries') as $code => [$cname]) <option value="{{ $code }}" @selected(request('country') === $code)>{{ $cname }}</option> @endforeach
@@ -23,7 +23,7 @@
     <tbody>
     @forelse ($users as $u)
       <tr class="row-link" onclick="location.href='{{ route('admin.users.show', $u) }}'">
-        <td><b>{{ $u->name }}</b> @if ($u->is_admin)<span class="badge info">Admin</span>@endif<span class="sub">{{ $u->email }}</span></td>
+        <td><b>{{ $u->name }}</b> @if ($u->is_admin)<span class="badge info">Admin</span>@endif @if (! $u->is_admin && ! $u->email_verified_at)<span class="badge warn">Email not verified</span>@endif<span class="sub"><span class="mono cid">{{ $u->client_id }}</span> · {{ $u->email }}</span></td>
         <td>{{ $u->phone }}<span class="sub">{{ $u->countryName() }}</span></td>
         <td><span class="badge {{ ['approved' => 'ok', 'rejected' => 'bad', 'pending' => 'warn'][$u->kyc_status] ?? '' }}">{{ $u->kyc_status }}</span></td>
         <td>{{ $u->orders_count }}</td>

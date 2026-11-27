@@ -685,3 +685,6 @@ a.stat:hover{border-color:var(--brand)}
 .logo-pick img{width:20px;height:20px;object-fit:contain}
 .logo-pick i{width:20px;height:20px;border-radius:50%;background:var(--bg-2);display:grid;place-items:center;font-style:normal;font-size:11px}
 .logo-pick input{margin:0}
+.cid{display:inline-block;padding:1px 6px;border-radius:6px;background:var(--brand-soft);color:var(--brand);font-size:11.5px;font-weight:700;letter-spacing:.3px}
+.cid-line{font-size:13px}
+.cid-line b{color:var(--brand);letter-spacing:.4px}

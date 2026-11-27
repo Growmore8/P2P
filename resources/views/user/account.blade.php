@@ -9,6 +9,7 @@
   </div>
   <div style="min-width:0">
     <h2>{{ $user->name }}</h2>
+    <p class="cid-line">Client ID: <b class="mono">{{ $user->client_id }}</b></p>
     <p>{{ $user->email }}</p>
     <p>{{ $user->phone }}</p>
   </div>

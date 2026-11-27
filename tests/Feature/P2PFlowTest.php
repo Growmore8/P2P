@@ -463,6 +463,17 @@ class P2PFlowTest extends TestCase
         $this->actingAs($this->admin)->get('/admin/currencies')->assertSee('converted from INR')->assertSee('AED 2,000')->assertDontSee('name="limits[1][buy]"', false);
     }
 
+    public function test_every_client_gets_a_unique_client_id(): void
+    {
+        $a = $this->customer();
+        $b = $this->customer();
+        $this->assertMatchesRegularExpression('/^SRM\d{7}$/', $a->client_id);
+        $this->assertNotSame($a->client_id, $b->client_id);
+        $this->actingAs($a)->get('/account')->assertSee($a->client_id);
+        $this->actingAs($this->admin)->get('/admin/users?q=' . strtolower($a->client_id))->assertSee($a->email)->assertDontSee($b->email);
+        $this->actingAs($this->admin)->get("/admin/users/{$a->id}")->assertSee('Client ID')->assertSee($a->client_id);
+    }
+
     public function test_duplicate_email_cannot_register_again(): void
     {
         $u = $this->customer();

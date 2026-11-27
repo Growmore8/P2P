@@ -56,6 +56,7 @@
       <dl class="kv" style="grid-template-columns:120px 1fr">
         <dt>Full name</dt><dd>{{ $kyc->full_name }}</dd>
         <dt>Account name</dt><dd>{{ $kyc->user->name }}</dd>
+        <dt>Client ID</dt><dd class="mono">{{ $kyc->user->client_id }}</dd>
         <dt>DOB</dt><dd>{{ $kyc->dob->format('d M Y') }} ({{ $kyc->dob->age }} yrs)</dd>
         <dt>Country</dt><dd>{{ $kyc->countryName() }}</dd>
         @if ($kyc->isIndian())

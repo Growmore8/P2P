@@ -18,7 +18,7 @@ class UserController extends Controller
             ->when($request->query('kyc'), fn ($q, $k) => $q->where('kyc_status', $k))
             ->when($request->query('country'), fn ($q, $c) => $q->where('country', $c))
             ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w
-                ->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")))
+                ->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")))
             ->latest()->paginate(25)->withQueryString();
 
         return view('admin.users.index', ['users' => $users]);

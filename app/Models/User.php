@@ -17,6 +17,23 @@ class User extends Authenticatable
     /** Same defaults as the database columns, so new models have them before a reload. */
     protected $attributes = ['country' => 'IN', 'status' => 'active', 'kyc_status' => 'none', 'kyc_level' => 0, 'is_admin' => false];
 
+    protected static function booted(): void
+    {
+        // Every account gets a permanent unique client ID, e.g. SRM4829173.
+        static::creating(function (User $u) {
+            $u->client_id ??= static::newClientId();
+        });
+    }
+
+    public static function newClientId(): string
+    {
+        do {
+            $id = 'SRM' . random_int(1000000, 9999999);
+        } while (static::where('client_id', $id)->exists());
+
+        return $id;
+    }
+
     public function isIndian(): bool
     {
         return $this->country === 'IN';
