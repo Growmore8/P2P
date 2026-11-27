@@ -474,6 +474,57 @@ class P2PFlowTest extends TestCase
         $this->actingAs($this->admin)->get("/admin/users/{$a->id}")->assertSee('Client ID')->assertSee($a->client_id);
     }
 
+    public function test_order_chat_between_client_and_srm_desk(): void
+    {
+        $u = $this->customer();
+        $other = $this->customer();
+        $m = DepositMethod::first();
+        $this->actingAs($u)->post('/trade', ['side' => 'buy', 'network' => 'TRC20', 'amount' => '5000',
+            'wallet_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'deposit_method_id' => $m->id, 'confirm' => '1'])->assertSessionHasNoErrors();
+        $order = Order::latest('id')->first();
+        $this->actingAs($u)->post("/orders/{$order->order_no}/payment", ['user_reference' => 'UTR123456789',
+            'user_proof' => UploadedFile::fake()->createWithContent('slip.png', self::png())])->assertSessionHasNoErrors();
+
+        // Client sees status messages (incl. the slip) and the chat box with Appeal.
+        $this->actingAs($u)->get("/orders/{$order->order_no}")->assertOk()->assertSee('Chat with SRM')->assertSee('Appeal');
+        $feed = $this->actingAs($u)->getJson("/orders/{$order->order_no}/chat")->assertOk()->json();
+        $this->assertStringContainsString('You marked the order as paid', $feed['items'][1]['body']);
+        $this->assertNotNull($feed['items'][1]['image']);
+
+        // Client writes; SRM desk is emailed and sees it with the release warning.
+        $this->actingAs($u)->postJson("/orders/{$order->order_no}/chat", ['body' => 'Paid, please check'])->assertOk();
+        Mail::assertSent(\App\Mail\OrderChatMail::class, fn ($mail) => $mail->type === 'to_staff');
+        $this->actingAs($this->admin)->get("/admin/orders/{$order->order_no}")->assertOk()->assertSee('Order chat')->assertSee('Slips and screenshots can be edited');
+        $admin = $this->actingAs($this->admin)->getJson("/admin/orders/{$order->order_no}/chat")->assertOk()->json('items');
+        $this->assertStringContainsString('verify the payment in your account before releasing', $admin[1]['body']);
+        $this->assertSame('them', end($admin)['kind']);
+
+        // Desk replies with an attachment; client gets it as "them".
+        $this->actingAs($this->admin)->post("/admin/orders/{$order->order_no}/chat", ['body' => 'Received, releasing now',
+            'attachment' => UploadedFile::fake()->createWithContent('ok.png', self::png())], ['Accept' => 'application/json'])->assertOk();
+        $last = collect($this->actingAs($u)->getJson("/orders/{$order->order_no}/chat")->json('items'))->last();
+        $this->assertSame(['them', 'SRM Fintech'], [$last['kind'], $last['name']]);
+        $this->actingAs($u)->get($last['image'])->assertOk();
+
+        // Nobody else can read or post; empty messages are refused.
+        $this->actingAs($other)->getJson("/orders/{$order->order_no}/chat")->assertNotFound();
+        $this->actingAs($other)->get($last['image'])->assertNotFound();
+        $this->actingAs($u)->getJson("/admin/orders/{$order->order_no}/chat")->assertForbidden();
+        $this->actingAs($u)->postJson("/orders/{$order->order_no}/chat", ['body' => ''])->assertUnprocessable();
+    }
+
+    public function test_admin_can_lock_and_unlock_client_from_list(): void
+    {
+        $u = $this->customer();
+        $this->actingAs($this->admin)->get('/admin/users')->assertSee('● Active');
+        $this->actingAs($this->admin)->post("/admin/users/{$u->id}/block")->assertSessionHas('success');
+        $this->assertTrue($u->fresh()->isBlocked());
+        $this->actingAs($this->admin)->get('/admin/users?state=locked')->assertSee($u->email)->assertSee('🔒 Locked');
+        $this->actingAs($this->admin)->post("/admin/users/{$u->id}/block");
+        $this->assertFalse($u->fresh()->isBlocked());
+        $this->actingAs($this->admin)->get('/admin/users?state=locked')->assertDontSee($u->email);
+    }
+
     public function test_duplicate_email_cannot_register_again(): void
     {
         $u = $this->customer();

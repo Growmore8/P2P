@@ -67,6 +67,11 @@ class Order extends Model
         return $this->hasMany(OrderLog::class)->orderBy('id');
     }
 
+    public function messages(): HasMany
+    {
+        return $this->hasMany(OrderMessage::class)->orderBy('id');
+    }
+
     /** Format an amount in this order's fiat currency. */
     public function money($amount, int $decimals = 2): string
     {

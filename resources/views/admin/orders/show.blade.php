@@ -118,6 +118,10 @@
       <div class="box"><h3>Completed</h3><p class="muted" style="margin-top:6px">{{ $buy ? 'Tx hash' : 'Payout UTR' }}: <span class="mono">{{ $order->admin_reference }}</span>
         @if ($buy && ($x = \App\Models\Order::explorerUrl($order->network, $order->admin_reference)))<a class="green" href="{{ $x }}" target="_blank" rel="noopener">Explorer ↗</a>@endif</p></div>
     @endif
+    <div class="box">
+      <h3 style="margin-bottom:12px">Order chat</h3>
+      @include('partials.order-chat', ['order' => $order, 'staff' => true])
+    </div>
   </div>
 
   <div>

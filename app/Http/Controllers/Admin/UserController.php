@@ -16,6 +16,7 @@ class UserController extends Controller
             ->withCount('orders')
             ->where('is_admin', false)
             ->when($request->query('kyc'), fn ($q, $k) => $q->where('kyc_status', $k))
+            ->when($request->query('state') === 'locked', fn ($q) => $q->where('status', 'blocked'))
             ->when($request->query('country'), fn ($q, $c) => $q->where('country', $c))
             ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w
                 ->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")))
@@ -43,6 +44,6 @@ class UserController extends Controller
         $user->forceFill(['status' => $user->isBlocked() ? 'active' : 'blocked'])->save();
         ActivityLog::log('user.' . $user->status, "Client {$user->email} set to {$user->status}", $user);
 
-        return back()->with('success', "{$user->name} is now {$user->status}.");
+        return back()->with('success', $user->name . ($user->isBlocked() ? ' is now locked and cannot log in.' : ' is now active again.'));
     }
 }

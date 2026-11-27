@@ -80,6 +80,9 @@ Route::middleware(['auth', 'active', 'email.verified', 'consent'])->group(functi
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/payment', [OrderController::class, 'submitPayment'])->middleware('throttle:10,1')->name('orders.payment');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::get('/orders/{order}/chat', [\App\Http\Controllers\OrderChatController::class, 'feed'])->middleware('throttle:90,1')->name('orders.chat');
+    Route::post('/orders/{order}/chat', [\App\Http\Controllers\OrderChatController::class, 'send'])->middleware('throttle:20,1')->name('orders.chat.send');
+    Route::get('/files/order-chat/{message}', [\App\Http\Controllers\OrderChatController::class, 'file'])->name('orders.chat.file');
 
     // Anyone logged in can see the trade screen; placing an order needs approved KYC.
     Route::get('/trade', [OrderController::class, 'create'])->name('trade');
@@ -148,6 +151,9 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::post('/orders/{order}/accept', [Admin\OrderController::class, 'accept'])->name('orders.accept');
     Route::post('/orders/{order}/complete', [Admin\OrderController::class, 'complete'])->name('orders.complete');
     Route::post('/orders/{order}/reject', [Admin\OrderController::class, 'reject'])->name('orders.reject');
+    Route::get('/orders/{order}/chat', [\App\Http\Controllers\OrderChatController::class, 'feed'])->name('orders.chat');
+    Route::post('/orders/{order}/chat', [\App\Http\Controllers\OrderChatController::class, 'send'])->name('orders.chat.send');
+    Route::get('/files/order-chat/{message}', [\App\Http\Controllers\OrderChatController::class, 'file'])->name('orders.chat.file');
 
     Route::post('/methods/{method}/toggle', [Admin\DepositMethodController::class, 'toggle'])->name('methods.toggle');
     Route::resource('methods', Admin\DepositMethodController::class)->except('show');

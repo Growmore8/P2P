@@ -185,19 +185,11 @@
   </div>
 </section>
 
-{{-- ===== Activity ===== --}}
+{{-- ===== Order chat (status updates + messages with SRM) ===== --}}
 <section class="o-sec">
-  <h3 class="o-sec-title" style="font-size:15px">Activity</h3>
-  <ul class="timeline o-timeline">
-    @foreach ($order->logs->reverse() as $log)
-      <li><b>{{ \App\Models\Order::LABELS[$log->status] ?? $log->status }}</b>
-        @if ($log->note)<span class="muted"> — {{ $log->note }}</span>@endif
-        <small>{{ $log->created_at->format('d M, h:i A') }}</small></li>
-    @endforeach
-  </ul>
+  <h3 class="o-sec-title" style="font-size:15px">Chat with SRM</h3>
+  @include('partials.order-chat', ['order' => $order, 'staff' => false])
 </section>
-
-<a class="btn btn-ghost btn-block" href="{{ route('support.create', ['order' => $order->order_no, 'category' => $order->isBuy() ? 'buy' : 'sell']) }}">🎧 Need help with this order? Raise a ticket</a>
 @endsection
 
 @push('scripts')
@@ -224,8 +216,5 @@
     });
   })();
 </script>
-@endif
-@if (in_array($order->status, ['payment_submitted', 'processing']))
-<script>setTimeout(function () { location.reload(); }, 30000);</script>
 @endif
 @endpush
