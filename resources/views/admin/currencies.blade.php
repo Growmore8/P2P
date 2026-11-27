@@ -22,9 +22,11 @@
 @endif
 
 {{-- ===== Add currency (hidden until "+ Add currency") ===== --}}
-<form method="POST" action="{{ route('admin.currencies.store') }}" class="box form cur-add" id="add" @if (! ($errors->any() && ! $editing) && $currencies->isNotEmpty()) hidden @endif>
+@php $addOpen = ($errors->any() && ! $editing) || $currencies->isEmpty(); @endphp
+<div class="modal {{ $addOpen ? 'open' : '' }}" id="addModal" data-admin-modal aria-hidden="{{ $addOpen ? 'false' : 'true' }}">
+<form method="POST" action="{{ route('admin.currencies.store') }}" class="modal-box modal-form form" id="add" role="dialog" aria-modal="true" aria-label="Add a currency">
   @csrf
-  <div class="box-head"><h3>Add a currency</h3><button type="button" class="icon-btn" data-close-add aria-label="Close">✕</button></div>
+  <div class="mf-head"><h3>Add a currency</h3><button type="button" class="modal-close" data-close-add aria-label="Close">×</button></div>
   <p class="muted" style="font-size:13px;margin:-6px 0 14px">Pick the currency — its name and symbol are set automatically. Keep it switched off until its payment methods are ready.</p>
   <div class="cur-grid">
     <div class="span-2"><label>Currency</label>
@@ -50,8 +52,15 @@
     <button class="btn btn-primary">Add currency</button>
   </div>
 </form>
+</div>
 
-{{-- ===== Currency cards ===== --}}
+{{-- ===== Currency list (one line each) ===== --}}
+@php
+  $pencil = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm17.7-10.2a1 1 0 0 0 0-1.42l-2.33-2.33a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+  $trash = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+@endphp
+<div class="box wl-box">
+  <div class="wl-head"><b>Currencies</b> <span class="muted">— {{ $currencies->where('is_active', true)->count() }} active of {{ $currencies->count() }}</span></div>
 @forelse ($currencies as $c)
   @php
     $orders = (int) ($orderCounts[$c->code] ?? 0);
@@ -59,42 +68,27 @@
     $open = $editing === $c->code;
     $sym = $c->symbol;
   @endphp
-  <div class="box cur-card {{ $c->is_active ? '' : 'is-off' }}" id="cur-{{ $c->code }}">
-    <div class="cur-head">
-      <span class="pay-code">{{ $c->code }}</span>
-      <div class="cur-title">
-        <h3>{{ $c->name }} <span class="muted">({{ trim($sym) }})</span></h3>
-        <div class="chips">
-          @foreach (array_slice($c->countryCodes(), 0, 5) as $cc)<span class="chip-sm"><img src="https://flagcdn.com/w20/{{ strtolower($cc) }}.png" alt="">{{ $cc }}</span>@endforeach
-          @if (count($c->countryCodes()) > 5)<span class="chip-sm">+{{ count($c->countryCodes()) - 5 }}</span>@endif
-          @if ($c->isBase())<span class="chip-sm cur-main">Main currency</span>@endif
-        </div>
+  <div class="wl-item {{ $open ? 'is-open' : '' }} {{ $c->is_active ? '' : 'is-off' }}" id="cur-{{ $c->code }}">
+    <div class="wl-row">
+      <span class="wl-chip">{{ $c->code }}</span>
+      <div class="wl-main">
+        <b>{{ $c->name }} <span class="muted wl-name">({{ trim($sym) }})@if ($c->isBase()) · main currency @endif</span></b>
+        <span class="wl-addr">Buy <b>{{ $sym }}{{ number_format($c->buy_rate, 2) }}</b> · Sell <b>{{ $sym }}{{ number_format($c->sell_rate, 2) }}</b> · Margin <b class="green-txt">{{ $sym }}{{ number_format($c->buy_rate - $c->sell_rate, 2) }}</b> · {{ money($c->min_amount, $c->code, 0) }}–{{ (float) $c->max_amount > 0 ? money($c->max_amount, $c->code, 0) : 'no limit' }} · TDS {{ rtrim(rtrim(number_format($c->tds_percent, 2), '0'), '.') }}%</span>
       </div>
-      <span class="badge {{ $c->is_active ? 'ok' : 'bad' }} cur-status">{{ $c->is_active ? 'Active' : 'Off' }}</span>
-    </div>
-
-    <div class="cur-stats">
-      <div><span>Buy rate</span><b>{{ $sym }}{{ number_format($c->buy_rate, 2) }}</b><small>client pays / USDT</small></div>
-      <div><span>Sell rate</span><b>{{ $sym }}{{ number_format($c->sell_rate, 2) }}</b><small>client receives / USDT</small></div>
-      <div class="is-margin"><span>Your margin</span><b>{{ $sym }}{{ number_format($c->buy_rate - $c->sell_rate, 2) }}</b><small>per USDT</small></div>
-      <div><span>Per order</span><b>{{ money($c->min_amount, $c->code, 0) }} – {{ (float) $c->max_amount > 0 ? money($c->max_amount, $c->code, 0) : 'no limit' }}</b><small>min – max</small></div>
-      <div><span>TDS on sell</span><b>{{ rtrim(rtrim(number_format($c->tds_percent, 2), '0'), '.') }}%</b><small>{{ $orders }} {{ \Illuminate\Support\Str::plural('order', $orders) }} so far</small></div>
-    </div>
-
-    <div class="cur-btns">
-      <button type="button" class="btn btn-ghost btn-sm" data-edit="{{ $c->code }}" aria-expanded="{{ $open ? 'true' : 'false' }}">✏️ Edit</button>
+      <span class="wl-status {{ $c->is_active ? 'ok' : 'off' }}"><i class="wl-dot"></i>{{ $c->is_active ? 'Active' : 'Off' }}</span>
+      <button type="button" class="wl-btn edit" data-edit="{{ $c->code }}" title="Edit {{ $c->code }}" aria-label="Edit {{ $c->code }}" aria-expanded="{{ $open ? 'true' : 'false' }}">{!! $pencil !!}</button>
       @if ($canDelete)
         <form method="POST" action="{{ route('admin.currencies.destroy', $c) }}" data-confirm="Delete {{ $c->code }} ({{ $c->name }})? Its payment methods are deleted too. This cannot be undone.">
           @csrf @method('DELETE')
-          <button class="btn btn-ghost btn-sm cur-del">🗑 Delete</button>
+          <button class="wl-btn del" title="Delete {{ $c->code }}" aria-label="Delete {{ $c->code }}">{!! $trash !!}</button>
         </form>
       @else
-        <span class="btn btn-ghost btn-sm is-disabled" title="{{ $c->isBase() ? 'Main currency — all limits are based on it' : 'Has orders — keep for records. Switch it off instead.' }}">🗑 Delete</span>
+        <span class="wl-btn del is-off" title="{{ $c->isBase() ? 'Main currency — all limits are based on it' : $orders . ' orders — keep for records. Switch it off instead.' }}">{!! $trash !!}</span>
       @endif
     </div>
 
     {{-- Edit form (opens with ✏️ Edit) --}}
-    <form method="POST" action="{{ route('admin.currencies.update', $c) }}" class="form cur-edit" data-edit-form="{{ $c->code }}" @unless ($open) hidden @endunless>
+    <form method="POST" action="{{ route('admin.currencies.update', $c) }}" class="form cur-edit wl-edit" data-edit-form="{{ $c->code }}" @unless ($open) hidden @endunless>
       @csrf @method('PUT')
       <input type="hidden" name="_cur" value="{{ $c->code }}">
       <div class="cur-grid">
@@ -116,15 +110,16 @@
     </form>
   </div>
 @empty
-  <div class="box" style="text-align:center"><p class="muted">No currencies yet — tap <b>+ Add currency</b>.</p></div>
+  <p class="muted" style="text-align:center;padding:20px 0">No currencies yet — tap <b>+ Add currency</b>.</p>
 @endforelse
+</div>
 
 @php $curMeta = json_encode(config('currency_meta'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG); @endphp
 <script>
 (function () {
   // Add form
-  var add = document.getElementById('add');
-  function openAdd(on) { add.hidden = !on; if (on) add.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  var add = document.getElementById('add'), addModal = document.getElementById('addModal');
+  function openAdd(on) { window.srmModal(addModal, on); }
   document.querySelectorAll('[data-open-add]').forEach(function (b) { b.addEventListener('click', function () { openAdd(true); }); });
   document.querySelectorAll('[data-close-add]').forEach(function (b) { b.addEventListener('click', function () { openAdd(false); }); });
   var meta = {!! $curMeta !!};
@@ -158,7 +153,7 @@
     pick.addEventListener('change', load);
     var started = false;
     document.querySelectorAll('[data-open-add]').forEach(function (b) { b.addEventListener('click', function () { if (!started) { started = true; load(); } }); });
-    if (!add.hidden) { started = true; load(); }
+    if (addModal.classList.contains('open')) { started = true; load(); }
   }
 
   // Edit form: "Use market rate"

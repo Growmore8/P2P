@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'How you pay clients')
 @section('heading', 'How you pay clients')
-@section('topActions')<a href="#add" class="btn btn-primary btn-sm" onclick="setTimeout(function(){var f=document.getElementById('add');f.classList.add('flash-target');f.querySelector('input[name=title]').focus();},50)">+ Add receive method</a>@parent @endsection
+@section('topActions')<button type="button" class="btn btn-primary btn-sm" data-modal-open="addModal">+ Add receive method</button>@parent @endsection
 
 @section('content')
 <p class="muted" style="margin:-4px 0 14px"><a class="green" href="{{ route('admin.payments') }}">← Payment setup</a> · The account types clients can add so you can pay them when they <b>sell</b> USDT.</p>
@@ -32,8 +32,12 @@
   </table></div>
 </div>
 
-<div class="box" id="add">
-  <h3 style="margin-bottom:12px">Add receive method</h3>
-  @include('admin.partials.payout-form', ['m' => new \App\Models\PayoutMethod(['currency' => 'INR', 'type' => 'bank', 'is_active' => true])])
+@php $addOpen = $errors->any() && old('_modal') === 'add'; @endphp
+<div class="modal {{ $addOpen ? 'open' : '' }}" id="addModal" data-admin-modal aria-hidden="{{ $addOpen ? 'false' : 'true' }}">
+  <div class="modal-box modal-form" id="add" role="dialog" aria-modal="true" aria-label="Add receive method">
+    <div class="mf-head"><h3>Add receive method</h3><button type="button" class="modal-close" data-modal-close aria-label="Close">×</button></div>
+    <p class="muted" style="font-size:13px;margin:-6px 0 12px">An account type clients can add to get paid when they sell USDT.</p>
+    @include('admin.partials.payout-form', ['m' => new \App\Models\PayoutMethod(['currency' => old('currency', 'INR'), 'type' => 'bank', 'is_active' => true]), 'modal' => true])
+  </div>
 </div>
 @endsection

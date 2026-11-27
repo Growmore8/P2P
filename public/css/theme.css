@@ -913,3 +913,26 @@ body:has(.oc-fab){padding-bottom:84px}
 .preset-label{font-size:12.5px;font-weight:700;color:var(--muted)}
 .preset-chip{padding:7px 13px;border-radius:99px;border:1px dashed var(--brand);background:var(--brand-soft);color:var(--brand);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .preset-chip.on{border-style:solid;background:var(--brand);color:#fff}
+
+/* ===== Admin pop-up forms ===== */
+.modal-box.modal-form{max-width:760px;padding:24px 26px}
+.modal-box.modal-form>h3,.modal-form .mf-head h3{font-size:18px;margin:0}
+.mf-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.mf-head .modal-close{position:static}
+body.modal-on{overflow:hidden}
+@media (max-width:560px){
+  .modal[data-admin-modal]{padding:0;align-items:flex-end}
+  .modal[data-admin-modal] .modal-box{max-height:94vh;border-radius:20px 20px 0 0;padding:20px 18px}
+}
+/* status dot + compact currency rows */
+.wl-status{display:inline-flex;align-items:center;gap:6px}
+.wl-dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.wl-item.is-off .wl-chip{opacity:.6}
+.wl-addr b{color:var(--text);font-weight:700}
+.green-txt{color:#16a34a!important}
+.wl-btn.is-off{opacity:.35;cursor:not-allowed}
+.wl-box{width:100%;max-width:none}
+/* Admin: use the full screen width (no empty space on the right) */
+.content{max-width:none}
+/* Keep right-to-left currency symbols (e.g. د.إ) from reordering the numbers around them */
+.wl-addr b,.cur-stats b,.wl-name{unicode-bidi:isolate}

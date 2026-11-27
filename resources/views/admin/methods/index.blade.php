@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'How clients pay you')
 @section('heading', 'How clients pay you')
-@section('topActions')<a href="{{ route('admin.methods.create') }}" class="btn btn-primary btn-sm">+ Add a way to pay</a>@parent @endsection
+@section('topActions')<button type="button" class="btn btn-primary btn-sm" data-modal-open="addModal">+ Add a way to pay</button>@parent @endsection
 
 @section('content')
 <p class="muted" style="margin:-4px 0 14px"><a class="green" href="{{ route('admin.payments') }}">← Payment setup</a> · The accounts clients send money to when they <b>buy</b> USDT.</p>
@@ -35,5 +35,15 @@
     @endforelse
     </tbody>
   </table></div>
+</div>
+
+{{-- "+ Add a way to pay" pop-up --}}
+@php $addOpen = $errors->any() && old('_modal') === 'add'; @endphp
+<div class="modal {{ $addOpen ? 'open' : '' }}" id="addModal" data-admin-modal aria-hidden="{{ $addOpen ? 'false' : 'true' }}">
+  <div class="modal-box modal-form" role="dialog" aria-modal="true" aria-label="Add a way clients pay you">
+    <div class="mf-head"><h3>Add a way clients pay you</h3><button type="button" class="modal-close" data-modal-close aria-label="Close">×</button></div>
+    <p class="muted" style="font-size:13px;margin:-6px 0 12px">Your account where clients send money when they buy USDT.</p>
+    @include('admin.methods._form', ['method' => new \App\Models\DepositMethod(['type' => 'upi', 'currency' => 'INR', 'is_active' => true]), 'modal' => true])
+  </div>
 </div>
 @endsection

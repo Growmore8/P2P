@@ -1,6 +1,7 @@
 <form method="POST" action="{{ $m->exists ? route('admin.payout-methods.update', $m) : route('admin.payout-methods.store') }}" class="form">
   @csrf
   @if ($m->exists) @method('PUT') @endif
+  @if ($modal ?? false)<input type="hidden" name="_modal" value="add">@endif
   <div class="form-grid-3">
     <div><label>Currency</label>
       <select class="input" name="currency" required>

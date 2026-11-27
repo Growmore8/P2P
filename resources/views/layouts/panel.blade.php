@@ -5,6 +5,27 @@
 <meta name="robots" content="noindex">
 </head>
 <body>
+<script>
+  // Admin pop-ups: [data-modal-open="id"] opens <div class="modal" id="id">, [data-modal-close] / backdrop / Esc closes.
+  (function () {
+    function open(m, on) {
+      if (!m) return;
+      m.classList.toggle('open', on); m.setAttribute('aria-hidden', on ? 'false' : 'true');
+      document.body.classList.toggle('modal-on', !!document.querySelector('.modal.open'));
+      if (on) { var f = m.querySelector('input:not([type=hidden]):not([readonly]), select, textarea'); if (f) setTimeout(function () { f.focus(); }, 60); }
+    }
+    document.addEventListener('click', function (e) {
+      var o = e.target.closest('[data-modal-open]');
+      if (o) { e.preventDefault(); open(document.getElementById(o.dataset.modalOpen), true); return; }
+      var c = e.target.closest('[data-modal-close]');
+      if (c) { open(c.closest('.modal'), false); return; }
+      if (e.target.classList && e.target.classList.contains('modal') && e.target.hasAttribute('data-admin-modal')) open(e.target, false);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.modal.open[data-admin-modal]').forEach(function (m) { open(m, false); }); });
+    window.srmModal = open;
+  })();
+</script>
+
 <div class="panel">
   <aside class="side" id="side">
     @include('partials.logo')
