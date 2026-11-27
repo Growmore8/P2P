@@ -21,6 +21,19 @@
   <div class="alert alert-error" style="margin-top:14px">⚠ Customer KYC status is <b>{{ $u->kyc_status }}</b>.</div>
 @endif
 
+@if ($order->trashed())
+  <div class="alert alert-error" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <span>🗑 This order was deleted on {{ $order->deleted_at->format('d M Y, h:i A') }}. It's hidden from all lists but kept in the records.</span>
+    <form method="POST" action="{{ route('admin.orders.restore', $order) }}" data-confirm="Restore this order? It will show in the lists again." data-ok-text="Restore">@csrf <button class="btn btn-primary btn-sm">↺ Restore order</button></form>
+  </div>
+@elseif (auth()->user()->is_admin && ! $order->isOpen())
+  @php $paidOrder = $order->status === 'completed' || $order->paid_at; @endphp
+  <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" style="margin-top:10px;text-align:right"
+        @if ($paidOrder) data-type-confirm="{{ $order->order_no }}" data-type-message="⚠ This order is {{ strtolower($order->statusLabel()) }} ({{ $order->money($order->fiat_amount) }}). Deleting hides it from all lists, but it is KEPT in the records and can be restored."
+        @else data-confirm="Delete order {{ $order->order_no }}? It is hidden from all lists and can be restored." @endif>
+    @csrf @method('DELETE') <button class="btn btn-ghost btn-sm" style="color:#dc2626">🗑 Delete order</button>
+  </form>
+@endif
 <div class="split" style="margin-top:14px">
   <div>
     <div class="box">

@@ -672,6 +672,43 @@ class P2PFlowTest extends TestCase
         $this->assertSame('received', $order->fresh()->review_status);
     }
 
+    public function test_admin_deletes_orders_but_records_are_kept(): void
+    {
+        $u = $this->customer();
+        $mk = fn ($no, $status, $extra = []) => $u->orders()->create(array_merge(['order_no' => $no, 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR',
+            'rate' => 93.5, 'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => $status], $extra));
+        $open = $mk('SRMDEL01', Order::SUBMITTED, ['paid_at' => now()]);
+        $cancelled = $mk('SRMDEL02', Order::CANCELLED);
+        $done = $mk('SRMDEL03', Order::COMPLETED, ['paid_at' => now(), 'completed_at' => now()]);
+
+        // In progress: can't delete
+        $this->actingAs($this->admin)->delete('/admin/orders/SRMDEL01')->assertSessionHas('error');
+        $this->assertFalse($open->fresh()->trashed());
+        // Cancelled (no money moved): simple delete
+        $this->actingAs($this->admin)->delete('/admin/orders/SRMDEL02')->assertSessionHas('success');
+        $this->assertSoftDeleted('orders', ['order_no' => 'SRMDEL02']);
+        // Completed: needs the order number typed in
+        $this->actingAs($this->admin)->delete('/admin/orders/SRMDEL03')->assertSessionHas('error');
+        $this->actingAs($this->admin)->delete('/admin/orders/SRMDEL03', ['confirm_id' => 'srmdel03'])->assertSessionHas('success');
+        $this->assertSoftDeleted('orders', ['order_no' => 'SRMDEL03']);
+
+        // Hidden from admin + client lists, kept in "Deleted", viewable, restorable
+        $this->actingAs($this->admin)->get('/admin/orders?state=deleted'); // clears the "deleted" message
+        $this->actingAs($this->admin)->get('/admin/orders')->assertDontSee('SRMDEL03')->assertSee('SRMDEL01');
+        $this->actingAs($u)->get('/orders')->assertDontSee('99.00 USDT · SRMDEL03');
+        $this->actingAs($this->admin)->get('/admin/orders?state=deleted')->assertSee('SRMDEL02')->assertSee('SRMDEL03')->assertDontSee('SRMDEL01');
+        $this->actingAs($this->admin)->get('/admin/orders/SRMDEL03')->assertOk()->assertSee('This order was deleted');
+        $this->actingAs($this->admin)->post('/admin/orders/SRMDEL03/restore')->assertSessionHas('success');
+        $this->assertFalse($done->fresh()->trashed());
+
+        // Managers can't delete; client with only deleted orders is still protected (records kept)
+        $mgr = User::factory()->create(['phone' => '+919800077777']);
+        $mgr->forceFill(['role' => User::MANAGER])->save();
+        $this->actingAs($mgr)->delete('/admin/orders/SRMDEL03', ['confirm_id' => 'SRMDEL03'])->assertForbidden();
+        $this->actingAs($this->admin)->delete("/admin/users/{$u->id}")->assertSessionHas('error'); // needs typed client ID
+        $this->assertDatabaseHas('orders', ['order_no' => 'SRMDEL02']);
+    }
+
     public function test_admin_can_lock_and_unlock_client_from_list(): void
     {
         $u = $this->customer();

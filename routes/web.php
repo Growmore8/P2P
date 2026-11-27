@@ -149,7 +149,9 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::post('/kyc-level/{upgrade}/reject', [Admin\KycController::class, 'rejectUpgrade'])->name('kyc.upgrade.reject');
 
     Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->withTrashed()->name('orders.show');
+    Route::delete('/orders/{order}', [Admin\OrderController::class, 'destroy'])->name('orders.destroy');
+    Route::post('/orders/{order}/restore', [Admin\OrderController::class, 'restore'])->withTrashed()->name('orders.restore');
     Route::post('/orders/{order}/review', [Admin\OrderController::class, 'review'])->name('orders.review');
     Route::post('/orders/{order}/accept', [Admin\OrderController::class, 'accept'])->name('orders.accept');
     Route::post('/orders/{order}/complete', [Admin\OrderController::class, 'complete'])->name('orders.complete');

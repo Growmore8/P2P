@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    use SoftDeletes; // admin delete = hidden everywhere, kept for records, restorable
+
     public const PENDING = 'pending_payment';
     public const SUBMITTED = 'payment_submitted';
     public const PROCESSING = 'processing';

@@ -15,7 +15,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = User::query()
-            ->withCount('orders')
+            ->withCount(['orders', 'orders as all_orders_count' => fn ($q) => $q->withTrashed()])
             ->clients()
             ->when($request->query('kyc'), fn ($q, $k) => $q->where('kyc_status', $k))
             ->when($request->query('state') === 'locked', fn ($q) => $q->where('status', 'blocked'))
@@ -70,7 +70,7 @@ class UserController extends Controller
             return back()->with('error', 'Admin accounts cannot be deleted here.');
         }
         // Clients with orders: remove the account but keep orders / KYC for records (AML rules). Needs the client ID typed in.
-        if ($user->orders()->exists()) {
+        if ($user->orders()->withTrashed()->exists()) { // deleted orders are still records
             if (strtoupper(trim((string) $request->input('confirm_id'))) !== $user->client_id) {
                 return back()->with('error', "Type the client ID {$user->client_id} exactly to delete this account.");
             }

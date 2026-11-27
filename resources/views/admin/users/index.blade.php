@@ -49,14 +49,14 @@
               <form method="POST" action="{{ route('admin.users.restore', $u) }}" data-confirm="Restore {{ $u->name }}'s account? They can log in again.">
                 @csrf <button class="icon-btn ok" title="Restore account" aria-label="Restore account">↺</button>
               </form>
-            @elseif ($u->orders_count === 0)
+            @elseif ($u->all_orders_count === 0)
               <form method="POST" action="{{ route('admin.users.destroy', $u) }}" data-confirm="Delete {{ $u->name }} ({{ $u->client_id }}) permanently? Their KYC documents are deleted too. This cannot be undone.">
                 @csrf @method('DELETE')
                 <button class="icon-btn bad" title="Delete account" aria-label="Delete account"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
               </form>
             @else
               <form method="POST" action="{{ route('admin.users.destroy', $u) }}" data-type-confirm="{{ $u->client_id }}"
-                    data-type-message="⚠ {{ $u->name }} has {{ $u->orders_count }} {{ \Illuminate\Support\Str::plural('order', $u->orders_count) }}. Deleting removes the account and they can't log in. Their orders and KYC are KEPT for legal records.">
+                    data-type-message="⚠ {{ $u->name }} has {{ $u->all_orders_count }} {{ \Illuminate\Support\Str::plural('order', $u->all_orders_count) }}. Deleting removes the account and they can't log in. Their orders and KYC are KEPT for legal records.">
                 @csrf @method('DELETE')
                 <button class="icon-btn bad" title="Delete account (orders are kept for records)" aria-label="Delete account"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
               </form>

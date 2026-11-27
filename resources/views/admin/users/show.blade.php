@@ -44,9 +44,9 @@
           <form method="POST" action="{{ route('admin.users.restore', $u) }}" data-confirm="Restore this account? The client can log in again." style="margin-top:8px">
             @csrf <button class="btn btn-primary btn-block btn-sm">↺ Restore account</button>
           </form>
-        @elseif ($u->orders()->exists())
+        @elseif ($u->orders()->withTrashed()->exists())
           <form method="POST" action="{{ route('admin.users.destroy', $u) }}" data-type-confirm="{{ $u->client_id }}" style="margin-top:10px"
-                data-type-message="⚠ This client has {{ $u->orders()->count() }} orders. Deleting removes the account and they can't log in. Their orders and KYC are KEPT for legal records.">
+                data-type-message="⚠ This client has {{ $u->orders()->withTrashed()->count() }} orders. Deleting removes the account and they can't log in. Their orders and KYC are KEPT for legal records.">
             @csrf @method('DELETE') <button class="btn btn-ghost btn-block btn-sm" style="color:#b91c1c">🗑 Delete account</button>
           </form>
           <p class="muted" style="font-size:12px;margin-top:6px">Has orders — deleting keeps their orders and KYC for records. You'll be asked to type the client ID.</p>

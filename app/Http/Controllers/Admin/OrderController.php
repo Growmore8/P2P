@@ -16,6 +16,7 @@ class OrderController extends Controller
         Order::where('status', Order::PENDING)->where('expires_at', '<', now())->get()->each->expireIfDue();
 
         $orders = Order::with(['user', 'reviewer'])
+            ->when($request->query('state') === 'deleted', fn ($q) => $q->onlyTrashed())
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
             ->when($request->query('review') === 'waiting', fn ($q) => $q->where('status', Order::SUBMITTED)->whereNull('review_status'))
             ->when($request->query('review') === 'reviewed', fn ($q) => $q->where('review_status', 'received')->whereIn('status', Order::OPEN))
@@ -31,6 +32,7 @@ class OrderController extends Controller
             ->latest()->paginate(25)->withQueryString();
 
         $counts = Order::selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status');
+        $counts['deleted'] = Order::onlyTrashed()->count();
         $counts['review_waiting'] = Order::where('status', Order::SUBMITTED)->whereNull('review_status')->count();
         $counts['review_done'] = Order::where('review_status', 'received')->whereIn('status', Order::OPEN)->count();
 
@@ -49,6 +51,34 @@ class OrderController extends Controller
     }
 
     /** Payment / USDT received and verified → processing. */
+    /**
+     * Delete an order: hidden from every list (admin and client) but kept in the database for records, and restorable.
+     * Orders in progress can't be deleted; completed / paid orders need the order number typed in.
+     */
+    public function destroy(Request $request, Order $order)
+    {
+        if ($order->isOpen()) {
+            return back()->with('error', "Order {$order->order_no} is still in progress. Complete or reject it first.");
+        }
+        $paid = $order->status === Order::COMPLETED || $order->paid_at;
+        if ($paid && strtoupper(trim((string) $request->input('confirm_id'))) !== $order->order_no) {
+            return back()->with('error', "Type the order number {$order->order_no} exactly to delete it.");
+        }
+        $order->delete();
+        ActivityLog::log('order.deleted', "Deleted order {$order->order_no} ({$order->statusLabel()}, " . $order->money($order->fiat_amount) . ') — kept in records', $order);
+
+        return redirect()->route('admin.orders.index')->with('success', "Order {$order->order_no} deleted. It's kept in the records — find it under Deleted to restore.");
+    }
+
+    public function restore(Order $order)
+    {
+        abort_unless($order->trashed(), 404);
+        $order->restore();
+        ActivityLog::log('order.restored', "Restored order {$order->order_no}", $order);
+
+        return back()->with('success', "Order {$order->order_no} restored.");
+    }
+
     /**
      * Manager (or admin) step: confirm whether the client's payment / USDT actually arrived.
      * The admin then approves (accept / complete) or rejects the order.
