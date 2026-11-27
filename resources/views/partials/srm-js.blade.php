@@ -7,4 +7,4 @@
   ];
 @endphp
 <script>window.SRM = {!! json_encode($srmJs, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};</script>
-<script src="{{ asset('js/site.js') }}?v=16"></script>
+<script src="{{ asset('js/site.js') }}?v=18"></script>

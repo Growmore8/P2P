@@ -570,3 +570,7 @@ a.stat:hover{border-color:var(--brand)}
 .vk2-progress span{display:block;height:100%;width:0;background:var(--brand);transition:width .2s}
 .vk2-upload{font-size:13.5px;cursor:pointer;text-align:center}
 @media (max-width:380px){.vk2-cam{width:210px;height:210px}.vk2-script p{font-size:15.5px}}
+/* header: keep buttons on one line on phones; ticker GPU-friendly */
+.nav-cta .btn{white-space:nowrap}
+.ticker-track{will-change:transform;backface-visibility:hidden}
+@media (max-width:420px){.nav-cta{gap:6px}.nav-cta .btn{padding:9px 12px;font-size:13.5px}.header .logo-img{height:46px}}

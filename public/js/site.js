@@ -45,28 +45,48 @@
   // Market reference prices for USDT in many currencies (public CoinGecko data — not our desk rates).
   const MARKET_CUR = ["usd", "eur", "gbp", "aed", "sar", "sgd", "myr", "aud", "cad", "jpy", "thb", "php", "ngn", "pkr", "bdt"];
   const MARKET_SYM = { usd: "$", eur: "€", gbp: "£", aed: "AED ", sar: "SAR ", sgd: "S$", myr: "RM", aud: "A$", cad: "C$", jpy: "¥", thb: "฿", php: "₱", ngn: "₦", pkr: "Rs ", bdt: "৳" };
+  let lastMarket = {};
   function renderTicker(market) {
     if (!track || !S.pricing) return;
-    market = market || {};
+    market = market || lastMarket;
+    lastMarket = market;
     const curs = Object.values(S.pricing.currencies || {});
     const btc = market.bitcoin && market.bitcoin.usd, eth = market.ethereum && market.ethereum.usd, usdt = market.tether || {};
     const desk = curs.map((c) => c.code.toLowerCase());
+    const narrow = window.innerWidth < 768;
+    // Phones get fewer market prices: a very wide moving strip can exceed the phone GPU's
+    // texture limit (~8000px) and the whole bar disappears.
+    const marketList = MARKET_CUR.filter((k) => usdt[k] && !desk.includes(k)).slice(0, narrow ? 4 : MARKET_CUR.length);
     const items = [
       ...curs.flatMap((c) => [`USDT/${c.code} Buy <b>${fiat(c.buy_rate, c)}</b>`, `USDT/${c.code} Sell <b>${fiat(c.sell_rate, c)}</b>`]),
       `BTC/USD <b>${btc ? "$" + Number(btc).toLocaleString("en-US") : "—"}</b>`,
       `ETH/USD <b>${eth ? "$" + Number(eth).toLocaleString("en-US") : "—"}</b>`,
-      ...MARKET_CUR.filter((k) => usdt[k] && !desk.includes(k)).map((k) =>
+      ...marketList.map((k) =>
         `USDT/${k.toUpperCase()} <small class="tk-mkt">market</small> <b>${MARKET_SYM[k] || ""}${Number(usdt[k]).toLocaleString("en-US", { maximumFractionDigits: usdt[k] < 10 ? 3 : 2 })}</b>`),
       `Avg. completion <b>${S.completion || ""}</b>`,
-      `Networks <b>${S.pricing.networks.map((n) => n.code).join(" · ")}</b>`,
-      `Desk hours <b>${S.hours || ""}</b>`
-    ].map((i) => `<span>${i}</span>`).join("");
-    track.innerHTML = items + items;
+      ...(narrow ? [] : [`Networks <b>${S.pricing.networks.map((n) => n.code).join(" · ")}</b>`, `Desk hours <b>${S.hours || ""}</b>`])
+    ];
+    const paint = () => { const html = items.map((i) => `<span>${i}</span>`).join(""); track.innerHTML = html + html; };
+    paint();
+    // Safety net: keep the doubled strip under ~7000px by dropping market prices (last first).
+    for (let i = items.length - 1; track.scrollWidth > 7000 && i >= 0; i--) {
+      if (items[i].includes("tk-mkt")) { items.splice(i, 1); paint(); }
+    }
+    // Constant, readable speed (~50px/s) whatever the content length; restart cleanly.
+    const half = track.scrollWidth / 2;
+    track.style.animation = "none";
+    void track.offsetWidth;
+    track.style.animation = `tick ${Math.max(20, Math.round(half / 50))}s linear infinite`;
   }
   if (track) {
     renderTicker();
     fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=" + MARKET_CUR.join(","))
       .then((r) => r.json()).then(renderTicker).catch(() => {});
+    let wasNarrow = window.innerWidth < 768;
+    window.addEventListener("resize", () => {
+      const n = window.innerWidth < 768;
+      if (n !== wasNarrow) { wasNarrow = n; renderTicker(); }
+    });
   }
 
   // Recent-orders feed — REAL completed orders only. Newest first, pages of 3, live relative times,
