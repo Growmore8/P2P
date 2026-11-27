@@ -21,6 +21,8 @@
 <a class="menu-item" href="{{ route('account.security') }}"><span class="mi">🛡</span> Security<span class="mchev">›</span></a>
 <a class="menu-item" href="{{ route('orders.index') }}"><span class="mi">🕘</span> Order History<span class="mchev">›</span></a>
 <a class="menu-item" href="{{ route('support.index') }}"><span class="mi">🎧</span> Support &amp; tickets<span class="mchev">›</span></a>
+<button type="button" class="menu-item" data-install-app hidden><span class="mi">📲</span> Install the app<span class="mchev">›</span></button>
+@include('partials.install-app')
 <div class="menu-sep"></div>
 <button type="button" class="menu-item" data-toggle="feedbackMenu" aria-expanded="false"><span class="mi">💬</span> Feedback<span class="mchev">⌄</span></button>
 <div class="sub-menu" id="feedbackMenu" hidden>

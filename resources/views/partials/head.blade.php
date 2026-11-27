@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title', 'SRM Fintech Solutions') | SRM Fintech Solutions</title>
 @php
@@ -25,9 +25,16 @@
 <meta name="theme-color" content="#1f56e0">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('srm-theme')||'light'}catch(e){document.documentElement.dataset.theme='light'}</script>
 <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=2">
+{{-- Install as an app (Android "Install app" / iPhone "Add to Home Screen") --}}
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SRM Fintech">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="SRM Fintech">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=36">
-<link rel="stylesheet" href="{{ asset('css/app.css') }}?v=36">
-<link rel="stylesheet" href="{{ asset('css/theme.css') }}?v=36">
+<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=38">
+<link rel="stylesheet" href="{{ asset('css/app.css') }}?v=38">
+<link rel="stylesheet" href="{{ asset('css/theme.css') }}?v=38">

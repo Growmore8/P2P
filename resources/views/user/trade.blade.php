@@ -85,7 +85,7 @@
   </div>
 
   <div class="stick-bottom">
-    <label class="check" style="font-size:12.5px;margin-bottom:12px"><input type="checkbox" name="confirm" value="1" @checked(old('confirm'))> I'm trading for myself with my own account / wallet and accept the <a href="{{ route('legal') }}#p2p-terms" target="_blank" class="green">P2P Terms</a>.</label>
+    <label class="check" style="font-size:12.5px;margin-bottom:12px"><input type="checkbox" name="confirm" value="1" @checked(old('confirm'))> <span>I'm trading for myself with my own account / wallet and accept the <a href="{{ route('legal') }}#p2p-terms" target="_blank" class="green">P2P Terms</a>.</span></label>
     @if (! $currency)
       <button class="btn btn-primary btn-block btn-lg" disabled>Not available in your country yet</button>
     @elseif ($u->isKycApproved())

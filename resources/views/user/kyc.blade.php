@@ -92,7 +92,7 @@
       </div>
     </div>
     <div class="box">
-      <label class="check"><input type="checkbox" name="consent" value="1" required> I confirm the information and documents are genuine and belong to me, and I consent to SRM Fintech Solutions using them for verification and compliance as per the <a href="{{ route('legal') }}#privacy" target="_blank" class="green">Privacy Policy</a>.</label>
+      <label class="check"><input type="checkbox" name="consent" value="1" required> <span>I confirm the information and documents are genuine and belong to me, and I consent to SRM Fintech Solutions using them for verification and compliance as per the <a href="{{ route('legal') }}#privacy" target="_blank" class="green">Privacy Policy</a>.</span></label>
       <button class="btn btn-primary btn-block btn-lg" style="margin-top:18px">Submit verification</button>
     </div>
   </form>

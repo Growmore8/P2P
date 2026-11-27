@@ -12,6 +12,8 @@
         <a href="{{ route('trade', ['side' => 'buy']) }}" class="btn btn-primary">Buy USDT →</a>
         <a href="{{ route('trade', ['side' => 'sell']) }}" class="btn btn-ghost">Sell USDT</a>
       </div>
+      <button type="button" class="install-chip" data-install-app hidden>📲 Install the app</button>
+      @include('partials.install-app')
       <div class="trust-row">
         <div><b>{{ $c['symbol'] }}{{ number_format($c['buy_rate'], 2) }}</b>Buy rate / USDT</div>
         <div><b>{{ $c['symbol'] }}{{ number_format($c['sell_rate'], 2) }}</b>Sell rate / USDT</div>

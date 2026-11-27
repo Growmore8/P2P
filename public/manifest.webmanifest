@@ -1,0 +1,24 @@
+{
+  "name": "SRM Fintech Solutions",
+  "short_name": "SRM Fintech",
+  "description": "Buy and sell USDT with local payment methods.",
+  "id": "/",
+  "start_url": "/dashboard?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0f2e",
+  "theme_color": "#1f56e0",
+  "lang": "en",
+  "categories": ["finance"],
+  "icons": [
+    { "src": "/images/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/images/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/images/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Buy USDT", "url": "/trade?side=buy", "icons": [{ "src": "/images/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Sell USDT", "url": "/trade?side=sell", "icons": [{ "src": "/images/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "My orders", "url": "/orders", "icons": [{ "src": "/images/app/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

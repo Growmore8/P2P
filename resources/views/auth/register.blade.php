@@ -37,8 +37,8 @@
     <div><label>Confirm</label><input class="input" type="password" name="password_confirmation" required autocomplete="new-password"></div>
   </div>
   <span class="hint" style="margin-top:-6px">At least 8 characters with letters and numbers.</span>
-  <label class="check"><input type="checkbox" name="terms" value="1" @checked(old('terms', $auth ? 1 : 0))> I agree to the <a href="{{ route('legal') }}#terms" target="_blank" class="green">Terms &amp; Conditions</a>, <a href="{{ route('legal') }}#p2p-terms" target="_blank" class="green">P2P Terms</a> and <a href="{{ route('legal') }}#privacy" target="_blank" class="green">Privacy Policy</a>.</label>
-  <label class="check"><input type="checkbox" name="risk" value="1" @checked(old('risk'))> I have read the <a href="{{ route('legal') }}#risk" target="_blank" class="green">Risk Disclosure</a> and understand digital assets carry risk.</label>
+  <label class="check"><input type="checkbox" name="terms" value="1" @checked(old('terms', $auth ? 1 : 0))> <span>I agree to the <a href="{{ route('legal') }}#terms" target="_blank" class="green">Terms &amp; Conditions</a>, <a href="{{ route('legal') }}#p2p-terms" target="_blank" class="green">P2P Terms</a> and <a href="{{ route('legal') }}#privacy" target="_blank" class="green">Privacy Policy</a>.</span></label>
+  <label class="check"><input type="checkbox" name="risk" value="1" @checked(old('risk'))> <span>I have read the <a href="{{ route('legal') }}#risk" target="_blank" class="green">Risk Disclosure</a> and understand digital assets carry risk.</span></label>
   <label class="check"><input type="checkbox" name="age" value="1" @checked(old('age'))> I am 18 or older and will trade only for myself.</label>
   <button class="btn btn-primary btn-block btn-lg">Create account</button>
 </form>

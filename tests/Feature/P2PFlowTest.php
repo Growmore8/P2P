@@ -79,6 +79,14 @@ class P2PFlowTest extends TestCase
         $html = $this->get('/login')->getContent();
         $this->assertNotFalse(strpos($html, 'id="countryModal"'));
         $this->assertLessThan(strpos($html, 'js/site.js'), strpos($html, 'id="countryModal"'));
+
+        // Installable as an app: manifest, service worker, offline page and icons exist and are linked.
+        $this->assertStringContainsString('rel="manifest"', $html);
+        $manifest = json_decode(file_get_contents(public_path('manifest.webmanifest')), true);
+        $this->assertSame('standalone', $manifest['display']);
+        foreach (array_merge(['sw.js', 'offline.html'], array_map(fn ($i) => ltrim($i['src'], '/'), $manifest['icons'])) as $f) {
+            $this->assertFileExists(public_path($f));
+        }
     }
 
     public function test_register_and_submit_kyc_then_admin_approves(): void
