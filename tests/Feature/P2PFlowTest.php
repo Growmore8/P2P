@@ -581,11 +581,14 @@ class P2PFlowTest extends TestCase
         $this->assertSame('TXYZabcdefghijkmnopqrstuvwxyz12345', $trc->fresh()->deposit_address);
         $this->actingAs($this->admin)->get('/admin/networks')->assertOk()->assertSee('TXYZabcdefghijkmnopqrstuvwxyz12345')->assertSee('Add crypto wallet');
 
-        // Add wallet pop-up: pick SOL → name / fee / format filled in; a wrong address is refused
-        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'SOL', 'deposit_address' => '0xnot-a-solana-address', 'active' => '1'])->assertSessionHasErrors('deposit_address');
-        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'SOL', 'deposit_address' => '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV', 'active' => '1'])->assertSessionHasNoErrors();
-        $sol = Network::where('code', 'SOL')->first();
-        $this->assertSame(['Solana (SPL)', true, true], [$sol->name, (bool) $sol->buy_enabled, (bool) $sol->sell_enabled]);
+        // Add wallet pop-up offers only TRC20 / BEP20 / ERC20; picking one fills name / fee / format; a wrong address is refused
+        Network::where('code', 'ERC20')->delete();
+        $this->actingAs($this->admin)->get('/admin/networks')->assertSee('<option value="ERC20"', false)->assertDontSee('<option value="SOL"', false);
+        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'ERC20', 'deposit_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'active' => '1'])->assertSessionHasErrors('deposit_address');
+        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'ERC20', 'deposit_address' => '0x5ED5C7248EB00A478918eaE5c5b574354607a7E6', 'active' => '1'])->assertSessionHasNoErrors();
+        $erc = Network::where('code', 'ERC20')->first();
+        $this->assertSame(['Ethereum (ERC20)', true, true, 5.0], [$erc->name, (bool) $erc->buy_enabled, (bool) $erc->sell_enabled, (float) $erc->fee]);
+        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'BEP20', 'deposit_address' => '0x5ED5C7248EB00A478918eaE5c5b574354607a7E6', 'active' => '0'])->assertSessionHasErrors('code'); // already exists
     }
 
     public function test_admin_can_lock_and_unlock_client_from_list(): void

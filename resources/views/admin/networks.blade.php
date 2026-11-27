@@ -27,10 +27,10 @@
       <div class="wl-modal-actions"><button type="button" class="btn btn-ghost" data-close-add>Close</button></div>
     @else
       <select class="input" name="code" required data-net-pick aria-label="Network">
-        @foreach ($presets as $code => $p)<option value="{{ $code }}" data-hint="{{ $p['hint'] }}" @selected(old('code') === $code)>{{ $code }} · {{ $p['name'] }}</option>@endforeach
+        @foreach ($presets as $code => $p)<option value="{{ $code }}" data-hint="{{ $p['hint'] }}" @selected(old('code') === $code)>{{ $code }}</option>@endforeach
       </select>
       <input class="input" value="USDT" readonly aria-label="Coin">
-      <textarea class="input mono addr-input" name="deposit_address" rows="2" spellcheck="false" autocomplete="off" placeholder="Wallet address" required data-addr>{{ old('deposit_address') }}</textarea>
+      <input class="input mono" name="deposit_address" value="{{ old('deposit_address') }}" spellcheck="false" autocomplete="off" placeholder="Wallet address" required data-addr>
       <p class="addr-check" data-addr-check data-net-hint></p>
       <input type="hidden" name="active" value="0">
       <label class="check"><input type="checkbox" name="active" value="1" checked> <span>Active</span></label>
@@ -116,7 +116,7 @@
   var modal = document.getElementById('addModal');
   function openAdd(on) {
     modal.classList.toggle('open', on); modal.setAttribute('aria-hidden', on ? 'false' : 'true');
-    if (on) { var t = modal.querySelector('textarea'); if (t) setTimeout(function () { t.focus(); }, 60); }
+    if (on) { var t = modal.querySelector('[data-addr]'); if (t) setTimeout(function () { t.focus(); }, 60); }
   }
   document.querySelectorAll('[data-open-add]').forEach(function (b) { b.addEventListener('click', function () { openAdd(true); }); });
   document.querySelectorAll('[data-close-add]').forEach(function (b) { b.addEventListener('click', function () { openAdd(false); }); });
@@ -124,7 +124,7 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') openAdd(false); });
   var pickNet = modal.querySelector('[data-net-pick]'), hint = modal.querySelector('[data-net-hint]');
   if (pickNet) {
-    var showHint = function () { var o = pickNet.selectedOptions[0]; if (hint && !modal.querySelector('textarea').value) hint.textContent = o ? pickNet.value + ' address ' + o.dataset.hint : ''; };
+    var showHint = function () { var o = pickNet.selectedOptions[0]; if (hint && !modal.querySelector('[data-addr]').value) hint.textContent = o ? pickNet.value + ' address ' + o.dataset.hint : ''; };
     pickNet.addEventListener('change', showHint); showHint();
   }
 

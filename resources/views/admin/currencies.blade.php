@@ -27,28 +27,31 @@
 <form method="POST" action="{{ route('admin.currencies.store') }}" class="modal-box modal-form form" id="add" role="dialog" aria-modal="true" aria-label="Add a currency">
   @csrf
   <div class="mf-head"><h3>Add a currency</h3><button type="button" class="modal-close" data-close-add aria-label="Close">×</button></div>
-  <p class="muted" style="font-size:13px;margin:-6px 0 14px">Pick the currency — its name and symbol are set automatically. Keep it switched off until its payment methods are ready.</p>
-  <div class="cur-grid">
+  <p class="muted">Pick the currency — name, symbol and suggested rates fill in automatically.</p>
+  <div class="mf-grid">
     <div class="span-2"><label>Currency</label>
       <select class="input" name="code" required data-cur-pick>
         @foreach ($available as $code)<option value="{{ $code }}" @selected(old('code') === $code)>{{ $code }} · {{ config('currency_meta.' . $code . '.0', $code) }} — {{ collect(config('countries'))->filter(fn ($c) => $c[2] === $code)->pluck(0)->join(', ') }}</option>@endforeach
       </select>
-      <span class="hint" data-cur-auto></span>
-      <p class="market-line" data-market></p>
     </div>
+    <div><label>TDS on sell (%)</label><input class="input" type="number" step="0.01" name="tds_percent" value="{{ old('tds_percent', 0) }}" required></div>
+  </div>
+  <p class="market-line" data-market></p>
+  <span class="hint" data-cur-auto hidden></span>
+  <div class="mf-grid">
     <div><label>Buy rate <small>client pays / USDT</small></label><input class="input big" type="number" step="0.0001" name="buy_rate" value="{{ old('buy_rate') }}" required></div>
     <div><label>Sell rate <small>client receives / USDT</small></label><input class="input big" type="number" step="0.0001" name="sell_rate" value="{{ old('sell_rate') }}" required></div>
     <div><label>Min per order</label><input class="input" type="number" step="0.01" name="min_amount" value="{{ old('min_amount', 0) }}" required></div>
     <div><label>Max per order <small>0 = no limit</small></label><input class="input" type="number" step="0.01" name="max_amount" value="{{ old('max_amount', 0) }}" required></div>
-    <div><label>TDS on sell (%)</label><input class="input" type="number" step="0.01" name="tds_percent" value="{{ old('tds_percent', 0) }}" required></div>
+    <div class="span-2 mf-switch"><label class="switch cur-switch" title="Ticked: clients in this country can trade straight away. Unticked: added but switched off until you're ready."><input type="checkbox" name="is_active" value="1"> Open for clients now</label></div>
   </div>
-  <p class="hint" style="margin:12px 0 0">Monthly limits are set automatically from the INR limits at this currency's rate.</p>
   <div class="preset-box" data-presets hidden>
     <label class="switch cur-switch preset-check"><input type="checkbox" name="add_receive" value="1" checked> Also add the usual ways clients get paid: <b data-receive></b></label>
-    <p class="hint" style="margin:8px 0 0">After adding, you'll be shown the usual ways clients pay you (<span data-pay></span>) to set up with your own account details.</p>
+    <span data-pay hidden></span>
   </div>
-  <div class="cur-actions">
-    <label class="switch cur-switch"><input type="checkbox" name="is_active" value="1"> Switch on now</label>
+  <p class="hint" style="margin:8px 0 0">Monthly limits are set automatically from the INR limits. Leave “Open for clients now” unticked until you've added how clients pay you.</p>
+  <div class="mf-foot">
+    <button type="button" class="btn btn-ghost" data-close-add>Cancel</button>
     <button class="btn btn-primary">Add currency</button>
   </div>
 </form>
@@ -141,7 +144,7 @@
       suggest(code).then(function (d) {
         if (!d || pick.value !== code) return;
         if (d.rates) {
-          mk.innerHTML = 'Market today: <b>1 USDT ≈ ' + num(d.rates.market) + ' ' + code + '</b> · suggested buy +2%, sell −1% (you can change them)';
+          mk.innerHTML = (m ? m[0] + ' · ' : '') + 'Market today: <b>1 USDT ≈ ' + num(d.rates.market) + ' ' + code + '</b> · rates below are +2% / −1%, change if you like';
           if (!buy.value || buy.value === auto.buy) { buy.value = auto.buy = d.rates.buy; }
           if (!sell.value || sell.value === auto.sell) { sell.value = auto.sell = d.rates.sell; }
         } else { mk.textContent = 'Market price not available right now — please enter your rates.'; }

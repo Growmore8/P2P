@@ -936,3 +936,53 @@ body.modal-on{overflow:hidden}
 .content{max-width:none}
 /* Keep right-to-left currency symbols (e.g. د.إ) from reordering the numbers around them */
 .wl-addr b,.cur-stats b,.wl-name{unicode-bidi:isolate}
+/* Compact "Add crypto wallet" pop-up */
+.wl-modal{max-width:420px;gap:10px;padding:20px 22px}
+.wl-modal h3{font-size:15.5px}
+.wl-modal .input{padding:10px 14px;font-size:14px;min-height:0;height:auto;border-radius:10px}
+.wl-modal .addr-check{font-size:12px}
+.wl-modal .check{font-size:14px;color:var(--text)}
+.wl-modal-actions .btn{padding:9px 18px;font-size:14px}
+
+/* ===== Compact pop-up forms: fit on screen without scrolling ===== */
+.mf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;margin-bottom:10px}
+.mf-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mf-grid .span-2{grid-column:span 2}
+.mf-grid [hidden],.mf-grid [style*="display: none"]{display:none!important}
+.mf-label{display:block;margin:4px 0 6px}
+.mf-switch{display:flex;align-items:flex-end;padding-bottom:4px}
+.mf-more{margin:4px 0 0}
+.mf-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.modal-form{max-width:720px}
+.modal-box.modal-form{padding:18px 22px;max-height:96vh}
+.modal-form .mf-head{margin-bottom:8px}
+.modal-form .mf-head h3{font-size:16.5px}
+.modal-form .mf-head + p{font-size:12.5px!important;margin:-4px 0 10px!important}
+.modal-form .form label,.modal-form label{font-size:12.5px;margin-bottom:4px}
+.modal-form .input{padding:8px 12px;font-size:14px;border-radius:10px;min-height:0}
+.modal-form select.input{padding-right:30px}
+.modal-form .input.big{font-size:15px}
+.modal-form textarea.input{min-height:0}
+.modal-form .hint{font-size:11.5px;margin-top:3px}
+.modal-form .form-grid,.modal-form .form-grid-3,.modal-form .cur-grid{gap:10px 12px}
+.modal-form .form-grid-3,.modal-form .form-grid{margin-bottom:10px}
+/* type cards → one row of small pills */
+.modal-form .type-cards{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.modal-form .type-card{flex-direction:row;align-items:center;gap:6px;padding:8px 10px;border-width:1.5px;border-radius:10px}
+.modal-form .type-card .tc-ico{font-size:16px}
+.modal-form .type-card b{font-size:12.5px;white-space:nowrap}
+.modal-form .type-card small{display:none}
+.modal-form .preset-chips{margin:8px 0 10px}
+.modal-form .preset-chip{padding:5px 11px;font-size:12.5px}
+.modal-form .net-adv{padding:8px 12px}
+.modal-form .net-adv summary{font-size:12.5px}
+.modal-form .cur-actions{margin-top:12px}
+.modal-form .preset-box{margin-top:10px;padding:10px 12px}
+.modal-form .market-line{font-size:12px;margin-top:4px}
+.modal-form .cbox,.modal-form label.cbox{font-size:13px}
+@media (max-width:640px){
+  .mf-grid,.mf-grid.two{grid-template-columns:1fr}
+  .mf-grid .span-2{grid-column:auto}
+  .modal-form .type-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-height:760px){ .modal-box.modal-form{padding:14px 18px} .modal-form .mf-grid{gap:8px 10px;margin-bottom:8px} }

@@ -27,7 +27,6 @@ class DatabaseSeeder extends Seeder
             ['code' => 'TRC20', 'name' => 'Tron (TRC20)', 'fee' => 1.00, 'address_regex' => '^T[1-9A-HJ-NP-Za-km-z]{33}$', 'sort' => 1],
             ['code' => 'BEP20', 'name' => 'BNB Chain (BEP20)', 'fee' => 0.50, 'address_regex' => '^0x[a-fA-F0-9]{40}$', 'sort' => 2],
             ['code' => 'ERC20', 'name' => 'Ethereum (ERC20)', 'fee' => 5.00, 'address_regex' => '^0x[a-fA-F0-9]{40}$', 'sort' => 3],
-            ['code' => 'POLYGON', 'name' => 'Polygon', 'fee' => 0.50, 'address_regex' => '^0x[a-fA-F0-9]{40}$', 'sort' => 4],
         ];
         foreach ($networks as $n) {
             Network::firstOrCreate(['code' => $n['code']], $n);
