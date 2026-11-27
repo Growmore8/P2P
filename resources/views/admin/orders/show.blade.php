@@ -93,7 +93,7 @@
         <form method="POST" action="{{ route('admin.orders.review', $order) }}" class="form review-form">
           @csrf
           <input class="input" name="review_note" value="{{ old('review_note') }}" placeholder="Note (required if not received)">
-          <button name="result" value="received" class="btn btn-primary" onclick="return confirm('Confirm the {{ $what }} has arrived in the account?')">✓ {{ $buy ? 'Payment received' : 'USDT received' }}</button>
+          <button name="result" value="received" class="btn btn-primary" data-confirm="Confirm the {{ $what }} has arrived in the account?">✓ {{ $buy ? 'Payment received' : 'USDT received' }}</button>
           <button name="result" value="not_received" class="btn btn-danger">✕ Not received</button>
         </form>
       @endif

@@ -19,7 +19,7 @@
   }));
 
   // Confirm dialogs
-  $$("form[data-confirm]").forEach((f) => f.addEventListener("submit", (e) => { if (!confirm(f.dataset.confirm)) e.preventDefault(); }));
+  // form[data-confirm] is handled by the site-styled pop-up in partials/dialog.blade.php
 
   // Countdown timers
   $$("[data-expires]").forEach((el) => {

@@ -24,14 +24,6 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.modal.open[data-admin-modal]').forEach(function (m) { open(m, false); }); });
     window.srmModal = open;
 
-    // Dangerous actions: <form data-type-confirm="SRM123" data-type-message="..."> asks the admin to type the code first.
-    document.addEventListener('submit', function (e) {
-      var f = e.target.closest('form[data-type-confirm]'); if (!f) return;
-      var code = f.dataset.typeConfirm, typed = window.prompt((f.dataset.typeMessage || 'This cannot be undone.') + '\n\nType ' + code + ' to confirm:');
-      if (typed === null || typed.trim().toUpperCase() !== code.toUpperCase()) { e.preventDefault(); if (typed !== null) alert('The code did not match — nothing was deleted.'); return; }
-      var h = f.querySelector('input[name=confirm_id]') || f.appendChild(Object.assign(document.createElement('input'), { type: 'hidden', name: 'confirm_id' }));
-      h.value = typed.trim();
-    }, true);
   })();
 </script>
 
