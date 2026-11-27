@@ -61,7 +61,7 @@ class P2PFlowTest extends TestCase
     private function customer(string $kyc = 'approved'): User
     {
         $u = User::create(['name' => 'Test User', 'email' => uniqid() . '@t.com', 'phone' => (string) random_int(6000000000, 9999999999), 'password' => 'secret123']);
-        $u->forceFill(['kyc_status' => $kyc, 'email_verified_at' => now()])->save();
+        $u->forceFill(['kyc_status' => $kyc, 'kyc_level' => $kyc === 'approved' ? 1 : 0, 'email_verified_at' => now()])->save();
         foreach (Consent::ACCOUNT_TYPES as $t) {
             Consent::create(['user_id' => $u->id, 'type' => $t, 'version' => Consent::currentVersion()]);
         }
@@ -99,7 +99,7 @@ class P2PFlowTest extends TestCase
         ])->assertRedirect('/kyc/verifying')->assertSessionHasNoErrors();
 
         $kyc = KycSubmission::first();
-        $this->assertCount(5, $kyc->checks); // PAN, Aadhaar front/back, selfie, video
+        $this->assertCount(4, $kyc->checks); // PAN, Aadhaar front/back, selfie (video is Level 2)
         $agents = collect($kyc->checks)->pluck('agent');
         $this->assertSame($agents->count(), $agents->unique()->count(), 'each document gets a different team name');
         $this->get('/kyc/verifying')->assertOk()->assertSee('Aadhaar — Front')->assertSee($agents[0]);
@@ -210,7 +210,7 @@ class P2PFlowTest extends TestCase
             ->assertRedirect('/account/security');
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewPass123', $u->fresh()->password));
 
-        Currency::where('code', 'INR')->update(['monthly_buy_limit' => 15000]);
+        Currency::where('code', 'INR')->first()->update(['level_limits' => ['1' => [15000, 15000], '2' => [500000, 500000], '3' => [2000000, 2000000]]]);
         $order = fn ($amt) => $this->actingAs($u)->post('/trade', ['side' => 'buy', 'network' => 'TRC20', 'amount' => $amt,
             'wallet_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'deposit_method_id' => DepositMethod::first()->id, 'confirm' => '1']);
         $order('10000')->assertSessionHasNoErrors();
@@ -341,8 +341,9 @@ class P2PFlowTest extends TestCase
 
         $this->actingAs($this->admin)->put('/admin/settings', array_merge(Setting::values(), ['terms_version' => '1.0', 'trading_enabled' => '1', 'kyc_video_required' => '1']))->assertRedirect();
         $inr = Currency::where('code', 'INR')->first();
-        $this->actingAs($this->admin)->put("/admin/currencies/{$inr->id}", array_merge($inr->only(['name', 'symbol', 'min_amount', 'max_amount', 'monthly_buy_limit', 'monthly_sell_limit', 'tds_percent', 'sort']),
-            ['buy_rate' => '95', 'sell_rate' => '92', 'is_active' => '1']))->assertRedirect()->assertSessionHasNoErrors();
+        $this->actingAs($this->admin)->put("/admin/currencies/{$inr->id}", array_merge($inr->only(['name', 'symbol', 'min_amount', 'max_amount', 'tds_percent', 'sort']),
+            ['buy_rate' => '95', 'sell_rate' => '92', 'is_active' => '1',
+             'limits' => [1 => ['buy' => 50000, 'sell' => 50000], 2 => ['buy' => 500000, 'sell' => 500000], 3 => ['buy' => 2000000, 'sell' => 2000000]]]))->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame(95.0, $inr->fresh()->buy_rate);
         $this->assertTrue(\App\Models\ActivityLog::where('action', 'currency.updated')->exists());
     }
@@ -531,6 +532,49 @@ class P2PFlowTest extends TestCase
         $this->assertStringNotContainsString('Kumar', $raw);
         $this->assertStringNotContainsString('40579', $raw);
         $this->get('/')->assertOk()->assertSee('Ra*** K.');
+    }
+
+    public function test_verification_levels_video_and_edd_raise_limits(): void
+    {
+        $u = $this->customer();          // Level 1 (identity approved)
+        $u->kycSubmissions()->create(['country' => 'IN', 'id_type' => 'pan_aadhaar', 'full_name' => 'Suresh Kumar', 'dob' => '1980-01-01',
+            'pan_number' => 'ABCDE1234F', 'aadhaar_last4' => '1234', 'address' => 'a', 'city' => 'c', 'state' => 's', 'pincode' => '636701',
+            'pan_image' => 'x', 'aadhaar_front' => 'x', 'aadhaar_back' => 'x', 'selfie' => 'x', 'status' => 'approved']);
+        $inr = Currency::where('code', 'INR')->first();
+
+        $this->actingAs($u)->get('/account/limits')->assertOk()->assertSee('Identity Verification')->assertSee('Video Verification')->assertSee('EDD')->assertSee('₹50,000');
+        $this->assertSame(50000.0, \App\Services\Pricing::monthlyLimit($inr, 'buy', $u));
+
+        // EDD is locked until video is approved
+        $this->actingAs($u)->get('/kyc/edd')->assertRedirect('/account/limits');
+
+        // Level 2: video with read-aloud script in the client's name
+        $this->actingAs($u)->get('/kyc/video')->assertOk()->assertSee('READ ALOUD')->assertSee('SURESH KUMAR')->assertSee('தமிழ்');
+        $this->actingAs($u)->postJson('/kyc/video', ['lang' => 'ta', 'consent' => '1'])->assertStatus(422);
+        $this->actingAs($u)->postJson('/kyc/video', ['video' => self::video(), 'lang' => 'ta', 'consent' => '1'])->assertOk()->assertJson(['redirect' => route('account.limits')]);
+        $video = \App\Models\KycUpgrade::where('level', 2)->first();
+        $this->assertStringContainsString('SURESH KUMAR', $video->details['script']);
+        $this->actingAs($u)->get('/kyc/video')->assertRedirect('/account/limits'); // already in review
+
+        // client cannot open someone else's video; admin can
+        $this->actingAs($this->customer())->get("/files/upgrade/{$video->id}/video")->assertForbidden();
+        $this->actingAs($this->admin)->get("/files/upgrade/{$video->id}/video")->assertOk();
+
+        $this->actingAs($this->admin)->get('/admin/kyc?level=2')->assertOk()->assertSee($u->email);
+        $this->actingAs($this->admin)->get("/admin/kyc-level/{$video->id}")->assertOk()->assertSee('Statement the client had to read');
+        $this->actingAs($this->admin)->post("/admin/kyc-level/{$video->id}/approve")->assertRedirect();
+        $this->assertSame(2, $u->fresh()->kyc_level);
+        $this->assertSame(500000.0, \App\Services\Pricing::monthlyLimit($inr, 'buy', $u->fresh()));
+
+        // Level 3: EDD
+        $doc = fn () => UploadedFile::fake()->createWithContent('stmt.png', self::png());
+        $this->actingAs($u->fresh())->get('/kyc/edd')->assertOk()->assertSee('Source of funds');
+        $this->actingAs($u->fresh())->post('/kyc/edd', ['occupation' => 'Business owner', 'annual_income' => '10-25L', 'source_of_funds' => 'Business income',
+            'purpose' => 'Personal investment', 'bank_statement' => $doc(), 'income_proof' => $doc(), 'declaration' => '1'])->assertRedirect('/account/limits');
+        $edd = \App\Models\KycUpgrade::where('level', 3)->first();
+        $this->actingAs($this->admin)->post("/admin/kyc-level/{$edd->id}/reject", ['reject_reason' => 'Bank statement unclear'])->assertRedirect();
+        $this->assertSame(2, $u->fresh()->kyc_level);
+        $this->actingAs($u->fresh())->get('/account/limits')->assertSee('Bank statement unclear')->assertSee('Resubmit');
     }
 
     public function test_blocked_user_is_logged_out(): void

@@ -15,7 +15,7 @@ class User extends Authenticatable
     protected $fillable = ['name', 'email', 'phone', 'country', 'password'];
 
     /** Same defaults as the database columns, so new models have them before a reload. */
-    protected $attributes = ['country' => 'IN', 'status' => 'active', 'kyc_status' => 'none', 'is_admin' => false];
+    protected $attributes = ['country' => 'IN', 'status' => 'active', 'kyc_status' => 'none', 'kyc_level' => 0, 'is_admin' => false];
 
     public function isIndian(): bool
     {
@@ -37,6 +37,54 @@ class User extends Authenticatable
     public function currency(): ?Currency
     {
         return Currency::where('code', $this->currencyCode())->where('is_active', true)->first();
+    }
+
+    public function kycUpgrades(): HasMany
+    {
+        return $this->hasMany(KycUpgrade::class);
+    }
+
+    /** Latest Level 2 / Level 3 request (or null). */
+    public function upgrade(int $level): ?KycUpgrade
+    {
+        return $this->kycUpgrades()->where('level', $level)->latest('id')->first();
+    }
+
+    /** Level used for limits: approved identity is at least Level 1. */
+    public function effectiveKycLevel(): int
+    {
+        return $this->isKycApproved() ? max(1, (int) $this->kyc_level) : 0;
+    }
+
+    /**
+     * Status of each verification step for the Verification page.
+     * done | review | rejected | next | locked
+     */
+    public function verificationSteps(): array
+    {
+        $level = $this->effectiveKycLevel();
+        $kyc = $this->kyc;
+        $steps = [];
+
+        $steps[1] = match (true) {
+            $this->kyc_status === 'approved' => ['state' => 'done'],
+            $this->kyc_status === 'pending' => ['state' => 'review'],
+            $this->kyc_status === 'rejected' => ['state' => 'rejected', 'reason' => $kyc?->reject_reason],
+            default => ['state' => 'next'],
+        };
+        foreach ([KycUpgrade::VIDEO, KycUpgrade::EDD] as $lvl) {
+            $u = $this->upgrade($lvl);
+            $prevOk = $lvl === KycUpgrade::VIDEO ? in_array($this->kyc_status, ['approved', 'pending'], true) : $level >= KycUpgrade::VIDEO;
+            $steps[$lvl] = match (true) {
+                $level >= $lvl => ['state' => 'done'],
+                $u?->status === 'pending' => ['state' => 'review'],
+                $u?->status === 'rejected' && $prevOk => ['state' => 'rejected', 'reason' => $u->reject_reason],
+                $prevOk => ['state' => 'next'],
+                default => ['state' => 'locked'],
+            };
+        }
+
+        return $steps;
     }
 
     public function tickets(): HasMany
@@ -73,6 +121,7 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'kyc_level' => 'integer',
         ];
     }
 

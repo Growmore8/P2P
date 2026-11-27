@@ -49,11 +49,17 @@ class CurrencyController extends Controller
             'sell_rate' => ['required', 'numeric', 'gt:0', 'lte:buy_rate'],
             'min_amount' => ['required', 'numeric', 'min:0'],
             'max_amount' => ['required', 'numeric', 'min:0'],
-            'monthly_buy_limit' => ['required', 'numeric', 'min:0'],
-            'monthly_sell_limit' => ['required', 'numeric', 'min:0'],
+            'limits' => ['required', 'array'],
+            'limits.*.buy' => ['required', 'numeric', 'min:0'],
+            'limits.*.sell' => ['required', 'numeric', 'min:0'],
             'tds_percent' => ['required', 'numeric', 'min:0', 'max:30'],
             'sort' => ['nullable', 'integer', 'min:0'],
         ], ['sell_rate.lte' => 'Sell rate should not be higher than the buy rate.']);
+        // Monthly limits per verification level → {"1":[buy,sell],"2":[...],"3":[...]}
+        $data['level_limits'] = collect([1, 2, 3])->mapWithKeys(fn ($l) => [(string) $l => [
+            (float) ($data['limits'][$l]['buy'] ?? 0), (float) ($data['limits'][$l]['sell'] ?? 0),
+        ]])->all();
+        unset($data['limits']);
         $data['is_active'] = $request->boolean('is_active');
         $data['sort'] = $data['sort'] ?? 0;
 

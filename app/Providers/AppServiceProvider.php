@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.admin', function ($view) {
             $view->with('badge', [
-                'kyc' => KycSubmission::where('status', 'pending')->count(),
+                'kyc' => KycSubmission::where('status', 'pending')->count() + \App\Models\KycUpgrade::where('status', 'pending')->count(),
                 'orders' => Order::where('status', Order::SUBMITTED)->count(),
                 'tickets' => \App\Models\Ticket::where('status', \App\Models\Ticket::OPEN)->count(),
             ]);

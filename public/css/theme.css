@@ -515,3 +515,58 @@ a.stat:hover{border-color:var(--brand)}
 .activity{transition:opacity .3s}
 .activity.act-fade{opacity:0}
 .act-nick{font-weight:700}
+
+/* ===================== Verification levels (stepper) ===================== */
+.vsteps{list-style:none;position:relative;margin:4px 0 18px;padding-left:34px}
+.vstep{position:relative;padding-bottom:16px}
+.vstep::before{content:"";position:absolute;left:-22px;top:28px;bottom:-4px;width:2px;background:var(--line)}
+.vstep:last-child::before{display:none}
+.vstep.is-done::before{background:#16a34a}
+.vdot{position:absolute;left:-34px;top:20px;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:13px;font-weight:800;z-index:1}
+.vstep.is-done .vdot{background:#16a34a;border-color:#16a34a;color:#fff}
+.vstep.is-next .vdot,.vstep.is-review .vdot{border-color:#16a34a;border-width:3px}
+.vstep.is-rejected .vdot{border-color:var(--red);color:var(--red)}
+.vcard{background:var(--card-2);border:1px solid var(--line);border-radius:16px;transition:.2s}
+.vstep.is-open .vcard{background:var(--card);box-shadow:0 14px 30px -18px rgba(15,23,42,.3)}
+.vcard-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 18px;cursor:default}
+.vcard-head[role=button]{cursor:pointer}
+.vcard-head b{font-size:17px}
+.vbody{padding:0 18px 18px}
+.vlimit{font-size:15.5px;font-weight:700;margin:2px 0}
+.vlimit span{font-weight:500;color:var(--muted)}
+.vreq-title{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 6px}
+.vreq{display:flex;gap:10px;align-items:center;font-size:14.5px;margin:6px 0}
+.vreq span{width:28px;height:28px;border-radius:8px;background:var(--card-2);display:grid;place-items:center;font-size:14px}
+.vsecure{display:flex;gap:8px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.count-pill{background:var(--red);color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;margin-left:4px}
+.lvl-limits{margin:6px 0 4px}
+.lvl-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 10px;align-items:center;margin-top:6px}
+.lvl-grid b{font-size:12.5px;color:var(--muted)}
+.lvl-grid span{font-size:13.5px;font-weight:600}
+
+/* ===================== Video KYC (circle camera) ===================== */
+.vk2-cam{position:relative;width:240px;height:240px;margin:2px auto 18px;border-radius:50%}
+.vk2-cam video{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px);border-radius:50%;object-fit:cover;background:#0b1020;transform:scaleX(-1)}
+.vk2-cam video[controls]{transform:none}
+.vk2-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.vk2-ring-bg{fill:none;stroke:#22c55e;stroke-width:4;opacity:.35}
+.vk2-ring-fg{fill:none;stroke:#16a34a;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.vk2-cam.is-recording .vk2-ring-bg{opacity:.6;animation:vkGlow 1.4s ease-in-out infinite}
+.vk2-cam.is-done .vk2-ring-bg{opacity:1}
+@keyframes vkGlow{50%{opacity:.25}}
+.vk2-placeholder{position:absolute;inset:10px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:30px;background:var(--card-2);color:var(--muted);font-size:13px}
+.vk2-placeholder span{font-size:32px}
+.vk2-card{background:var(--card-2);border:1px solid var(--line);border-radius:18px;padding:18px}
+.vk2-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.vk2-label{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--brand)}
+.vk2-status{font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.vk2-script p{font-size:17px;line-height:1.5;margin:0 0 10px;color:var(--text)}
+.vk2-langs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.vk2-lang{border:none;border-radius:99px;padding:11px;background:var(--card);color:var(--muted);font:inherit;font-weight:600;cursor:pointer}
+.vk2-lang.active{background:var(--brand-soft);color:var(--brand)}
+.vk2-tips{list-style:none;margin:14px 0 4px;font-size:13px;color:var(--muted);display:grid;gap:4px}
+.vk2-tips li::before{content:"✓ ";color:#16a34a;font-weight:700}
+.vk2-progress{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:10px}
+.vk2-progress span{display:block;height:100%;width:0;background:var(--brand);transition:width .2s}
+.vk2-upload{font-size:13.5px;cursor:pointer;text-align:center}
+@media (max-width:380px){.vk2-cam{width:210px;height:210px}.vk2-script p{font-size:15.5px}}

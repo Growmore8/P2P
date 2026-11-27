@@ -25,9 +25,11 @@ class AccountController extends Controller
             'kyc' => $user->kyc,
             'currency' => $currency,
             'code' => $code,
+            'steps' => $user->verificationSteps(),
+            'level' => $user->effectiveKycLevel(),
             'limits' => $currency ? [
-                'buy' => ['used' => Pricing::monthlyUsed($user, 'buy', $code), 'limit' => Pricing::monthlyLimit($currency, 'buy')],
-                'sell' => ['used' => Pricing::monthlyUsed($user, 'sell', $code), 'limit' => Pricing::monthlyLimit($currency, 'sell')],
+                'buy' => ['used' => Pricing::monthlyUsed($user, 'buy', $code), 'limit' => Pricing::monthlyLimit($currency, 'buy', $user)],
+                'sell' => ['used' => Pricing::monthlyUsed($user, 'sell', $code), 'limit' => Pricing::monthlyLimit($currency, 'sell', $user)],
             ] : null,
         ]);
     }

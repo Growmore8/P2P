@@ -36,9 +36,6 @@ class KycController extends Controller
             'aadhaar_back' => $file,
             'selfie' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'consent' => ['accepted'],
-            'video' => [Setting::get('kyc_video_required') ? 'required' : 'nullable', 'file',
-                'mimetypes:video/webm,video/mp4,video/quicktime,video/x-matroska,video/3gpp', 'max:30720'],
-            'video_consent' => [Setting::get('kyc_video_required') ? 'accepted' : 'nullable'],
         ];
         $rules += $india
             ? ['pan_number' => ['required', 'regex:/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/'], 'aadhaar_number' => ['required', 'regex:/^[2-9][0-9]{11}$/']]
@@ -51,13 +48,10 @@ class KycController extends Controller
             'id_number.regex' => 'Enter a valid document number (letters, numbers and dashes only).',
             'pincode.regex' => 'Enter a valid postal code.',
             'aadhaar_back.required' => $india ? 'Upload the back of your Aadhaar.' : 'Upload a proof of address.',
-            'video.required' => 'Please record your verification video.',
-            'video.max' => 'The video is too large (max 30 MB). Record a shorter clip.',
-            'video_consent.accepted' => 'Please allow us to use your video for verification.',
         ]);
 
         $paths = [];
-        foreach ([...array_keys(KycSubmission::DOCS), 'video'] as $doc) {
+        foreach (array_keys(KycSubmission::DOCS) as $doc) {
             if ($request->hasFile($doc)) {
                 $paths[$doc] = $request->file($doc)->store("kyc/{$user->id}", 'local');
             }
@@ -84,7 +78,7 @@ class KycController extends Controller
             ]));
             $user->forceFill(['kyc_status' => 'pending'])->save();
         });
-        Consent::record($user, isset($paths['video']) ? ['kyc', 'video_kyc'] : ['kyc'], $request);
+        Consent::record($user, ['kyc'], $request);
 
         return redirect()->route('kyc.verifying');
     }

@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\KycUpgradeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PasswordResetController;
@@ -62,6 +63,11 @@ Route::middleware(['auth', 'active', 'email.verified', 'consent'])->group(functi
     Route::get('/kyc', [KycController::class, 'show'])->name('kyc.show');
     Route::post('/kyc', [KycController::class, 'store'])->middleware('throttle:5,1')->name('kyc.store');
     Route::get('/kyc/verifying', [KycController::class, 'verifying'])->name('kyc.verifying');
+    Route::get('/kyc/video', [KycUpgradeController::class, 'video'])->name('kyc.video');
+    Route::post('/kyc/video', [KycUpgradeController::class, 'storeVideo'])->middleware('throttle:6,1')->name('kyc.video.store');
+    Route::get('/kyc/edd', [KycUpgradeController::class, 'edd'])->name('kyc.edd');
+    Route::post('/kyc/edd', [KycUpgradeController::class, 'storeEdd'])->middleware('throttle:6,1')->name('kyc.edd.store');
+    Route::get('/files/upgrade/{upgrade}/{key}', [FileController::class, 'upgrade'])->name('files.upgrade');
 
     Route::get('/accounts', [BankAccountController::class, 'index'])->name('accounts.index');
     Route::post('/accounts', [BankAccountController::class, 'store'])->name('accounts.store');
@@ -119,6 +125,9 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::get('/kyc/{kyc}', [Admin\KycController::class, 'show'])->name('kyc.show');
     Route::post('/kyc/{kyc}/approve', [Admin\KycController::class, 'approve'])->name('kyc.approve');
     Route::post('/kyc/{kyc}/reject', [Admin\KycController::class, 'reject'])->name('kyc.reject');
+    Route::get('/kyc-level/{upgrade}', [Admin\KycController::class, 'showUpgrade'])->name('kyc.upgrade.show');
+    Route::post('/kyc-level/{upgrade}/approve', [Admin\KycController::class, 'approveUpgrade'])->name('kyc.upgrade.approve');
+    Route::post('/kyc-level/{upgrade}/reject', [Admin\KycController::class, 'rejectUpgrade'])->name('kyc.upgrade.reject');
 
     Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');

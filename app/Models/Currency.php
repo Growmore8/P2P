@@ -9,7 +9,7 @@ class Currency extends Model
 {
     protected $fillable = [
         'code', 'name', 'symbol', 'buy_rate', 'sell_rate', 'min_amount', 'max_amount',
-        'monthly_buy_limit', 'monthly_sell_limit', 'tds_percent', 'is_active', 'sort',
+        'level_limits', 'tds_percent', 'is_active', 'sort',
     ];
 
     protected function casts(): array
@@ -17,7 +17,7 @@ class Currency extends Model
         return [
             'is_active' => 'boolean',
             'buy_rate' => 'float', 'sell_rate' => 'float', 'min_amount' => 'float', 'max_amount' => 'float',
-            'monthly_buy_limit' => 'float', 'monthly_sell_limit' => 'float', 'tds_percent' => 'float',
+            'level_limits' => 'array', 'tds_percent' => 'float',
         ];
     }
 
@@ -25,6 +25,17 @@ class Currency extends Model
     {
         static::saved(fn () => Cache::forget('currency-symbols'));
         static::deleted(fn () => Cache::forget('currency-symbols'));
+    }
+
+    /** Monthly limit for a verification level (1–3) and side; 0 = no limit, level 0 = cannot trade. */
+    public function limitFor(int $level, string $side): float
+    {
+        if ($level < 1) {
+            return 0.0;
+        }
+        $row = $this->level_limits[(string) min($level, 3)] ?? null;
+
+        return (float) ($row[$side === 'buy' ? 0 : 1] ?? 0);
     }
 
     public function scopeActive($q)

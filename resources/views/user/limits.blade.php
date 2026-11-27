@@ -1,44 +1,90 @@
 @extends('layouts.app')
-@section('title', 'Verification and Limits')
+@section('title', 'Verification')
 @section('back', route('account'))
-@section('heading', 'Verification and Limits')
+@section('heading', 'Verification')
 
 @section('content')
-@php $st = $user->kyc_status; @endphp
-<div class="hero-icon">🪪</div>
+@php
+  $levels = [
+    1 => ['title' => 'Identity Verification', 'need' => [$user->isIndian() ? 'PAN card + Aadhaar (front & back)' : 'ID document (front & back)', 'Selfie holding your ID'], 'route' => route('kyc.show')],
+    2 => ['title' => 'Video Verification', 'need' => ['Selfie video — read a short statement aloud'], 'route' => route('kyc.video')],
+    3 => ['title' => 'EDD', 'sub' => 'Enhanced Due Diligence', 'need' => ['Bank statement (last 6 months)', 'Income proof (ITR / salary slip)', 'Source of funds details'], 'route' => route('kyc.edd')],
+  ];
+  // the step the Proceed button opens: first one that needs action
+  $action = collect([1, 2, 3])->first(fn ($l) => in_array($steps[$l]['state'], ['next', 'rejected'], true));
+  $fmt = fn ($v) => $currency ? ($v > 0 ? money($v, $code, 0) : 'No limit') : '—';
+@endphp
 
-<div class="box" style="text-align:center">
-  @if ($st === 'approved')
-    <span class="badge ok">✓ Verified</span>
-    @if ($kyc)<p class="muted" style="margin-top:8px;font-size:14px">{{ $kyc->idTypeLabel() }}@if ($kyc->reviewed_at) · verified {{ $kyc->reviewed_at->format('d M Y') }}@endif</p>@endif
-  @elseif ($st === 'pending')
-    <span class="badge warn">In review</span>
-    <p class="muted" style="margin-top:8px;font-size:14px">Submitted {{ $kyc?->created_at->diffForHumans() }}. We'll update you within working hours.</p>
+<ol class="vsteps">
+  @foreach ($levels as $lvl => $info)
+    @php
+      $st = $steps[$lvl]['state'];
+      $open = $lvl === $action || ($action === null && $st === 'review');
+    @endphp
+    <li class="vstep is-{{ $st }} {{ $open ? 'is-open' : '' }}">
+      <span class="vdot">@if ($st === 'done')✓@elseif ($st === 'rejected')!@endif</span>
+      <div class="vcard">
+        <div class="vcard-head" @unless ($open) data-toggle="vbody{{ $lvl }}" role="button" tabindex="0" @endunless>
+          <div>
+            <b>{{ $info['title'] }}</b>
+            @if (! empty($info['sub']))<small class="muted"> · {{ $info['sub'] }}</small>@endif
+          </div>
+          <span class="vstate">
+            @switch($st)
+              @case('done')<span class="badge ok">Verified</span>@break
+              @case('review')<span class="badge warn">In review</span>@break
+              @case('rejected')<span class="badge bad">Action needed</span>@break
+              @case('locked')<span class="muted" style="font-size:13px">{{ $currency ? $fmt($currency->limitFor($lvl, 'buy')) . ' limit' : 'Locked' }} ⌄</span>@break
+              @default<span class="badge info">Next step</span>
+            @endswitch
+          </span>
+        </div>
+        <div class="vbody" id="vbody{{ $lvl }}" @unless ($open) hidden @endunless>
+          @if ($currency)
+            <p class="vlimit">{{ $fmt($currency->limitFor($lvl, 'buy')) }} <span>Buy limit / month</span></p>
+            <p class="vlimit">{{ $fmt($currency->limitFor($lvl, 'sell')) }} <span>Sell limit / month</span></p>
+          @endif
+          @if ($st === 'rejected' && ! empty($steps[$lvl]['reason']))
+            <div class="alert alert-error" style="margin:10px 0 0">Rejected: {{ $steps[$lvl]['reason'] }}</div>
+          @endif
+          @if ($st === 'review')
+            <p class="muted" style="font-size:13.5px;margin-top:8px">Submitted — our team reviews within working hours ({{ $settings['desk_hours'] }}).</p>
+          @elseif ($st !== 'done')
+            <p class="vreq-title">Required</p>
+            @foreach ($info['need'] as $n)<p class="vreq"><span>🪪</span>{{ $n }}</p>@endforeach
+          @endif
+        </div>
+      </div>
+    </li>
+  @endforeach
+</ol>
+
+@if ($limits)
+  <p class="section-label" style="margin-top:4px">This month · {{ $code }}</p>
+  <div class="box">
+    @foreach (['buy' => 'Buy', 'sell' => 'Sell'] as $k => $label)
+      @php $l = $limits[$k]; $pct = $l['limit'] > 0 ? min(100, $l['used'] / $l['limit'] * 100) : 0; @endphp
+      <div class="srow">
+        <div class="sbody">
+          <b>{{ $label }}</b>
+          <small>{{ money($l['used'], $code, 0) }} used of {{ $level < 1 ? 'verification required' : ($l['limit'] > 0 ? money($l['limit'], $code, 0) : 'no limit') }} · resets on the 1st</small>
+          @if ($l['limit'] > 0)<div class="meter"><span style="width:{{ $pct }}%"></span></div>@endif
+        </div>
+      </div>
+    @endforeach
+  </div>
+@elseif (! $currency)
+  <div class="alert alert-info">Trading in {{ $code }} ({{ $user->countryName() }}) isn't available yet. You can still verify your account.</div>
+@endif
+
+<div class="stick-bottom">
+  <p class="vsecure">🛡 Your data is 100% secure. We require verification to prevent ID theft and fraud.</p>
+  @if ($action)
+    <a href="{{ $levels[$action]['route'] }}" class="btn btn-primary btn-block btn-lg">{{ $steps[$action]['state'] === 'rejected' ? 'Resubmit' : 'Proceed' }}</a>
+  @elseif ($level >= 3)
+    <a href="{{ route('trade') }}" class="btn btn-primary btn-block btn-lg">Fully verified — start trading</a>
   @else
-    @if ($st === 'rejected')
-      <div class="alert alert-error" style="text-align:left">Previous verification rejected: {{ $kyc?->reject_reason }}</div>
-    @endif
-    <a href="{{ route('kyc.show') }}" class="btn btn-primary btn-block btn-lg">Verify Now</a>
-    <p class="muted" style="margin-top:10px;font-size:13px">Takes about 3 minutes. Keep your ID ready.</p>
+    <a href="{{ route('trade') }}" class="btn btn-ghost btn-block btn-lg">Back to trading</a>
   @endif
 </div>
-
-<p class="section-label" style="margin-top:6px">Monthly limits · {{ $code }}</p>
-@if (! $limits)
-  <div class="alert alert-info">Trading in {{ $code }} ({{ $user->countryName() }}) isn't available yet. You can still verify your account — we'll notify you when it opens.</div>
-@else
-<div class="box">
-  @foreach (['buy' => 'Buy', 'sell' => 'Sell'] as $k => $label)
-    @php $l = $limits[$k]; $pct = $l['limit'] > 0 ? min(100, $l['used'] / $l['limit'] * 100) : 0; @endphp
-    <div class="srow">
-      <div class="sbody">
-        <b>{{ $label }}</b>
-        <small>{{ money($l['used'], $code, 0) }} used of {{ $l['limit'] > 0 ? money($l['limit'], $code, 0) : 'no limit' }} · resets on the 1st</small>
-        @if ($l['limit'] > 0)<div class="meter"><span style="width:{{ $pct }}%"></span></div>@endif
-      </div>
-    </div>
-  @endforeach
-</div>
-@endif
-<p class="muted" style="font-size:12.5px">@if ($currency)Per order: {{ money($currency->min_amount, $currency->code, 0) }} – {{ money($currency->max_amount, $currency->code, 0) }}.@endif Need higher limits? <a class="green" href="https://wa.me/{{ $settings['support_whatsapp'] }}" target="_blank" rel="noopener">Contact us</a>.</p>
 @endsection

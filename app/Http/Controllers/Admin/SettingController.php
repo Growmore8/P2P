@@ -31,7 +31,6 @@ class SettingController extends Controller
         ]);
 
         $data['trading_enabled'] = $request->boolean('trading_enabled') ? '1' : '0';
-        $data['kyc_video_required'] = $request->boolean('kyc_video_required') ? '1' : '0';
         $oldVersion = Setting::get('terms_version');
         Setting::put($data);
 

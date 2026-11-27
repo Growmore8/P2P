@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DepositMethod;
 use App\Models\KycSubmission;
+use App\Models\KycUpgrade;
 use App\Models\Order;
 use App\Models\TicketMessage;
 use Illuminate\Http\Request;
@@ -21,6 +22,14 @@ class FileController extends Controller
         abort_unless($request->user()->is_admin || $request->user()->id === $kyc->user_id, 403);
 
         return $this->serve($kyc->{$doc});
+    }
+
+    public function upgrade(Request $request, KycUpgrade $upgrade, string $key)
+    {
+        abort_unless($request->user()->is_admin || $request->user()->id === $upgrade->user_id, 403);
+        abort_unless(is_string($upgrade->files[$key] ?? null), 404);
+
+        return $this->serve($upgrade->files[$key]);
     }
 
     public function proof(Request $request, Order $order)

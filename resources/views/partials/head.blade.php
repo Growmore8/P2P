@@ -8,6 +8,6 @@
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=16">
-<link rel="stylesheet" href="{{ asset('css/app.css') }}?v=16">
-<link rel="stylesheet" href="{{ asset('css/theme.css') }}?v=16">
+<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=17">
+<link rel="stylesheet" href="{{ asset('css/app.css') }}?v=17">
+<link rel="stylesheet" href="{{ asset('css/theme.css') }}?v=17">

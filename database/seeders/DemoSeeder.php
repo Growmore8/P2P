@@ -36,7 +36,7 @@ class DemoSeeder extends Seeder
         Network::where('code', 'TRC20')->update(['deposit_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345']);
         Currency::firstOrCreate(['code' => 'LKR'], [
             'name' => 'Sri Lankan Rupee', 'symbol' => 'Rs ', 'buy_rate' => 310, 'sell_rate' => 300,
-            'min_amount' => 3000, 'max_amount' => 1500000, 'monthly_buy_limit' => 3000000, 'monthly_sell_limit' => 3000000,
+            'min_amount' => 3000, 'max_amount' => 1500000, 'level_limits' => ['1' => [150000, 150000], '2' => [1500000, 1500000], '3' => [6000000, 6000000]],
             'tds_percent' => 0, 'is_active' => true, 'sort' => 2,
         ]);
         DepositMethod::firstOrCreate(['title' => 'Bank transfer (CEFTS)'], [
@@ -138,7 +138,7 @@ class DemoSeeder extends Seeder
     private function client(string $email, string $name, string $country, string $phone, string $kyc): User
     {
         $u = User::firstOrCreate(['email' => $email], ['name' => $name, 'phone' => $phone, 'country' => $country, 'password' => self::PASSWORD]);
-        $u->forceFill(['kyc_status' => $kyc, 'email_verified_at' => now()])->save();
+        $u->forceFill(['kyc_status' => $kyc, 'kyc_level' => $kyc === 'approved' ? max(1, (int) $u->kyc_level) : 0, 'email_verified_at' => now()])->save();
         foreach (Consent::ACCOUNT_TYPES as $t) {
             Consent::firstOrCreate(['user_id' => $u->id, 'type' => $t, 'version' => Consent::currentVersion()], ['ip' => '127.0.0.1', 'user_agent' => 'DemoSeeder']);
         }

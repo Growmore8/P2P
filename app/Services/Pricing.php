@@ -35,10 +35,10 @@ class Pricing
         ];
     }
 
-    /** Monthly limit in the currency (0 = unlimited). */
-    public static function monthlyLimit(Currency $currency, string $side): float
+    /** Monthly limit in the currency for this client's verification level (0 = unlimited). */
+    public static function monthlyLimit(Currency $currency, string $side, User $user): float
     {
-        return $side === 'buy' ? $currency->monthly_buy_limit : $currency->monthly_sell_limit;
+        return $currency->limitFor($user->effectiveKycLevel(), $side);
     }
 
     /** Value of this calendar month's orders (in the currency) that count toward the limit. */

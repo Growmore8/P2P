@@ -74,12 +74,12 @@ class OrderController extends Controller
             throw ValidationException::withMessages(['amount' => $q['error']]);
         }
 
-        $limit = Pricing::monthlyLimit($currency, $side);
+        $limit = Pricing::monthlyLimit($currency, $side, $user);
         if ($limit > 0) {
             $remaining = $limit - Pricing::monthlyUsed($user, $side, $currency->code);
             if ($q['fiat_amount'] > $remaining) {
                 throw ValidationException::withMessages(['amount' => 'This exceeds your monthly ' . $side . ' limit. Remaining this month: '
-                    . money(max($remaining, 0), $currency->code) . '.']);
+                    . money(max($remaining, 0), $currency->code) . '. Complete the next verification level to increase your limit.']);
             }
         }
 

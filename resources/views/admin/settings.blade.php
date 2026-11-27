@@ -21,10 +21,7 @@
   <div class="box">
     <h3 style="margin-bottom:14px">Verification &amp; consent</h3>
     <div class="form-grid">
-      <div>
-        <label class="switch"><input type="checkbox" name="kyc_video_required" value="1" @checked(old('kyc_video_required', $s['kyc_video_required']))> Require video verification in KYC</label>
-        <span class="hint">Clients record a ~10 second selfie video holding their ID.</span>
-      </div>
+      <div class="full"><span class="hint">Video verification is now <b>Level 2</b> and EDD is <b>Level 3</b>. Set the monthly limits for each level in <a class="green" href="{{ route('admin.currencies.index') }}">Currencies &amp; Rates</a>.</span></div>
       <div class="full"><label>Verification team names (one per line)</label>
         <textarea class="input" name="kyc_agent_names" rows="5" required>{{ old('kyc_agent_names', $s['kyc_agent_names']) }}</textarea>
         <span class="hint">Shown to clients on the "checking your documents" screen — a different name per document. Use your real team members or the working names they use with clients.</span></div>
