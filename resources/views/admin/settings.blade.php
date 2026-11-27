@@ -38,7 +38,9 @@
     <div class="form-grid">
       <div><label>WhatsApp number (with country code, digits only)</label><input class="input" name="support_whatsapp" value="{{ old('support_whatsapp', $s['support_whatsapp']) }}" required></div>
       <div><label>Phone (display)</label><input class="input" name="support_phone" value="{{ old('support_phone', $s['support_phone']) }}" required></div>
-      <div><label>Support email</label><input class="input" type="email" name="support_email" value="{{ old('support_email', $s['support_email']) }}" required></div>
+      <div><label>Contact email (shown on website)</label><input class="input" type="email" name="support_email" value="{{ old('support_email', $s['support_email']) }}" required></div>
+      <div><label>Ticket alerts email (new tickets &amp; client replies)</label><input class="input" type="email" name="ticket_email" value="{{ old('ticket_email', $s['ticket_email']) }}" required>
+        <span class="hint">Clients replying to ticket emails also reach this inbox.</span></div>
       <div><label>Instagram URL</label><input class="input" name="instagram_url" value="{{ old('instagram_url', $s['instagram_url']) }}"></div>
       <div class="full"><label>Announcement bar (leave empty to hide)</label><input class="input" name="announcement" value="{{ old('announcement', $s['announcement']) }}" placeholder="e.g. Desk closed on Sunday for maintenance"></div>
     </div>

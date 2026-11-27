@@ -26,9 +26,9 @@ class Notify
         }
     }
 
-    /** The support inbox (Admin → Settings → Support email). */
+    /** The ticket inbox (Admin → Settings → Ticket alerts email). */
     public static function staff(Mailable $mail): bool
     {
-        return self::mail((string) Setting::get('support_email'), $mail);
+        return self::mail((string) Setting::get('ticket_email'), $mail);
     }
 }

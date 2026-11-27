@@ -25,6 +25,7 @@ class SettingController extends Controller
             'support_whatsapp' => ['required', 'regex:/^\d{10,15}$/'],
             'support_phone' => ['required', 'string', 'max:30'],
             'support_email' => ['required', 'email'],
+            'ticket_email' => ['required', 'email'],
             'instagram_url' => ['nullable', 'url'],
             'announcement' => ['nullable', 'string', 'max:200'],
         ]);

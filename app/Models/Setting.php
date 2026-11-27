@@ -24,7 +24,8 @@ class Setting extends Model
         'avg_completion' => '15–30 min',
         'support_whatsapp' => '910000000000',
         'support_phone' => '+91 00000 00000',
-        'support_email' => 'info@srmfintechsolutions.com',
+        'support_email' => 'info@srmfintechsolutions.com',     // shown on the website
+        'ticket_email' => 'support@srmfintechsolutions.com',   // receives new-ticket / client-reply alerts
         'instagram_url' => 'https://instagram.com/',
         'announcement' => '',
     ];

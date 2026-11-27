@@ -43,7 +43,7 @@ class TicketMail extends Mailable
             // Client emails: "Reply" goes to the support inbox. Staff emails: "Reply" goes to the client.
             replyTo: $toStaff
                 ? [new Address($this->ticket->user->email, $this->ticket->user->name)]
-                : [new Address((string) Setting::get('support_email'), 'SRM Fintech Support')],
+                : [new Address((string) Setting::get('ticket_email'), 'SRM Fintech Support')],
         );
     }
 

@@ -485,7 +485,7 @@ class P2PFlowTest extends TestCase
         $this->assertMatchesRegularExpression('/^TKT-\d{6}-[A-Z0-9]{5}$/', $t->ticket_no);
         $this->actingAs($u)->get("/support/{$t->ticket_no}")->assertOk()->assertSee('Ticket submitted successfully')->assertSee($t->ticket_no);
         Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'created' && $m->hasTo($u->email));
-        Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'staff_new' && $m->hasTo(Setting::get('support_email')));
+        Mail::assertSent(\App\Mail\TicketMail::class, fn ($m) => $m->type === 'staff_new' && $m->hasTo('support@srmfintechsolutions.com'));
 
         $this->actingAs($u)->post('/support', ['category' => 'buy', 'order_id' => $mine->id, 'subject' => 'Order delay', 'message' => 'My order is still processing.'])->assertRedirect();
         $this->assertSame($mine->id, \App\Models\Ticket::latest('id')->first()->order_id);
