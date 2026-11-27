@@ -28,6 +28,7 @@ class Setting extends Model
         'ticket_email' => 'support@srmfintechsolutions.com',   // receives new-ticket / client-reply alerts
         'instagram_url' => 'https://instagram.com/',
         'announcement' => '',
+        'pay_logos' => '',   // homepage "Pay with" logos (comma-separated slugs); empty = follow active deposit methods
     ];
 
     public static function values(): array

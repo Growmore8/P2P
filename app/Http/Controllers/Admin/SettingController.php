@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
@@ -28,7 +29,10 @@ class SettingController extends Controller
             'ticket_email' => ['required', 'email'],
             'instagram_url' => ['nullable', 'url'],
             'announcement' => ['nullable', 'string', 'max:200'],
+            'pay_logos' => ['nullable', 'array'],
+            'pay_logos.*' => ['string', Rule::in(array_column(config('brands.payments'), 'slug'))],
         ]);
+        $data['pay_logos'] = implode(',', array_unique($data['pay_logos'] ?? []));
 
         $data['trading_enabled'] = $request->boolean('trading_enabled') ? '1' : '0';
         $oldVersion = Setting::get('terms_version');

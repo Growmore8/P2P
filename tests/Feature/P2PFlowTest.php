@@ -706,6 +706,14 @@ class P2PFlowTest extends TestCase
         $this->assertNotContains('PayPal', $pay);
         $m->update(['instructions' => 'Cards, UPI, PayPal accepted']);
         $this->assertContains('PayPal', collect(\App\Support\BrandStrip::build()['payments'])->pluck('name'));
+
+        // Admin can pick the "Pay with" logos directly in Settings (cards, wallets, crypto).
+        $settings = array_merge(\App\Models\Setting::values(), ['pay_logos' => ['paypal', 'applepay', 'bitcoin', 'visa']]);
+        unset($settings['trading_enabled']);
+        $this->actingAs($this->admin)->get('/admin/settings')->assertOk()->assertSee('Pay with')->assertSee('Bitcoin');
+        $this->actingAs($this->admin)->put('/admin/settings', $settings + ['trading_enabled' => '1'])->assertSessionHasNoErrors();
+        $this->assertEquals(['Visa', 'Apple Pay', 'PayPal', 'Bitcoin'], collect(\App\Support\BrandStrip::build()['payments'])->pluck('name')->all());
+        $this->actingAs($this->admin)->put('/admin/settings', array_merge($settings, ['pay_logos' => ['fake']]))->assertSessionHasErrors('pay_logos.0');
     }
 
     public function test_blocked_user_is_logged_out(): void

@@ -678,3 +678,10 @@ a.stat:hover{border-color:var(--brand)}
 .cw-avatar img{width:26px;height:26px;object-fit:contain}
 .cw-online{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#22c55e;border:2px solid #1745bd}
 .cw-head-text small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+
+.logo-picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.form label.logo-pick{display:flex;align-items:center;gap:8px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2);font-size:13.5px;font-weight:600;color:var(--text);cursor:pointer}
+.logo-pick:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.logo-pick img{width:20px;height:20px;object-fit:contain}
+.logo-pick i{width:20px;height:20px;border-radius:50%;background:var(--bg-2);display:grid;place-items:center;font-style:normal;font-size:11px}
+.logo-pick input{margin:0}

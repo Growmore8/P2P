@@ -42,6 +42,20 @@
       <div class="full"><label>Announcement bar (leave empty to hide)</label><input class="input" name="announcement" value="{{ old('announcement', $s['announcement']) }}" placeholder="e.g. Desk closed on Sunday for maintenance"></div>
     </div>
   </div>
+  <div class="box">
+    <h3 style="margin-bottom:4px">Homepage "Pay with" logos</h3>
+    <p class="muted" style="font-size:13px;margin-bottom:14px">Tick the payment methods you accept. Leave everything unticked to show logos automatically from your active deposit methods.</p>
+    @php $picked = array_filter(explode(',', (string) ($s['pay_logos'] ?? ''))); @endphp
+    <div class="logo-picks">
+      @foreach (config('brands.payments') as $b)
+        @php $logo = collect(['svg', 'png'])->map(fn ($e) => "images/brands/{$b['slug']}.{$e}")->first(fn ($f) => is_file(public_path($f))); @endphp
+        <label class="logo-pick"><input type="checkbox" name="pay_logos[]" value="{{ $b['slug'] }}" @checked(in_array($b['slug'], old('pay_logos', $picked), true))>
+          @if ($logo)<img src="{{ asset($logo) }}" alt="">@else<i>{{ mb_substr($b['name'], 0, 1) }}</i>@endif
+          <span>{{ $b['name'] }}</span></label>
+      @endforeach
+    </div>
+  </div>
+
   <button class="btn btn-primary">Save settings</button>
 </form>
 @endsection

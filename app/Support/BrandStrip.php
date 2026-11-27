@@ -24,11 +24,15 @@ class BrandStrip
             return false;
         };
 
+        $picked = array_values(array_filter(explode(',', (string) \App\Models\Setting::get('pay_logos', ''))));
         $withLogo = fn (array $b) => $b + ['logo' => self::logo($b['slug'])];
 
         return [
             'wallets' => array_map($withLogo, config('brands.wallets')),
-            'payments' => array_values(array_map($withLogo, array_filter(config('brands.payments'), fn ($p) => $offers($p['show'])))),
+            // Admin can pick the "Pay with" logos in Settings; if none are picked, they follow the active deposit methods.
+            'payments' => array_values(array_map($withLogo, array_filter(config('brands.payments'), function ($p) use ($offers, $picked) {
+                return $picked ? in_array($p['slug'], $picked, true) : $offers($p['show']);
+            }))),
         ];
     }
 
