@@ -22,7 +22,6 @@
     <div style="display:flex;gap:16px;align-items:end">
       <label class="switch" style="padding-bottom:12px"><input type="checkbox" name="is_active" value="1" @checked($m->is_active)> Active</label></div>
   </div>
-  @include('partials.admin-countries', ['selected' => $m->countries, 'currency' => $m->currency])
   <div class="mf-foot">
     @if ($modal ?? false)<button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>@endif
     <button class="btn btn-primary {{ ($modal ?? false) ? '' : 'btn-sm' }}">{{ $m->exists ? 'Save' : 'Add receive method' }}</button>

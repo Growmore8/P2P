@@ -8,7 +8,6 @@
   @php
     $typeCards = ['upi' => ['📱', 'UPI', 'GPay, PhonePe, Paytm — QR made automatically'], 'bank' => ['🏦', 'Bank transfer', 'Account number + IFSC / SWIFT'], 'wallet' => ['👛', 'Mobile wallet', 'eZ Cash, M-Pesa, bKash…'], 'link' => ['🔗', 'Payment link', 'Razorpay.me or similar link'], 'other' => ['✏️', 'Other', 'Write your own instructions']];
     $curType = old('type', $method->type ?: 'upi');
-    $moreOpen = $errors->hasAny(['countries', 'countries.*', 'instructions']) || old('instructions', $method->instructions) || ! empty(old('countries', $method->countries));
   @endphp
   <div class="mf-grid">
     <div><label>Currency</label>
@@ -40,6 +39,7 @@
     <div data-type="bank wallet"><label>Account / wallet holder</label><input class="input" name="account_holder" value="{{ old('account_holder', $method->account_holder) }}"></div>
     <div data-type="bank wallet"><label><span data-type="bank">Bank name</span><span data-type="wallet">Wallet provider</span></label><input class="input" name="bank_name" value="{{ old('bank_name', $method->bank_name) }}"></div>
     <div data-type="bank wallet"><label><span data-type="bank">Account number / IBAN</span><span data-type="wallet">Wallet number</span></label><input class="input" name="account_number" value="{{ old('account_number', $method->account_number) }}"></div>
+    <div data-type="other" class="span-2"><label>How should clients pay? <small>shown on the order</small></label><textarea name="instructions" class="input" rows="2" placeholder="e.g. Pay at our office — details below">{{ old('instructions', $method->instructions) }}</textarea></div>
     <div data-type="bank"><label>IFSC / SWIFT / branch code</label><input class="input" name="ifsc" value="{{ old('ifsc', $method->ifsc) }}" style="text-transform:uppercase"></div>
   </div>
 
@@ -49,11 +49,6 @@
     <div class="mf-switch"><label class="switch cur-switch"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $method->is_active))> Active</label></div>
   </div>
 
-  <details class="net-adv mf-more" @if ($moreOpen) open @endif>
-    <summary>More options — countries &amp; instructions for clients</summary>
-    <div style="margin-top:10px">@include('partials.admin-countries', ['selected' => old('countries', $method->countries), 'currency' => $cur])</div>
-    <div style="margin-top:10px"><label>Instructions shown to client</label><textarea name="instructions" class="input" rows="2">{{ old('instructions', $method->instructions) }}</textarea></div>
-  </details>
 
   <div class="mf-foot">
     @if ($modal ?? false)<button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>@endif
