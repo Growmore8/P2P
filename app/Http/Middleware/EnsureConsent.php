@@ -11,7 +11,7 @@ class EnsureConsent
     public function handle(Request $request, Closure $next)
     {
         $user = $request->user();
-        if ($user && ! $user->is_admin && ! $user->hasCurrentConsent()) {
+        if ($user && ! $user->isStaff() && ! $user->hasCurrentConsent()) {
             if ($request->expectsJson()) {
                 abort(403, 'Please accept the updated terms.');
             }

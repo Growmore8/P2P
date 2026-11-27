@@ -652,6 +652,18 @@ class P2PFlowTest extends TestCase
         $this->actingAs($mgr)->get("/admin/users/{$u->id}")->assertOk()->assertSee('SRMREV01')->assertSee($u->maskedEmail())->assertDontSee($u->email)->assertDontSee('Deactivate account')->assertDontSee('Payout accounts');
         $this->actingAs($mgr)->get('/admin/users?q=' . urlencode($u->email))->assertDontSee($u->maskedEmail());
         $this->actingAs($mgr)->post("/admin/users/{$u->id}/block")->assertForbidden();
+        // Managers can't verify KYC, see KYC documents, or change / delete client accounts
+        $kyc = $u->kycSubmissions()->first() ?? $u->kycSubmissions()->create(['country' => 'IN', 'id_type' => 'aadhaar', 'full_name' => $u->name, 'dob' => '1990-01-01',
+            'aadhaar_last4' => '1234', 'address' => 'a', 'city' => 'c', 'pincode' => '636701', 'pan_image' => 'kyc/x.png', 'aadhaar_front' => '', 'aadhaar_back' => '', 'selfie' => '', 'status' => 'pending']);
+        $this->actingAs($mgr)->post("/admin/kyc/{$kyc->id}/approve")->assertForbidden();
+        $this->actingAs($mgr)->post("/admin/kyc/{$kyc->id}/reject", ['reason' => 'x'])->assertForbidden();
+        $this->actingAs($mgr)->get("/admin/kyc/{$kyc->id}")->assertRedirect('/admin/orders');
+        $this->actingAs($mgr)->get("/files/kyc/{$kyc->id}/pan_image")->assertForbidden();
+        $order->update(['user_proof' => 'proofs/none.png']);
+        $this->actingAs($mgr)->get('/files/proof/SRMREV01')->assertNotFound(); // reaches the slip check (file missing here), not the client terms page
+        $this->actingAs($mgr)->delete("/admin/users/{$u->id}", ['confirm_id' => $u->client_id])->assertForbidden();
+        $this->actingAs($mgr)->post("/admin/users/{$u->id}/restore")->assertForbidden();
+        $this->assertFalse($u->fresh()->isBlocked());
 
         // Rates: managers can change buy / sell; admin sees who changed it
         $inr = \App\Models\Currency::where('code', 'INR')->first();

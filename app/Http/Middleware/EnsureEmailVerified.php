@@ -11,7 +11,7 @@ class EnsureEmailVerified
     public function handle(Request $request, Closure $next)
     {
         $user = $request->user();
-        if ($user && ! $user->is_admin && ! $user->email_verified_at) {
+        if ($user && ! $user->isStaff() && ! $user->email_verified_at) {
             return redirect()->route('verification.notice');
         }
 

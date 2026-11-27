@@ -1033,3 +1033,9 @@ body.modal-on{overflow:hidden}
 .rate-margin b{color:#16a34a}
 .rate-margin b.neg{color:#dc2626}
 @media (max-width:640px){ .rate-row .wl-main{flex-basis:100%;order:2} .rate-in .input{width:100px} }
+/* Quick rates: stronger selectors so the general form styles can't stack these vertically */
+.form.rate-row{display:flex!important;flex-direction:row;align-items:center;gap:12px;flex-wrap:wrap}
+.form.rate-row label.rate-in{display:inline-flex!important;align-items:center;gap:6px;margin:0!important;width:auto}
+.form.rate-row label.rate-in .input{width:120px!important}
+.form.rate-row .wl-chip{display:inline-block;width:auto}
+.form.rate-row .btn{width:auto}
