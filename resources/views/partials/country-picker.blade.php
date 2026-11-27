@@ -15,7 +15,7 @@
 </div>
 
 @once
-@push('scripts')
+@push('modals')
 <div class="modal" id="countryModal" aria-hidden="true">
   <div class="modal-box cmodal" role="dialog" aria-modal="true" aria-label="Select country">
     <div class="cmodal-head"><h3>Select Country</h3><button type="button" class="modal-close" data-close aria-label="Close">×</button></div>

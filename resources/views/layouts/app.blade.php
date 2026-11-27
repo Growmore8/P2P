@@ -49,6 +49,7 @@
   </div>
   <p class="auth-legal">🛡 SRM Fintech Solutions · KYC-verified P2P desk</p>
 </div>
+@stack('modals')
 @include('partials.srm-js')
 @stack('scripts')
 </body>

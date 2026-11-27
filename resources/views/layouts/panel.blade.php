@@ -34,6 +34,7 @@
     </div>
   </div>
 </div>
+@stack('modals')
 @include('partials.srm-js')
 @stack('scripts')
 </body>

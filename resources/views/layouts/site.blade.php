@@ -73,6 +73,7 @@
   </div>
 </footer>
 @include('partials.chat-widget')
+@stack('modals')
 @include('partials.srm-js')
 @stack('scripts')
 </body>

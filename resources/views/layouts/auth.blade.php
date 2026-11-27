@@ -22,6 +22,7 @@
   </div>
   <p class="auth-legal"><a href="{{ route('legal') }}#terms">Terms &amp; Conditions</a> · <a href="{{ route('legal') }}#privacy">Privacy Policy</a></p>
 </div>
+@stack('modals')
 @include('partials.srm-js')
 @stack('scripts')
 </body>

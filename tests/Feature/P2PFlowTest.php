@@ -74,6 +74,11 @@ class P2PFlowTest extends TestCase
         foreach (['/', '/p2p', '/services', '/about', '/insights', '/contact', '/legal', '/login', '/register'] as $url) {
             $this->get($url)->assertOk();
         }
+
+        // The country list must be in the page before site.js runs, or the "+94 ▾" button does nothing.
+        $html = $this->get('/login')->getContent();
+        $this->assertNotFalse(strpos($html, 'id="countryModal"'));
+        $this->assertLessThan(strpos($html, 'js/site.js'), strpos($html, 'id="countryModal"'));
     }
 
     public function test_register_and_submit_kyc_then_admin_approves(): void
