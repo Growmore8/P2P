@@ -438,6 +438,28 @@ class P2PFlowTest extends TestCase
             $this->actingAs($this->admin)->get($url)->assertOk()->assertSee('Payment setup');
         }
         $this->actingAs($this->admin)->get('/admin/currencies')->assertSee('data-cur-pick', false)->assertSee('id="cur-INR"', false);
+
+        // Name and symbol are filled automatically from the currency code; editing keeps them.
+        $limits = [1 => ['buy' => 0, 'sell' => 0], 2 => ['buy' => 0, 'sell' => 0], 3 => ['buy' => 0, 'sell' => 0]];
+        $this->actingAs($this->admin)->post('/admin/currencies', ['code' => 'AED', 'buy_rate' => 3.7, 'sell_rate' => 3.6, 'tds_percent' => 0,
+            'min_amount' => 0, 'max_amount' => 0, 'limits' => $limits])->assertSessionHasNoErrors();
+        $aed = \App\Models\Currency::where('code', 'AED')->first();
+        $this->assertSame('UAE Dirham', $aed->name);
+        $this->assertSame('AED ', $aed->symbol);
+        $this->actingAs($this->admin)->put("/admin/currencies/{$aed->id}", ['buy_rate' => 3.8, 'sell_rate' => 3.6, 'tds_percent' => 0,
+            'min_amount' => 0, 'max_amount' => 0, 'limits' => $limits, 'is_active' => '1'])->assertSessionHasNoErrors();
+        $this->assertSame('UAE Dirham', $aed->fresh()->name);
+        $this->assertEquals(3.8, $aed->fresh()->buy_rate);
+
+        // Monthly limits are typed on INR only; other currencies convert by rate and round to a clean figure.
+        $inr = \App\Models\Currency::where('code', 'INR')->first();
+        $inr->update(['buy_rate' => 93.5, 'level_limits' => ['1' => [50000, 50000], '2' => [500000, 500000], '3' => [0, 0]]]);
+        $aed->update(['buy_rate' => 3.8]);
+        $this->assertEquals(2000, $aed->fresh()->limitFor(1, 'buy'));    // 50,000 × 3.8 / 93.5 ≈ 2,032 → 2,000
+        $this->assertEquals(20000, $aed->fresh()->limitFor(2, 'sell'));  // ≈ 20,321 → 20,000
+        $this->assertEquals(0, $aed->fresh()->limitFor(3, 'buy'));       // no limit stays no limit
+        $this->assertEquals(50000, $inr->fresh()->limitFor(1, 'buy'));
+        $this->actingAs($this->admin)->get('/admin/currencies')->assertSee('set automatically from the INR limits')->assertSee('AED 2,000');
     }
 
     public function test_duplicate_email_cannot_register_again(): void

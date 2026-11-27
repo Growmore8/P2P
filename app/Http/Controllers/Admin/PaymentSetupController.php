@@ -23,11 +23,11 @@ class PaymentSetupController extends Controller
             $depositOn = $deposit->where('is_active', true)->count();
             $payoutOn = $payout->where('is_active', true)->count();
             $ratesOk = $c->buy_rate > 0 && $c->sell_rate > 0 && $c->sell_rate <= $c->buy_rate;
-            $limitsOk = collect($c->level_limits ?? [])->flatten()->filter(fn ($v) => (float) $v > 0)->isNotEmpty();
+            $limitsOk = collect([1, 2, 3])->contains(fn ($l) => $c->limitFor($l, 'buy') > 0 || $c->limitFor($l, 'sell') > 0);
 
             $checks = [
                 ['ok' => $ratesOk, 'label' => 'Buy & sell rates', 'detail' => $ratesOk ? "Buy {$c->symbol}" . number_format($c->buy_rate, 2) . " · Sell {$c->symbol}" . number_format($c->sell_rate, 2) : 'Set your rates', 'fix' => route('admin.currencies.index') . '#cur-' . $c->code],
-                ['ok' => $limitsOk, 'label' => 'Monthly limits', 'detail' => $limitsOk ? 'Level 1 ' . money($c->limitFor(1, 'buy'), $c->code, 0) . ' → Level 3 ' . money($c->limitFor(3, 'buy'), $c->code, 0) : 'No limits set (unlimited)', 'fix' => route('admin.currencies.index') . '#cur-' . $c->code, 'optional' => true],
+                ['ok' => $limitsOk, 'label' => 'Monthly limits', 'detail' => $limitsOk ? ($c->isBase() ? '' : 'Auto from ' . \App\Models\Currency::BASE . ' · ') . 'Level 1 ' . money($c->limitFor(1, 'buy'), $c->code, 0) . ' → Level 3 ' . money($c->limitFor(3, 'buy'), $c->code, 0) : 'No limits set (unlimited)', 'fix' => route('admin.currencies.index') . '#cur-' . $c->code, 'optional' => true],
                 ['ok' => $depositOn > 0, 'label' => 'How clients pay you (buy)', 'detail' => $depositOn ? "{$depositOn} active · " . $deposit->where('is_active', true)->pluck('title')->take(2)->join(', ') : ($deposit->count() ? $deposit->count() . ' added but switched off' : 'No deposit method yet'), 'fix' => route('admin.methods.index')],
                 ['ok' => $payoutOn > 0, 'label' => 'How you pay clients (sell)', 'detail' => $payoutOn ? "{$payoutOn} active · " . $payout->where('is_active', true)->pluck('title')->take(2)->join(', ') : 'No receive method yet', 'fix' => route('admin.payout-methods.index')],
                 ['ok' => $sellWallets->isNotEmpty(), 'label' => 'Your USDT wallet (for sell orders)', 'detail' => $sellWallets->isNotEmpty() ? $sellWallets->pluck('code')->join(', ') : 'No deposit address set', 'fix' => route('admin.networks.index')],

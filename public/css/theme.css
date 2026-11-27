@@ -666,3 +666,15 @@ a.stat:hover{border-color:var(--brand)}
 @keyframes flashT{0%,40%{box-shadow:0 0 0 3px var(--brand)}100%{box-shadow:none}}
 @media (max-width:900px){.pay-flow{grid-template-columns:repeat(2,1fr)}.type-cards{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.pay-flow{grid-template-columns:1fr}.pay-check{flex-wrap:wrap}.pay-check .pc-body small{white-space:normal}}
+.form label.cur-switch{display:inline-flex;align-items:center;gap:8px;margin:0;padding:7px 14px;border:1px solid var(--line);border-radius:99px;background:var(--card-2);font-size:14px;font-weight:600;color:var(--text);line-height:1}
+.form label.cur-switch input{margin:0;width:18px;height:18px}
+.cur-auto{display:flex;align-items:center;color:var(--muted);background:var(--bg-2);cursor:default}
+.lvl-auto{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0}
+.lvl-auto>div{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.lvl-auto span{font-size:12.5px;color:var(--muted);font-weight:600}
+.lvl-auto b{font-size:14.5px}
+@media (max-width:700px){.lvl-auto{grid-template-columns:1fr}}
+.cw-avatar{position:relative;background:#fff;overflow:visible}
+.cw-avatar img{width:26px;height:26px;object-fit:contain}
+.cw-online{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#22c55e;border:2px solid #1745bd}
+.cw-head-text small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}

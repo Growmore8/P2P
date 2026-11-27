@@ -27,15 +27,45 @@ class Currency extends Model
         static::deleted(fn () => Cache::forget('currency-symbols'));
     }
 
+    /** Monthly limits are set once on this currency; every other currency follows by exchange rate. */
+    public const BASE = 'INR';
+
+    public function isBase(): bool
+    {
+        return $this->code === self::BASE;
+    }
+
+    public static function base(): ?Currency
+    {
+        return static::where('code', self::BASE)->first();
+    }
+
     /** Monthly limit for a verification level (1–3) and side; 0 = no limit, level 0 = cannot trade. */
     public function limitFor(int $level, string $side): float
     {
         if ($level < 1) {
             return 0.0;
         }
+        $base = $this->isBase() ? null : static::base();
+        if ($base && $base->buy_rate > 0 && $this->buy_rate > 0) {
+            $baseLimit = $base->limitFor($level, $side);
+
+            return $baseLimit > 0 ? self::nice($baseLimit * $this->buy_rate / $base->buy_rate) : 0.0;
+        }
         $row = $this->level_limits[(string) min($level, 3)] ?? null;
 
         return (float) ($row[$side === 'buy' ? 0 : 1] ?? 0);
+    }
+
+    /** Round to a clean figure: 160,427 → 160,000; 1,234 → 1,200; 87 → 87. */
+    public static function nice(float $v): float
+    {
+        if ($v < 100) {
+            return round($v);
+        }
+        $step = 10 ** (floor(log10($v)) - 1);
+
+        return round($v / $step) * $step;
     }
 
     public function scopeActive($q)

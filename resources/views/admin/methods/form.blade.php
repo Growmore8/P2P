@@ -47,7 +47,6 @@
 
     <div><label>Min amount (0 = none)</label><input class="input" type="number" step="0.01" name="min_amount" value="{{ old('min_amount', $method->min_amount ?? 0) }}"></div>
     <div><label>Max amount (0 = no limit)</label><input class="input" type="number" step="0.01" name="max_amount" value="{{ old('max_amount', $method->max_amount ?? 0) }}"></div>
-    <div><label>Sort order</label><input class="input" type="number" name="sort" value="{{ old('sort', $method->sort ?? 0) }}"></div>
     <div style="align-self:end"><label class="switch"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $method->is_active))> Active (visible to clients)</label></div>
     <div class="full">@include('partials.admin-countries', ['selected' => old('countries', $method->countries), 'currency' => $cur])</div>
     <div class="full"><label>Instructions shown to client</label><textarea name="instructions" class="input" rows="4">{{ old('instructions', $method->instructions) }}</textarea></div>

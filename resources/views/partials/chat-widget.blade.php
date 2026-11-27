@@ -8,8 +8,8 @@
 
   <section class="cw-panel" id="cwPanel" role="dialog" aria-label="Chat with SRM Fintech Solutions" hidden>
     <header class="cw-head">
-      <div class="cw-avatar">S</div>
-      <div class="cw-head-text"><b>SRM Assistant</b><small><span class="cw-dot"></span> Instant answers · team replies by chat &amp; email</small></div>
+      <div class="cw-avatar"><img src="{{ asset('images/logo-mark.png') }}" alt=""><span class="cw-online"></span></div>
+      <div class="cw-head-text"><b>SRM Assistant</b><small>Online · We're here to help</small></div>
       <button type="button" class="cw-close" id="cwClose" aria-label="Close chat">✕</button>
     </header>
 

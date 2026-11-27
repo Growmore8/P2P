@@ -17,7 +17,7 @@
   </div>
   <div class="form-grid">
     <div><label>Short note (optional)</label><input class="input" name="instructions" value="{{ $m->instructions }}" placeholder="e.g. Account must be in your own name"></div>
-    <div style="display:flex;gap:16px;align-items:end"><div style="flex:1"><label>Sort</label><input class="input" type="number" name="sort" value="{{ $m->sort ?? 0 }}"></div>
+    <div style="display:flex;gap:16px;align-items:end">
       <label class="switch" style="padding-bottom:12px"><input type="checkbox" name="is_active" value="1" @checked($m->is_active)> Active</label></div>
   </div>
   @include('partials.admin-countries', ['selected' => $m->countries, 'currency' => $m->currency])
