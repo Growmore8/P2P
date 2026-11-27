@@ -696,6 +696,16 @@ class P2PFlowTest extends TestCase
         $this->actingAs($u)->post("/orders/{$order->order_no}/payment", ['user_reference' => 'pay_NB2kX9aZ1q2w3e',
             'user_proof' => UploadedFile::fake()->createWithContent('p.png', self::png())])->assertSessionHasNoErrors();
         $this->assertSame(Order::SUBMITTED, $order->fresh()->status);
+
+        // With only a payment link active, the homepage shows the UPI apps and cards it accepts — not PayPal / Apple Pay unless mentioned.
+        DepositMethod::where('type', '!=', 'link')->update(['is_active' => false]);
+        $pay = collect(\App\Support\BrandStrip::build()['payments'])->pluck('name');
+        foreach (['Razorpay', 'UPI', 'Google Pay', 'Visa', 'Mastercard', 'Net banking'] as $brand) {
+            $this->assertContains($brand, $pay);
+        }
+        $this->assertNotContains('PayPal', $pay);
+        $m->update(['instructions' => 'Cards, UPI, PayPal accepted']);
+        $this->assertContains('PayPal', collect(\App\Support\BrandStrip::build()['payments'])->pluck('name'));
     }
 
     public function test_blocked_user_is_logged_out(): void

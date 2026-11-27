@@ -9,13 +9,19 @@ class BrandStrip
 {
     public static function build(): array
     {
-        $active = DepositMethod::active()->get(['type', 'title']);
-        $offers = function (string $rule) use ($active): bool {
-            return match ($rule) {
-                'upi' => $active->contains('type', 'upi'),
-                'bank' => $active->contains('type', 'bank'),
-                default => $active->contains(fn ($m) => stripos($m->title, $rule) !== false),
-            };
+        $active = DepositMethod::active()->get(['type', 'title', 'instructions']);
+        // A brand shows when any of its rules match: a method type (upi / bank / link) or a word in a method's title or instructions.
+        $offers = function (string|array $rules) use ($active): bool {
+            foreach ((array) $rules as $rule) {
+                $hit = in_array($rule, ['upi', 'bank', 'link', 'wallet'], true)
+                    ? $active->contains('type', $rule)
+                    : $active->contains(fn ($m) => stripos($m->title . ' ' . $m->instructions, $rule) !== false);
+                if ($hit) {
+                    return true;
+                }
+            }
+
+            return false;
         };
 
         $withLogo = fn (array $b) => $b + ['logo' => self::logo($b['slug'])];
