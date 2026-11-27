@@ -516,10 +516,10 @@ class P2PFlowTest extends TestCase
     public function test_admin_can_lock_and_unlock_client_from_list(): void
     {
         $u = $this->customer();
-        $this->actingAs($this->admin)->get('/admin/users')->assertSee('● Active');
+        $this->actingAs($this->admin)->get('/admin/users')->assertSee('Deactivate account');
         $this->actingAs($this->admin)->post("/admin/users/{$u->id}/block")->assertSessionHas('success');
         $this->assertTrue($u->fresh()->isBlocked());
-        $this->actingAs($this->admin)->get('/admin/users?state=locked')->assertSee($u->email)->assertSee('🔒 Locked');
+        $this->actingAs($this->admin)->get('/admin/users?state=locked')->assertSee($u->email)->assertSee('Inactive')->assertSee('Activate account');
         $this->actingAs($this->admin)->post("/admin/users/{$u->id}/block");
         $this->assertFalse($u->fresh()->isBlocked());
         $this->actingAs($this->admin)->get('/admin/users?state=locked')->assertDontSee($u->email);

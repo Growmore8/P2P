@@ -36,8 +36,8 @@
         <dt>Last login</dt><dd>{{ $u->last_login_at?->diffForHumans() ?? '—' }}</dd>
       </dl>
       @unless ($u->is_admin)
-        <form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Unlock this account? The client can log in again.' : 'Lock this account? The client will be logged out and cannot log in.' }}" style="margin-top:16px">
-          @csrf <button class="btn {{ $u->isBlocked() ? 'btn-primary' : 'btn-danger' }} btn-block btn-sm">{{ $u->isBlocked() ? '🔓 Unlock account' : '🔒 Lock account' }}</button>
+        <form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Activate this account? The client can log in again.' : 'Deactivate this account? The client will be logged out and cannot log in.' }}" style="margin-top:16px">
+          @csrf <button class="btn {{ $u->isBlocked() ? 'btn-primary' : 'btn-danger' }} btn-block btn-sm">{{ $u->isBlocked() ? 'Activate account' : 'Deactivate account' }}</button>
         </form>
       @endunless
     </div>

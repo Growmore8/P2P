@@ -725,3 +725,12 @@ a.stat:hover{border-color:var(--brand)}
 .acct-toggle{padding:5px 12px;border-radius:99px;border:1px solid #bbf7d0;background:#dcfce7;color:#166534;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
 .acct-toggle.is-locked{border-color:#fecaca;background:#fee2e2;color:#b91c1c}
 .acct-toggle:hover{filter:brightness(.96)}
+.t-right{text-align:right}
+.icon-actions{display:inline-flex;gap:6px;justify-content:flex-end}
+.icon-actions form{margin:0}
+.icon-btn{width:34px;height:34px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;text-decoration:none;transition:.15s}
+.icon-btn:hover{border-color:var(--brand);color:var(--brand)}
+.icon-btn.bad{color:#b91c1c}
+.icon-btn.bad:hover{border-color:#b91c1c;background:#fee2e2}
+.icon-btn.ok{color:#166534}
+.icon-btn.ok:hover{border-color:#166534;background:#dcfce7}

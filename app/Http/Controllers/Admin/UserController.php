@@ -44,6 +44,6 @@ class UserController extends Controller
         $user->forceFill(['status' => $user->isBlocked() ? 'active' : 'blocked'])->save();
         ActivityLog::log('user.' . $user->status, "Client {$user->email} set to {$user->status}", $user);
 
-        return back()->with('success', $user->name . ($user->isBlocked() ? ' is now locked and cannot log in.' : ' is now active again.'));
+        return back()->with('success', $user->name . ($user->isBlocked() ? ' is now inactive and cannot log in.' : ' is now active.'));
     }
 }
