@@ -546,6 +546,42 @@ class P2PFlowTest extends TestCase
         $this->actingAs($u)->postJson('/orders/SRMOPEN1/chat', ['body' => 'hello'])->assertOk();
     }
 
+    public function test_currency_suggestions_delete_rules_and_wallet_address_check(): void
+    {
+        \Illuminate\Support\Facades\Http::fake(['api.coingecko.com/*' => \Illuminate\Support\Facades\Http::response(['tether' => ['lkr' => 300]])]);
+
+        // Suggest: market price → buy +2% / sell −1%, plus usual LKR methods
+        $s = $this->actingAs($this->admin)->getJson('/admin/currencies/suggest/LKR')->assertOk()->json();
+        $this->assertEquals([300, 306, 297], [$s['rates']['market'], $s['rates']['buy'], $s['rates']['sell']]);
+        $this->assertContains('eZ Cash', array_column($s['presets']['pay'], 1));
+        $this->actingAs($this->admin)->getJson('/admin/currencies/suggest/XXX')->assertNotFound();
+
+        // Adding NPR with "usual receive methods" creates them and suggests ways to pay
+        $limits = [];
+        $this->actingAs($this->admin)->post('/admin/currencies', ['code' => 'NPR', 'buy_rate' => 140, 'sell_rate' => 135, 'tds_percent' => 0,
+            'min_amount' => 0, 'max_amount' => 0, 'add_receive' => '1'])->assertSessionHas('suggest_pay', 'NPR');
+        $this->assertEqualsCanonicalizing(['eSewa', 'Khalti', 'Bank transfer'], \App\Models\PayoutMethod::where('currency', 'NPR')->pluck('title')->all());
+        $this->actingAs($this->admin)->get('/admin/methods/create?currency=NPR&type=wallet&title=eSewa')->assertOk()->assertSee('value="eSewa"', false);
+
+        // Delete: allowed for an untraded currency (with its methods); INR and traded currencies are kept
+        $npr = \App\Models\Currency::where('code', 'NPR')->first();
+        $this->actingAs($this->admin)->get('/admin/currencies')->assertOk()->assertSee('Main currency')->assertSee('Use market rate');
+        $this->actingAs($this->admin)->delete("/admin/currencies/{$npr->id}")->assertSessionHas('success');
+        $this->assertDatabaseMissing('currencies', ['code' => 'NPR']);
+        $this->assertDatabaseMissing('payout_methods', ['currency' => 'NPR']);
+        $inr = \App\Models\Currency::where('code', 'INR')->first();
+        $this->actingAs($this->admin)->delete("/admin/currencies/{$inr->id}")->assertSessionHas('error');
+        $this->assertDatabaseHas('currencies', ['code' => 'INR']);
+
+        // Wallet address must match the network's format; spaces from copy-paste are removed
+        $trc = Network::where('code', 'TRC20')->first();
+        $base = ['name' => $trc->name, 'fee' => 1, 'sort' => 1, 'address_regex' => $trc->address_regex, 'buy_enabled' => '1', 'sell_enabled' => '1'];
+        $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", $base + ['deposit_address' => '0x1234567890abcdef1234567890abcdef12345678'])->assertSessionHasErrors('deposit_address');
+        $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", $base + ['deposit_address' => " TXYZabcdefghijkmnopqrstuvwxyz\n12345 "])->assertSessionHasNoErrors();
+        $this->assertSame('TXYZabcdefghijkmnopqrstuvwxyz12345', $trc->fresh()->deposit_address);
+        $this->actingAs($this->admin)->get('/admin/networks')->assertOk()->assertSee('✓ Sell ready')->assertSee('TXYZab');
+    }
+
     public function test_admin_can_lock_and_unlock_client_from_list(): void
     {
         $u = $this->customer();

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'How clients pay you')
 @section('heading', 'How clients pay you')
-@section('topActions')<a href="{{ route('admin.methods.create') }}" class="btn btn-primary btn-sm">+ Add a way to pay</a>@endsection
+@section('topActions')<a href="{{ route('admin.methods.create') }}" class="btn btn-primary btn-sm">+ Add a way to pay</a>@parent @endsection
 
 @section('content')
 <p class="muted" style="margin:-4px 0 14px"><a class="green" href="{{ route('admin.payments') }}">← Payment setup</a> · The accounts clients send money to when they <b>buy</b> USDT.</p>

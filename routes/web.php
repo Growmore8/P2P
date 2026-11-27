@@ -113,8 +113,10 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
 
     Route::get('/payments', [Admin\PaymentSetupController::class, 'index'])->name('payments');
     Route::get('/currencies', [Admin\CurrencyController::class, 'index'])->name('currencies.index');
+    Route::get('/currencies/suggest/{code}', [Admin\CurrencyController::class, 'suggest'])->middleware('throttle:30,1')->name('currencies.suggest');
     Route::post('/currencies', [Admin\CurrencyController::class, 'store'])->name('currencies.store');
     Route::put('/currencies/{currency}', [Admin\CurrencyController::class, 'update'])->name('currencies.update');
+    Route::delete('/currencies/{currency}', [Admin\CurrencyController::class, 'destroy'])->name('currencies.destroy');
 
     Route::get('/payout-methods', [Admin\PayoutMethodController::class, 'index'])->name('payout-methods.index');
     Route::post('/payout-methods', [Admin\PayoutMethodController::class, 'store'])->name('payout-methods.store');

@@ -16,9 +16,17 @@ class DepositMethodController extends Controller
         return view('admin.methods.index', ['methods' => DepositMethod::orderBy('sort')->orderBy('id')->get()]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.methods.form', ['method' => new DepositMethod(['type' => 'upi', 'is_active' => true])]);
+        // Can be pre-filled from a suggestion, e.g. ?currency=LKR&type=wallet&title=eZ Cash
+        $type = in_array($request->query('type'), array_keys(DepositMethod::TYPES), true) ? $request->query('type') : 'upi';
+
+        return view('admin.methods.form', ['method' => new DepositMethod([
+            'type' => $type,
+            'currency' => strtoupper((string) $request->query('currency', 'INR')),
+            'title' => mb_substr((string) $request->query('title', ''), 0, 100),
+            'is_active' => true,
+        ])]);
     }
 
     public function store(Request $request)
