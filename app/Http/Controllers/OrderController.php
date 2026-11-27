@@ -139,11 +139,15 @@ class OrderController extends Controller
         $user->orders()->where('status', Order::PENDING)->where('expires_at', '<', now())->get()->each->expireIfDue();
 
         $orders = $user->orders()
-            ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->query('status'), fn ($q, $s) => match ($s) {
+                'ongoing' => $q->whereIn('status', Order::OPEN),
+                'closed' => $q->whereIn('status', [Order::REJECTED, Order::CANCELLED, Order::EXPIRED]),
+                default => $q->where('status', $s),
+            })
             ->when($request->query('side'), fn ($q, $s) => $q->where('side', $s))
             ->latest()->paginate(15)->withQueryString();
 
-        return view('user.orders', ['orders' => $orders]);
+        return view('user.orders', ['orders' => $orders, 'ongoing' => $user->orders()->whereIn('status', Order::OPEN)->count()]);
     }
 
     public function show(Request $request, Order $order)

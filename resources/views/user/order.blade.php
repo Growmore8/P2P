@@ -204,11 +204,13 @@
   </div>
 </section>
 
-{{-- ===== Order chat (status updates + messages with SRM) ===== --}}
-<section class="o-sec">
-  <h3 class="o-sec-title" style="font-size:15px">Chat with SRM</h3>
-  @include('partials.order-chat', ['order' => $order, 'staff' => false])
-</section>
+{{-- ===== Order chat: floating button (bottom right), opens the chat panel ===== --}}
+{{-- Chat only while the order is in progress; finished orders use "Raise a ticket". --}}
+@if ($order->isOpen())
+  @include('partials.order-chat', ['order' => $order, 'staff' => false, 'floating' => true])
+@else
+  <a class="btn btn-ghost btn-block" style="margin-top:6px" href="{{ route('support.create', ['order' => $order->order_no, 'category' => $order->isBuy() ? 'buy' : 'sell']) }}">🎧 Need help with this order? Raise a ticket</a>
+@endif
 @endsection
 
 @push('scripts')

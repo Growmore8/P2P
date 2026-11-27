@@ -521,6 +521,23 @@ class P2PFlowTest extends TestCase
         $this->actingAs($u)->postJson("/orders/{$order->order_no}/chat", ['body' => ''])->assertUnprocessable();
     }
 
+    public function test_chat_only_on_ongoing_orders_and_ongoing_tab(): void
+    {
+        $u = $this->customer();
+        $open = $u->orders()->create(['order_no' => 'SRMOPEN1', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
+            'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::SUBMITTED, 'user_reference' => 'UTR111222333']);
+        $done = $u->orders()->create(['order_no' => 'SRMDONE1', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
+            'fiat_amount' => 9350, 'usdt_amount' => 50, 'status' => Order::COMPLETED, 'completed_at' => now(), 'admin_reference' => '0xabc']);
+
+        $this->actingAs($u)->get('/orders?status=ongoing')->assertSee('99.00 USDT')->assertDontSee('50.00 USDT')->assertSee('Tap to view &amp; chat', false);
+        $this->actingAs($u)->get('/orders?status=completed')->assertSee('50.00 USDT')->assertDontSee('99.00 USDT');
+
+        $this->actingAs($u)->get('/orders/SRMOPEN1')->assertSee('id="ocFab"', false);
+        $this->actingAs($u)->get('/orders/SRMDONE1')->assertDontSee('id="ocFab"', false)->assertSee('Raise a ticket');
+        $this->actingAs($u)->postJson('/orders/SRMDONE1/chat', ['body' => 'hello'])->assertStatus(422)->assertJson(['message' => 'This order is closed. Please raise a support ticket for help.']);
+        $this->actingAs($u)->postJson('/orders/SRMOPEN1/chat', ['body' => 'hello'])->assertOk();
+    }
+
     public function test_admin_can_lock_and_unlock_client_from_list(): void
     {
         $u = $this->customer();

@@ -1,9 +1,18 @@
-{{-- Binance-style order chat. Params: $order, $staff (bool). --}}
+{{-- Binance-style order chat. Params: $order, $staff (bool), $floating (bool: chat button + pop-up panel). --}}
 @php
+  $floating = $floating ?? false;
   $feedUrl = route($staff ? 'admin.orders.chat' : 'orders.chat', $order);
   $sendUrl = route($staff ? 'admin.orders.chat.send' : 'orders.chat.send', $order);
 @endphp
-<div class="oc" id="orderChat" data-feed="{{ $feedUrl }}" data-send="{{ $sendUrl }}" data-status="{{ $order->status }}">
+@if ($floating)
+<div class="oc-float">
+  <button type="button" class="oc-fab" id="ocFab" aria-label="Chat with SRM" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg>
+    <span class="oc-badge" id="ocBadge" hidden>0</span>
+  </button>
+  <div class="oc-panel" id="ocPanel" hidden>
+@endif
+<div class="oc" id="orderChat" data-order="{{ $order->order_no }}" data-feed="{{ $feedUrl }}" data-send="{{ $sendUrl }}" data-status="{{ $order->status }}">
   <div class="oc-head">
     <div class="oc-av">{{ $staff ? strtoupper(mb_substr($order->user->name, 0, 1)) : 'S' }}</div>
     <div class="oc-who">
@@ -11,6 +20,7 @@
       <small>{{ $staff ? ($order->user->client_id . ' · ' . $order->user->countryName()) : 'Order ' . $order->order_no . ' · ' . $order->statusLabel() }}</small>
     </div>
     @unless ($staff)
+      @if ($floating)<button type="button" class="oc-close" id="ocClose" aria-label="Close chat">×</button>@endif
       <a class="oc-appeal" href="{{ route('support.create', ['order' => $order->order_no, 'category' => $order->isBuy() ? 'buy' : 'sell']) }}">Appeal</a>
     @endunless
   </div>
@@ -33,6 +43,10 @@
   <p class="oc-file" id="ocFile" hidden></p>
   <p class="oc-err" id="ocErr"></p>
 </div>
+@if ($floating)
+  </div>
+</div>
+@endif
 
 @push('scripts')
 <script>
@@ -59,6 +73,32 @@
         + (i.body ? '<p>' + esc(i.body).replace(/\n/g, '<br>') + '</p>' : '') + media + '<small>' + esc(i.time) + '</small></div>';
     }).join('') : '<p class="oc-empty">No messages yet.</p>';
     if (nearBottom || !body.dataset.seen) { body.scrollTop = body.scrollHeight; body.dataset.seen = '1'; }
+    theirs = items.filter(function (i) { return i.kind === 'them' || i.kind === 'system'; }).length;
+    updateBadge();
+  }
+
+  // Floating mode: chat button + pop-up panel with an unread badge.
+  var fab = document.getElementById('ocFab'), panel = document.getElementById('ocPanel'), badge = document.getElementById('ocBadge');
+  var seenKey = 'oc-seen-' + root.dataset.order, theirs = 0;
+  function seen() { try { return parseInt(localStorage.getItem(seenKey) || '0', 10); } catch (e) { return 0; } }
+  function setSeen(n) { try { localStorage.setItem(seenKey, String(n)); } catch (e) {} }
+  function isOpen() { return !panel || !panel.hidden; }
+  function updateBadge() {
+    if (!badge) return;
+    if (isOpen()) { setSeen(theirs); badge.hidden = true; return; }
+    var n = theirs - seen(); badge.hidden = n <= 0; badge.textContent = n > 9 ? '9+' : n;
+  }
+  function openChat(open) {
+    if (!panel) return;
+    panel.hidden = !open; fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.classList.toggle('oc-open', open);
+    if (open) { body.scrollTop = body.scrollHeight; setTimeout(function () { ta.focus(); }, 80); }
+    updateBadge();
+  }
+  if (fab) {
+    fab.addEventListener('click', function () { openChat(panel.hidden); });
+    document.getElementById('ocClose').addEventListener('click', function () { openChat(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen()) openChat(false); });
   }
 
   function handle(d) {

@@ -27,6 +27,10 @@ class OrderChatController extends Controller
     public function send(Request $request, Order $order)
     {
         $staff = $this->authorizeAccess($request, $order);
+        // Clients can chat only while the order is in progress; after that they raise a ticket.
+        if (! $staff && ! $order->isOpen()) {
+            return response()->json(['message' => 'This order is closed. Please raise a support ticket for help.'], 422);
+        }
         $data = $request->validate([
             'body' => ['nullable', 'string', 'max:1000', 'required_without:attachment'],
             'attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
