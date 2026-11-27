@@ -5,18 +5,22 @@
 
 @section('content')
 <p class="muted" style="margin:-4px 0 14px"><a class="green" href="{{ route('admin.payments') }}">← Payment setup</a> · The accounts clients send money to when they <b>buy</b> USDT.</p>
-<div class="alert alert-info"><b>Deposit methods</b> are where clients PAY when they <b>buy</b> USDT. Set a currency and (optionally) specific countries — clients only see methods for their own country. Details are copied into each order, so editing a method doesn't change past orders.</div>
+<div class="alert alert-info"><b>Deposit methods</b> are where clients PAY when they <b>buy</b> USDT. Each method follows its currency — INR methods are shown to Indian clients, LKR methods to Sri Lankan clients, and so on. Details are copied into each order, so editing a method doesn't change past orders.</div>
 <div class="box">
   <div class="table-wrap"><table>
-    <thead><tr><th>Method</th><th>Currency / countries</th><th>Details</th><th>Limits</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Method</th><th>Currency</th><th>Details</th><th>Limits</th><th>Status</th><th></th></tr></thead>
     <tbody>
     @forelse ($methods as $m)
       <tr>
-        <td><b>{{ $m->title }}</b><span class="sub">{{ \App\Models\DepositMethod::TYPES[$m->type] ?? $m->type }} · sort {{ $m->sort }}</span></td>
-        <td><b class="mono">{{ $m->currency }}</b><span class="sub" style="max-width:220px">{{ $m->countriesLabel() }}</span></td>
+        <td><b>{{ $m->title }}</b><span class="sub">{{ \App\Models\DepositMethod::TYPES[$m->type] ?? $m->type }}</span></td>
+        <td><b class="mono">{{ $m->currency }}</b><span class="sub">{{ $m->countriesLabel() }}</span></td>
         <td class="mono">
           @if ($m->type === 'upi') {{ $m->upi_id }} @if ($m->qr_image)<span class="badge info">QR</span>@endif
-          @else {{ $m->account_holder }}<span class="sub">{{ $m->bank_name }} · {{ $m->account_number }} · {{ $m->ifsc }}</span>@endif
+          @elseif ($m->type === 'link')
+            @if ($m->pay_url)<a href="{{ $m->pay_url }}" target="_blank" rel="noopener" class="green method-link">{{ preg_replace('#^https?://#', '', $m->pay_url) }} ↗</a>@else<span class="muted">No link set</span>@endif
+          @elseif ($m->type === 'other')
+            <span class="sub" style="font-family:inherit">{{ \Illuminate\Support\Str::limit($m->instructions, 80) ?: 'No instructions' }}</span>
+          @else {{ $m->account_holder }}<span class="sub">{{ collect([$m->bank_name, $m->account_number, $m->ifsc])->filter()->join(' · ') }}</span>@endif
         </td>
         <td>{{ money($m->min_amount, $m->currency, 0) }} – {{ (float) $m->max_amount > 0 ? money($m->max_amount, $m->currency, 0) : 'no limit' }}</td>
         <td>

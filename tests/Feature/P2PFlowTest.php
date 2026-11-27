@@ -879,6 +879,7 @@ class P2PFlowTest extends TestCase
             'pay_url' => 'https://razorpay.me/@srmfintechsolutions', 'is_active' => '1'])->assertSessionHasNoErrors();
         $m = DepositMethod::where('type', 'link')->first();
         $this->assertSame('https://razorpay.me/@srmfintechsolutions', $m->pay_url);
+        $this->actingAs($this->admin)->get('/admin/methods')->assertOk()->assertSee('razorpay.me/@srmfintechsolutions ↗', false)->assertDontSee('sort 0');
 
         $u = $this->customer();
         $this->actingAs($u)->post('/trade', ['side' => 'buy', 'network' => 'TRC20', 'amount' => '5000',

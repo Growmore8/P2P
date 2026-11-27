@@ -996,3 +996,4 @@ body.modal-on{overflow:hidden}
 .net-fee-inline{display:inline-flex;align-items:center;gap:6px;margin:0!important;font-size:13px;color:var(--muted)}
 .net-fee-inline .input{width:80px;padding:7px 10px;font-size:14px}
 @media (max-width:560px){ .net-set .wl-main{flex-basis:100%;order:2} }
+.method-link{word-break:break-all;font-weight:600}
