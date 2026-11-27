@@ -17,7 +17,7 @@ class EmailVerificationController extends Controller
 
         return view('auth.otp', [
             'title' => 'Verify your email',
-            'intro' => 'We sent a 6-digit code to',
+            'intro' => 'Enter the 6-digit verification code sent to',
             'email' => $user->email,
             'action' => route('verification.verify'),
             'resend' => route('verification.resend'),

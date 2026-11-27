@@ -48,7 +48,7 @@ class PasswordResetController extends Controller
 
         return view('auth.otp', [
             'title' => 'Enter reset code',
-            'intro' => 'Enter the 6-digit code we emailed to',
+            'intro' => 'Enter the 6-digit reset code sent to',
             'email' => $s['email'],
             'action' => route('password.code.verify'),
             'resend' => route('password.code.resend'),

@@ -24,11 +24,11 @@
 
 <form method="POST" action="{{ $resend }}" class="center" style="margin-top:16px">
   @csrf
-  <span class="muted" style="font-size:14px">Didn't get it? Check spam, or</span>
+  <span class="muted" style="font-size:14px">Didn't receive the code? Check your spam folder or</span>
   <button class="linkish" id="resendBtn" data-wait="{{ $cooldown }}" @disabled($cooldown > 0)>Resend code</button>
   <span class="muted" id="resendTimer" style="font-size:14px"></span>
 </form>
-<p class="muted center" style="font-size:12px;margin-top:18px">The code expires in {{ \App\Models\OtpCode::TTL_MINUTES }} minutes. Never share it with anyone.</p>
+<p class="muted center" style="font-size:12px;margin-top:18px">This code is valid for {{ \App\Models\OtpCode::TTL_MINUTES }} minutes. For your security, do not share it with anyone.</p>
 @endsection
 
 @push('scripts')

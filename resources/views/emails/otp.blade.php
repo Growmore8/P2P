@@ -1,27 +1,28 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Your code</title></head>
-<body style="margin:0;padding:0;background:#f3f5f9;font-family:Arial,Helvetica,sans-serif;color:#0d1424">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f5f9;padding:32px 12px">
-    <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;overflow:hidden">
-        <tr><td style="background:#0a0f2e;padding:22px 28px;text-align:center">
-          <img src="{{ asset('images/logo-dark.png') }}" alt="SRM Fintech Solutions" height="44" style="height:44px;border:0">
-        </td></tr>
-        <tr><td style="padding:30px 28px 10px">
-          <p style="margin:0 0 12px;font-size:16px">Hi {{ $name ?: 'there' }},</p>
-          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#475467">
-            {{ $reset ? 'Use this code to reset your SRM Fintech Solutions password:' : 'Use this code to verify your email address for SRM Fintech Solutions:' }}
-          </p>
-          <div style="font-size:34px;font-weight:bold;letter-spacing:10px;text-align:center;background:#eef3ff;color:#1f56e0;border-radius:12px;padding:18px 0;margin:0 0 20px">{{ $code }}</div>
-          <p style="margin:0 0 8px;font-size:14px;color:#475467">This code expires in {{ $minutes }} minutes.</p>
-          <p style="margin:0 0 24px;font-size:14px;color:#475467">If you didn't request it, you can ignore this email — your account is safe. <b>Never share this code with anyone</b>, including our staff.</p>
-        </td></tr>
-        <tr><td style="padding:16px 28px 26px;border-top:1px solid #eef0f4;font-size:12px;color:#98a2b3;text-align:center">
-          SRM Fintech Solutions · {{ config('mail.from.address') }}
-        </td></tr>
-      </table>
+@extends('emails.layout')
+@section('title', 'Your verification code')
+@section('preheader', $code . ' is your code. It expires in ' . $minutes . ' minutes.')
+
+@section('content')
+  <p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#1f56e0">{{ $reset ? 'Password reset' : 'Email verification' }}</p>
+  <h1 style="margin:0 0 14px;font-size:24px;line-height:1.25;font-weight:800;color:#0d1424">{{ $reset ? 'Reset your password' : 'Verify your email' }}</h1>
+  <p style="margin:0 0 6px;font-size:15.5px;color:#0d1424">Hi {{ $name ?: 'there' }},</p>
+  <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#5b6577">
+    {{ $reset ? 'Enter this code to set a new password for your SRM Fintech Solutions account.' : 'Enter this code to finish creating your SRM Fintech Solutions account.' }}
+  </p>
+
+  {{-- Code --}}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px">
+    <tr><td align="center" bgcolor="#eef3ff" style="background:#eef3ff;border:2px dashed #9db8ff;border-radius:14px;padding:20px 10px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5b6577;margin-bottom:8px">Your code</div>
+      <div style="font-family:'Courier New',Consolas,monospace;font-size:38px;line-height:1;font-weight:800;letter-spacing:12px;color:#1f56e0;padding-left:12px">{{ $code }}</div>
     </td></tr>
   </table>
-</body>
-</html>
+
+  <p style="margin:0 0 22px;text-align:center">
+    <span style="display:inline-block;background:#fff4dd;color:#8a5a00;font-size:13px;font-weight:700;border-radius:99px;padding:6px 14px">⏱ Expires in {{ $minutes }} minutes</span>
+  </p>
+
+  <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#5b6577">
+    If you did not request this code, please ignore this email. Your account remains secure. <b style="color:#0d1424">For your security, do not share this code with anyone.</b>
+  </p>
+@endsection
