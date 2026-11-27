@@ -577,6 +577,70 @@ class P2PFlowTest extends TestCase
         $this->actingAs($u->fresh())->get('/account/limits')->assertSee('Bank statement unclear')->assertSee('Resubmit');
     }
 
+    public function test_country_preselected_from_network_and_region_notice(): void
+    {
+        // Visitor on a Sri Lankan network → +94 pre-selected, and a "not available" notice (LKR not active)
+        $this->withHeader('CF-IPCountry', 'LK')->get('/login')->assertOk()->assertSee('name="country" value="LK"', false)->assertSee('+94');
+        $this->withHeader('CF-IPCountry', 'LK')->get('/register')->assertOk()->assertSee('name="country" value="LK"', false);
+        $this->withHeader('CF-IPCountry', 'LK')->get('/')->assertOk()->assertSee('Not available in Sri Lanka yet');
+
+        // Indian visitor → India, no notice (INR is active)
+        $this->withHeader('CF-IPCountry', 'IN')->get('/login')->assertSee('name="country" value="IN"', false);
+        $this->withHeader('CF-IPCountry', 'IN')->get('/')->assertDontSee('Not available in');
+
+        // Unknown / local network → India by default, no notice
+        $this->get('/login')->assertSee('name="country" value="IN"', false);
+        $this->get('/')->assertDontSee('Not available in')->assertSee('Buy &amp; Sell USDT P2P | SRM Fintech Solutions', false)->assertSee('og:image', false);
+    }
+
+    public function test_website_chat_bot_answers_and_admin_reply_reaches_visitor(): void
+    {
+        $this->getJson('/chat/poll')->assertOk()->assertJson(['started' => false, 'needContact' => true]);
+        $this->postJson('/chat/send', ['message' => 'hello'])->assertStatus(422)->assertJsonValidationErrors(['name', 'email']);
+
+        // honeypot: bots filling the hidden field create nothing
+        $this->postJson('/chat/send', ['message' => 'spam', 'name' => 'x', 'email' => 'x@x.com', 'website' => 'http://spam'])->assertOk();
+        $this->assertSame(0, \App\Models\ChatConversation::count());
+
+        $res = $this->postJson('/chat/send', ['name' => 'Meena', 'email' => 'Meena@Example.com', 'message' => "What are today's rates?"])->assertOk();
+        $chat = \App\Models\ChatConversation::first();
+        $this->assertSame('meena@example.com', $chat->email);
+        $this->assertStringContainsString('USDT/INR', collect($res->json('messages'))->last()['body']); // instant bot answer
+        $res->assertCookie('srm_chat');
+        Mail::assertSent(\App\Mail\ChatMail::class, fn ($m) => $m->type === 'staff' && $m->hasTo('support@srmfintechsolutions.com'));
+
+        // unknown question → hand-off message, stays in the admin inbox
+        $this->withCredentials()->withCookie('srm_chat', $chat->token)->postJson('/chat/send', ['message' => 'Can I get a refund for order SRM123?'])->assertOk()
+            ->assertJsonFragment(['from' => 'bot']);
+        $this->assertSame(2, $chat->fresh()->unread_admin);
+
+        // admin replies → saved, visitor sees it, and it is emailed
+        $this->actingAs($this->admin)->get('/admin/chats')->assertOk()->assertSee('Meena');
+        $this->actingAs($this->admin)->get("/admin/chats/{$chat->id}")->assertOk()->assertSee('refund');
+        $this->assertSame(0, $chat->fresh()->unread_admin);
+        $this->actingAs($this->admin)->postJson("/admin/chats/{$chat->id}/reply", ['message' => 'Hi Meena, refund is processed.'])->assertOk()->assertJson(['mailed' => true]);
+        Mail::assertSent(\App\Mail\ChatMail::class, fn ($m) => $m->type === 'reply' && $m->hasTo('meena@example.com'));
+        auth()->logout();
+
+        $poll = $this->withCredentials()->withCookie('srm_chat', $chat->token)->getJson('/chat/poll?after=0')->assertOk()->json();
+        $this->assertTrue($poll['started']);
+        $this->assertSame('Hi Meena, refund is processed.', collect($poll['messages'])->last()['body']);
+        $this->assertSame('SRM Support', collect($poll['messages'])->last()['name']);
+    }
+
+    public function test_admin_can_change_own_email_and_password(): void
+    {
+        $this->actingAs($this->admin)->get('/admin/profile')->assertOk()->assertSee('Change password');
+        $this->actingAs($this->admin)->put('/admin/profile', ['name' => 'Boss', 'email' => 'boss@srm.test', 'current_password' => 'wrong'])->assertSessionHasErrors('current_password');
+        $this->actingAs($this->admin)->put('/admin/profile', ['name' => 'Boss', 'email' => 'Boss@SRM.test', 'current_password' => 'ChangeMe@123'])->assertSessionHasNoErrors();
+        $this->assertSame('boss@srm.test', $this->admin->fresh()->email);
+
+        $this->actingAs($this->admin->fresh())->put('/admin/profile/password', ['current_password' => 'ChangeMe@123', 'password' => 'weak', 'password_confirmation' => 'weak'])->assertSessionHasErrors('password');
+        $this->actingAs($this->admin->fresh())->put('/admin/profile/password', ['current_password' => 'ChangeMe@123', 'password' => 'NewAdmin2026Pass', 'password_confirmation' => 'NewAdmin2026Pass'])->assertSessionHasNoErrors();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewAdmin2026Pass', $this->admin->fresh()->password));
+        $this->assertDatabaseHas('activity_logs', ['action' => 'admin.password']);
+    }
+
     public function test_blocked_user_is_logged_out(): void
     {
         $u = $this->customer();

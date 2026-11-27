@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Consent;
 use App\Models\User;
+use App\Support\GeoCountry;
 use App\Support\Phone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,8 @@ class AuthController extends Controller
     /** Step 1 — "Sign up or login". */
     public function showLogin(Request $request)
     {
-        return view('auth.start', ['country' => old('country', $request->session()->get('auth.country', 'IN'))]);
+        // Pre-select the phone country from the visitor's network location (they can change it).
+        return view('auth.start', ['country' => old('country', $request->session()->get('auth.country') ?? GeoCountry::preselect($request))]);
     }
 
     public function identify(Request $request)
@@ -112,7 +114,7 @@ class AuthController extends Controller
     /** Step 2b — short sign-up for a new account. */
     public function showRegister(Request $request)
     {
-        return view('auth.register', ['auth' => $request->session()->get('auth')]);
+        return view('auth.register', ['auth' => $request->session()->get('auth'), 'geoCountry' => GeoCountry::preselect($request)]);
     }
 
     public function register(Request $request)

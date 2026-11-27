@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ConsentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailVerificationController;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/p2p', [PageController::class, 'p2p'])->name('p2p');
 Route::get('/activity.json', [PageController::class, 'activityFeed'])->middleware('throttle:60,1')->name('activity.feed');
+Route::get('/chat/poll', [ChatController::class, 'poll'])->middleware('throttle:120,1')->name('chat.poll');
+Route::post('/chat/send', [ChatController::class, 'send'])->middleware('throttle:12,1')->name('chat.send');
 foreach (['services', 'about', 'insights', 'contact', 'legal'] as $p) {
     Route::get('/' . $p, [PageController::class, 'page'])->defaults('view', $p)->name($p);
 }
@@ -115,6 +118,16 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::delete('/payout-methods/{payoutMethod}', [Admin\PayoutMethodController::class, 'destroy'])->name('payout-methods.destroy');
 
     Route::get('/history', [Admin\ActivityController::class, 'index'])->name('history');
+
+    Route::get('/chats', [Admin\ChatController::class, 'index'])->name('chats.index');
+    Route::get('/chats/{chat}', [Admin\ChatController::class, 'show'])->name('chats.show');
+    Route::get('/chats/{chat}/poll', [Admin\ChatController::class, 'poll'])->name('chats.poll');
+    Route::post('/chats/{chat}/reply', [Admin\ChatController::class, 'reply'])->name('chats.reply');
+    Route::post('/chats/{chat}/close', [Admin\ChatController::class, 'close'])->name('chats.close');
+
+    Route::get('/profile', [Admin\ProfileController::class, 'edit'])->name('profile');
+    Route::put('/profile', [Admin\ProfileController::class, 'update'])->middleware('throttle:6,1')->name('profile.update');
+    Route::put('/profile/password', [Admin\ProfileController::class, 'password'])->middleware('throttle:6,1')->name('profile.password');
 
     Route::get('/tickets', [Admin\TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{ticket}', [Admin\TicketController::class, 'show'])->name('tickets.show');

@@ -6,7 +6,7 @@
   $auth = $auth ?? null;
   $byEmail = ($auth['type'] ?? null) === 'email';
   $byPhone = ($auth['type'] ?? null) === 'phone';
-  $country = old('country', $auth['country'] ?? 'IN');
+  $country = old('country', $auth['country'] ?? ($geoCountry ?? 'IN'));
   $localPhone = $byPhone ? substr($auth['value'], strlen('+' . config("countries.$country.1"))) : '';
 @endphp
 <h1 class="app-title">Create your account</h1>

@@ -12,7 +12,7 @@
       <label class="switch"><input type="checkbox" name="trading_enabled" value="1" @checked(old('trading_enabled', $s['trading_enabled']))> Trading enabled</label>
     </div>
     <div class="form-grid">
-      <div><label>Payment window (minutes)</label><input class="input" type="number" name="order_expiry_minutes" value="{{ old('order_expiry_minutes', $s['order_expiry_minutes']) }}" required></div>
+      <div><label>Payment window (minutes) — unpaid orders auto-cancel after this</label><input class="input" type="number" name="order_expiry_minutes" value="{{ old('order_expiry_minutes', $s['order_expiry_minutes']) }}" required></div>
       <div><label>Average completion time (shown to clients)</label><input class="input" name="avg_completion" value="{{ old('avg_completion', $s['avg_completion']) }}" required></div>
       <div class="full"><label>Desk hours</label><input class="input" name="desk_hours" value="{{ old('desk_hours', $s['desk_hours']) }}" required></div>
     </div>

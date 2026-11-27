@@ -35,27 +35,27 @@
     </div>
     <div class="grid-3">
       <article class="card post reveal" data-cat="analysis">
-        <div class="thumb" style="background:linear-gradient(135deg,#3a2c08,#f5b740)">XAUUSD</div>
+        <img class="thumb-img" src="{{ asset('images/insights/gold.svg') }}" alt="Gold price candlestick chart" loading="lazy" width="800" height="420">
         <p class="meta">Market Analysis · Coming soon</p><h3 style="margin-top:0">Gold weekly outlook</h3><p>Technical breakdown of key support, resistance and market structure.</p>
       </article>
       <article class="card post reveal" data-cat="journal">
-        <div class="thumb" style="background:linear-gradient(135deg,#0b2a4d,#3b82f6)">Journal</div>
+        <img class="thumb-img" src="{{ asset('images/insights/journal.svg') }}" alt="Trade journal notebook" loading="lazy" width="800" height="420">
         <p class="meta">Trade Journal · Coming soon</p><h3 style="margin-top:0">Completed trade reviews</h3><p>Documented observations from completed trades — what worked and what didn't.</p>
       </article>
       <article class="card post reveal" data-cat="research">
-        <div class="thumb" style="background:linear-gradient(135deg,#06331f,#16c784)">S / R</div>
+        <img class="thumb-img" src="{{ asset('images/insights/support-resistance.svg') }}" alt="Support and resistance chart" loading="lazy" width="800" height="420">
         <p class="meta">Technical Research · Coming soon</p><h3 style="margin-top:0">Support, resistance &amp; price action</h3><p>How market structure and price action shape decision-making.</p>
       </article>
       <article class="card post reveal" data-cat="updates">
-        <div class="thumb" style="background:linear-gradient(135deg,#2a1240,#a855f7)">Macro</div>
+        <img class="thumb-img" src="{{ asset('images/insights/macro.svg') }}" alt="Economic calendar and globe" loading="lazy" width="800" height="420">
         <p class="meta">Market Updates · Coming soon</p><h3 style="margin-top:0">Economic calendar highlights</h3><p>Important economic events and global market developments to watch.</p>
       </article>
       <article class="card post reveal" data-cat="education">
-        <div class="thumb" style="background:linear-gradient(135deg,#3d0d14,#ef4f5f)">Risk</div>
+        <img class="thumb-img" src="{{ asset('images/insights/risk.svg') }}" alt="Risk management shield and stop loss" loading="lazy" width="800" height="420">
         <p class="meta">Trading Education · Coming soon</p><h3 style="margin-top:0">Capital protection &amp; risk management</h3><p>Position sizing, stop losses and trading discipline fundamentals.</p>
       </article>
       <article class="card post reveal" data-cat="marketing">
-        <div class="thumb" style="background:linear-gradient(135deg,#0e3436,#5eead4)">Meta Ads</div>
+        <img class="thumb-img" src="{{ asset('images/insights/meta-ads.svg') }}" alt="Social media ad results" loading="lazy" width="800" height="420">
         <p class="meta">Digital Marketing · Coming soon</p><h3 style="margin-top:0">Meta advertising updates</h3><p>Practical notes on Facebook &amp; Instagram campaigns and lead generation.</p>
       </article>
     </div>

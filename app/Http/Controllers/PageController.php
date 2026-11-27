@@ -10,7 +10,20 @@ class PageController extends Controller
 {
     public function home()
     {
-        return view('pages.home', ['pricing' => Pricing::config(), 'activity' => self::activity(), 'strip' => \App\Support\BrandStrip::build()]);
+        return view('pages.home', ['pricing' => Pricing::config(), 'activity' => self::activity(), 'strip' => \App\Support\BrandStrip::build(),
+            'region' => self::region(request())]);
+    }
+
+    /** Visitor's detected country and whether we trade in its currency yet (for the region notice). */
+    private static function region(\Illuminate\Http\Request $request): ?array
+    {
+        $cc = \App\Support\GeoCountry::detect($request);
+        if (! $cc) {
+            return null;
+        }
+        $cur = config("countries.$cc.2");
+
+        return ['code' => $cc, 'name' => config("countries.$cc.0"), 'served' => \App\Models\Currency::where('code', $cur)->where('is_active', true)->exists()];
     }
 
     /** JSON for the live feed (polled by the homepage). */

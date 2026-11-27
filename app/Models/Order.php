@@ -23,7 +23,7 @@ class Order extends Model
         self::COMPLETED => 'Completed',
         self::REJECTED => 'Rejected',
         self::CANCELLED => 'Cancelled',
-        self::EXPIRED => 'Expired',
+        self::EXPIRED => 'Auto-cancelled',
     ];
 
     public const OPEN = [self::PENDING, self::SUBMITTED, self::PROCESSING];
@@ -134,7 +134,7 @@ class Order extends Model
     public function expireIfDue(): bool
     {
         if ($this->status === self::PENDING && $this->expires_at && $this->expires_at->isPast()) {
-            $this->transition(self::EXPIRED, null, 'Payment window expired');
+            $this->transition(self::EXPIRED, null, 'Auto-cancelled: not paid within ' . Setting::get('order_expiry_minutes', 15) . ' minutes');
             return true;
         }
         return false;

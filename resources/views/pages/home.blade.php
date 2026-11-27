@@ -1,14 +1,13 @@
 @extends('layouts.site')
-@section('title', 'Buy & Sell USDT P2P in INR')
+@section('title', 'Buy & Sell USDT P2P')
 
 @section('content')
 @php $c = $pricing['currencies'][$pricing['currency']] ?? ['code' => 'INR', 'symbol' => '₹', 'buy_rate' => 0, 'sell_rate' => 0, 'min' => 0, 'max' => 0, 'tds' => 0]; @endphp
 <section class="hero">
   <div class="container hero-grid">
     <div>
-      <span class="pill"><span class="dot"></span> P2P desk live · {{ $settings['desk_hours'] }}</span>
       <h1><span>Buy &amp; sell USDT</span><br>the simple, verified way</h1>
-      <p class="lead">The easy way to convert INR to USDT and back. Pay with UPI, IMPS or bank transfer — clear rates, KYC-verified customers, live order tracking and real human support.</p>
+      <p class="lead">Buy and sell USDT with local payment methods — clear rates, KYC-verified customers, live order tracking and real human support. Now live in India with UPI, IMPS &amp; bank transfer; more regions coming soon.</p>
       <div class="hero-actions">
         <a href="{{ route('trade', ['side' => 'buy']) }}" class="btn btn-primary">Buy USDT →</a>
         <a href="{{ route('trade', ['side' => 'sell']) }}" class="btn btn-ghost">Sell USDT</a>
@@ -20,6 +19,10 @@
       </div>
     </div>
     <div>
+      @if ($region && ! $region['served'])
+        <div class="region-note"><img src="https://flagcdn.com/w40/{{ strtolower($region['code']) }}.png" alt="" width="22" height="22">
+          <div><b>Not available in {{ $region['name'] }} yet</b><small>Our P2P desk is currently live in India only. You can still create an account and verify — we'll notify you when your region opens.</small></div></div>
+      @endif
       @include('partials.calc', ['mode' => 'widget'])
       @if ($activity->isNotEmpty())
         <div class="activity" id="activityFeed" aria-live="polite" aria-label="Recent completed orders" data-src="{{ route('activity.feed') }}">
@@ -44,7 +47,7 @@
       <p>You see the rate, the fee and the final amount before you commit — and track every order live in your dashboard.</p>
     </div>
     <div class="grid-4">
-      <div class="card reveal"><div class="icon">₹</div><h3>INR in, USDT out</h3><p>Pay via UPI, IMPS, NEFT/RTGS or bank transfer. Receive USDT on {{ collect($pricing['networks'])->pluck('code')->join(', ') }}.</p></div>
+      <div class="card reveal"><div class="icon">₹</div><h3>Local money in, USDT out</h3><p>In India: pay via UPI, IMPS, NEFT/RTGS or bank transfer — more currencies coming soon. Receive USDT on {{ collect($pricing['networks'])->pluck('code')->join(', ') }}.</p></div>
       <div class="card reveal"><div class="icon blue">🛡</div><h3>KYC-verified only</h3><p>Every customer is verified. Own-account payments only — no third-party funds.</p></div>
       <div class="card reveal"><div class="icon gold">⚡</div><h3>Fast settlement</h3><p>Most orders complete in {{ $settings['avg_completion'] }} once payment is verified.</p></div>
       <div class="card reveal"><div class="icon">📍</div><h3>Live order tracking</h3><p>Follow each step — payment, verification and delivery — from your dashboard.</p></div>

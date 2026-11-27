@@ -12,6 +12,8 @@
 
   <div class="nav-title">Clients</div>
   <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><span class="ico">👥</span> Clients</a>
+  <a href="{{ route('admin.chats.index') }}" class="{{ request()->routeIs('admin.chats.*') ? 'active' : '' }}"><span class="ico">💬</span> Live Chat
+    @if ($badge['chats'])<span class="count">{{ $badge['chats'] }}</span>@endif</a>
   <a href="{{ route('admin.tickets.index') }}" class="{{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}"><span class="ico">🎧</span> Support Tickets
     @if ($badge['tickets'])<span class="count">{{ $badge['tickets'] }}</span>@endif</a>
   <a href="{{ route('admin.kyc.index') }}" class="{{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}"><span class="ico">🛡</span> KYC Verification
@@ -26,6 +28,7 @@
   <div class="nav-title">System</div>
   <a href="{{ route('admin.history') }}" class="{{ request()->routeIs('admin.history') ? 'active' : '' }}"><span class="ico">🕘</span> History</a>
   <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}"><span class="ico">⚙</span> Settings</a>
+  <a href="{{ route('admin.profile') }}" class="{{ request()->routeIs('admin.profile') ? 'active' : '' }}"><span class="ico">🔐</span> My account</a>
   <a href="{{ route('home') }}" target="_blank"><span class="ico">⌂</span> View website</a>
 @endsection
 

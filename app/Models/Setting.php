@@ -14,7 +14,7 @@ class Setting extends Model
 
     public const DEFAULTS = [
         // Rates, limits and TDS live on each Currency (Admin → Currencies & Rates).
-        'order_expiry_minutes' => '30',
+        'order_expiry_minutes' => '15',  // unpaid orders auto-cancel after this many minutes
         'terms_version' => '1.0',        // bump to make every client re-accept the terms
         'kyc_video_required' => '1',
         // Names shown on the KYC "checking your documents" screen — use real team members or their working names.

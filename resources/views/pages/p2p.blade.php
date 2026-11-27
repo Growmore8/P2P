@@ -1,5 +1,5 @@
 @extends('layouts.site')
-@section('title', 'P2P USDT Desk — Buy & Sell USDT with INR')
+@section('title', 'P2P USDT Desk — Buy & Sell USDT')
 
 @section('content')
 @php $c = $pricing['currencies'][$pricing['currency']] ?? ['code' => 'INR', 'symbol' => '₹', 'buy_rate' => 0, 'sell_rate' => 0, 'min' => 0, 'max' => 0, 'tds' => 0]; @endphp
@@ -119,7 +119,7 @@
     <div class="sec-head center reveal"><span class="eyebrow">FAQ</span><h2>P2P questions, answered</h2></div>
     <div class="faq reveal">
       <details><summary>What is P2P USDT trading?</summary><p>You transact directly with SRM Fintech Solutions' merchant desk instead of an exchange order book. You pay INR and receive USDT, or send USDT and receive INR.</p></details>
-      <details><summary>How long do I have to pay?</summary><p>Each buy order has a payment window of {{ $settings['order_expiry_minutes'] }} minutes. Unpaid orders expire automatically — just place a new order.</p></details>
+      <details><summary>How long do I have to pay?</summary><p>Each buy order has a payment window of {{ $settings['order_expiry_minutes'] }} minutes. Unpaid orders are cancelled automatically — just place a new order.</p></details>
       <details><summary>How long does verification take?</summary><p>KYC is usually reviewed within working hours. Orders typically complete in {{ $settings['avg_completion'] }} after payment is verified.</p></details>
       <details><summary>Why is TDS deducted on sell orders?</summary><p>Under Section 194S of the Income-tax Act, 1% TDS may apply on the transfer of virtual digital assets. Where applicable we deduct it and it is shown in your quote.</p></details>
       <details><summary>Can someone else pay on my behalf?</summary><p>No. Payments and payouts must be from / to accounts in the verified customer's own name. Third-party payments are refunded to source and the order rejected.</p></details>

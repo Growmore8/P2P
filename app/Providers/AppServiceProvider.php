@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
                 'kyc' => KycSubmission::where('status', 'pending')->count() + \App\Models\KycUpgrade::where('status', 'pending')->count(),
                 'orders' => Order::where('status', Order::SUBMITTED)->count(),
                 'tickets' => \App\Models\Ticket::where('status', \App\Models\Ticket::OPEN)->count(),
+                'chats' => \App\Models\ChatConversation::where('unread_admin', '>', 0)->count(),
             ]);
         });
     }
