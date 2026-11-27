@@ -2,7 +2,28 @@
      • <form data-confirm="Message">                 → Yes / Cancel
      • <button data-confirm="Message"> inside a form  → only that button asks
      • <form data-type-confirm="CODE" data-type-message="Warning"> → admin must type CODE (sent as confirm_id) --}}
-<div class="sd-wrap" id="srmDialog" aria-hidden="true">
+<style>
+  /* Kept inline so the pop-up looks right even if an old copy of the site's CSS is cached. */
+  .sd-wrap{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(3,6,12,.6);backdrop-filter:blur(4px)}
+  .sd-wrap.open{display:flex}
+  .sd-box{width:100%;max-width:420px;background:var(--card,#fff);color:var(--text,#0d1424);border:1px solid var(--line,#e3e8f2);border-radius:20px;padding:24px 24px 20px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+  .sd-ico{width:52px;height:52px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:800}
+  .sd-ico.is-danger{background:#fee2e2;color:#dc2626}
+  .sd-ico.is-info{background:var(--brand-soft,#eef3ff);color:var(--brand,#1f56e0)}
+  .sd-box h3{font-size:18px;margin:0 0 8px}
+  .sd-box p{margin:0 0 16px;color:var(--muted,#5b6577);font-size:14.5px;line-height:1.55;white-space:pre-line}
+  .sd-type{text-align:left;margin:0 0 16px}
+  .sd-type label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted,#5b6577)}
+  .sd-type b{color:var(--text,#0d1424);font-family:ui-monospace,Consolas,monospace}
+  .sd-type .input{width:100%;box-sizing:border-box;padding:10px 12px;font-size:15px;letter-spacing:.5px}
+  .sd-actions{display:flex;gap:10px}
+  .sd-actions .btn{flex:1}
+  .sd-actions .btn:disabled{opacity:.45;cursor:not-allowed}
+  .sd-actions .btn-danger{background:#dc2626;border-color:#dc2626;color:#fff}
+  .sd-actions .btn-danger:hover:not(:disabled){background:#b91c1c}
+  :root[data-theme="dark"] .sd-ico.is-danger{background:rgba(239,68,68,.16);color:#f87171}
+</style>
+<div class="sd-wrap" id="srmDialog" aria-hidden="true" style="display:none">
   <div class="sd-box" role="alertdialog" aria-modal="true" aria-labelledby="sdTitle" aria-describedby="sdMsg">
     <div class="sd-ico" id="sdIco">!</div>
     <h3 id="sdTitle">Are you sure?</h3>
@@ -26,7 +47,7 @@
   var DANGER = /^(delete|remove|reject|deactivate|cancel|lock|block|close)\b/i;
 
   function close(result) {
-    wrap.classList.remove('open'); wrap.setAttribute('aria-hidden', 'true');
+    wrap.classList.remove('open'); wrap.style.display = 'none'; wrap.setAttribute('aria-hidden', 'true');
     var d = done; done = null; if (d) d(result);
   }
   // srmDialog({ message, title, typeCode, okText, danger }) → Promise(false | true | typedText)
@@ -42,7 +63,7 @@
       ok.textContent = o.okText || (danger && first ? first.charAt(0).toUpperCase() + first.slice(1).toLowerCase() : 'Yes, continue');
       typeBox.hidden = !code; codeEl.textContent = code; input.value = '';
       ok.disabled = !!code;
-      wrap.classList.add('open'); wrap.setAttribute('aria-hidden', 'false');
+      wrap.classList.add('open'); wrap.style.display = 'flex'; wrap.setAttribute('aria-hidden', 'false');
       setTimeout(function () { (code ? input : ok).focus(); }, 30);
     });
   };
