@@ -161,11 +161,11 @@ class OrderController extends Controller
 
         $data = $request->validate([
             'user_reference' => $order->isBuy()
-                ? ['required', 'string', 'regex:/^[A-Za-z0-9]{6,30}$/']
+                ? ['required', 'string', 'regex:/^[A-Za-z0-9_\-]{6,40}$/']
                 : ['required', 'string', 'regex:/^(0x)?[A-Fa-f0-9]{40,80}$/'],
             'user_proof' => [$order->isBuy() ? 'required' : 'nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
         ], [
-            'user_reference.regex' => $order->isBuy() ? 'Enter a valid UTR / reference number.' : 'Enter a valid transaction hash.',
+            'user_reference.regex' => $order->isBuy() ? 'Enter a valid UTR / payment ID (letters, numbers, _ or -).' : 'Enter a valid transaction hash.',
         ]);
 
         $updated = DB::transaction(function () use ($request, $order, $data) {

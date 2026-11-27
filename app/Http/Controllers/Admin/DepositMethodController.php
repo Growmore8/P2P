@@ -68,6 +68,7 @@ class DepositMethodController extends Controller
             'countries.*' => [Rule::in(array_keys(config('countries')))],
             'title' => ['required', 'string', 'max:100'],
             'upi_id' => ['required_if:type,upi', 'nullable', 'string', 'max:100'],
+            'pay_url' => ['required_if:type,link', 'nullable', 'url:https', 'max:255'],
             'qr' => ['nullable', 'image', 'max:2048'],
             'account_holder' => ['required_if:type,bank', 'nullable', 'string', 'max:100'],
             'account_number' => ['required_if:type,bank', 'required_if:type,wallet', 'nullable', 'regex:/^[A-Za-z0-9 +\-]{5,34}$/'],

@@ -641,6 +641,26 @@ class P2PFlowTest extends TestCase
         $this->assertDatabaseHas('activity_logs', ['action' => 'admin.password']);
     }
 
+    public function test_payment_link_deposit_method(): void
+    {
+        $this->actingAs($this->admin)->post('/admin/methods', ['type' => 'link', 'currency' => 'INR', 'title' => 'Razorpay', 'pay_url' => 'http://insecure.example'])
+            ->assertSessionHasErrors('pay_url'); // https only
+        $this->actingAs($this->admin)->post('/admin/methods', ['type' => 'link', 'currency' => 'INR', 'title' => 'Razorpay (UPI / card / netbanking)',
+            'pay_url' => 'https://razorpay.me/@srmfintechsolutions', 'is_active' => '1'])->assertSessionHasNoErrors();
+        $m = DepositMethod::where('type', 'link')->first();
+        $this->assertSame('https://razorpay.me/@srmfintechsolutions', $m->pay_url);
+
+        $u = $this->customer();
+        $this->actingAs($u)->post('/trade', ['side' => 'buy', 'network' => 'TRC20', 'amount' => '5000',
+            'wallet_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'deposit_method_id' => $m->id, 'confirm' => '1'])->assertSessionHasNoErrors();
+        $order = Order::latest('id')->first();
+        $this->actingAs($u)->get("/orders/{$order->order_no}")->assertOk()
+            ->assertSee('https://razorpay.me/@srmfintechsolutions', false)->assertSee('on Razorpay')->assertSee('Payment ID (pay_…) or UTR');
+        $this->actingAs($u)->post("/orders/{$order->order_no}/payment", ['user_reference' => 'pay_NB2kX9aZ1q2w3e',
+            'user_proof' => UploadedFile::fake()->createWithContent('p.png', self::png())])->assertSessionHasNoErrors();
+        $this->assertSame(Order::SUBMITTED, $order->fresh()->status);
+    }
+
     public function test_blocked_user_is_logged_out(): void
     {
         $u = $this->customer();

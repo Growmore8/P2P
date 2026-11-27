@@ -20,7 +20,7 @@
     <div><label>Current password</label><input class="input" type="password" name="current_password" required autocomplete="current-password"></div>
     <div><label>New password</label><input class="input" type="password" name="password" required autocomplete="new-password"></div>
     <div><label>Confirm new password</label><input class="input" type="password" name="password_confirmation" required autocomplete="new-password"></div>
-    <span class="hint">At least 10 characters with upper- and lower-case letters and numbers. Other logged-in devices will be signed out.</span>
+    <span class="hint">At least 8 characters with letters and numbers. Other logged-in devices will be signed out.</span>
     <button class="btn btn-primary">Change password</button>
   </form>
 </div>

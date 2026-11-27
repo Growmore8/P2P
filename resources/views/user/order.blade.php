@@ -58,6 +58,14 @@
         </div>
         <div class="o-method"><span class="pr-ico">{{ ['upi' => '📲', 'bank' => '🏦', 'wallet' => '👛'][$d['type'] ?? ''] ?? '💳' }}</span><b>{{ $d['title'] ?? 'Payment details' }}</b></div>
 
+        @if (($d['type'] ?? '') === 'link' && ! empty($d['pay_url']))
+          <a href="{{ $d['pay_url'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block btn-lg" style="margin:10px 0 6px">Pay {{ $order->money($order->fiat_amount) }} on {{ str_contains(strtolower($d['pay_url']), 'razorpay') ? 'Razorpay' : 'the payment page' }} ↗</a>
+          <ol class="o-steps-mini">
+            <li>Enter exactly <b>{{ $order->money($order->fiat_amount) }}</b> on the payment page</li>
+            <li>Add your order number <b class="mono">{{ $order->order_no }}</b> in the note / description</li>
+            <li>After paying, copy the <b>Payment ID</b> (starts with <span class="mono">pay_</span>) and paste it below</li>
+          </ol>
+        @endif
         @if (($d['type'] ?? '') === 'upi')
           <div class="o-qr-wrap">
             <div class="qr" id="upiQr">@if (! empty($d['qr_image']))<img src="{{ route('files.orderQr', $order) }}" alt="UPI QR code">@endif</div>
@@ -99,7 +107,7 @@
     <h3 class="o-sec-title"><span class="o-num">2</span>{{ $buy ? 'Confirm your payment' : 'Confirm your transfer' }}</h3>
     <form method="POST" action="{{ route('orders.payment', $order) }}" enctype="multipart/form-data" class="form o-card">
       @csrf
-      <div><label>{{ $buy ? 'UTR / reference number' : 'Transaction hash (TxID)' }}</label>
+      <div><label>{{ $buy ? ((($d['type'] ?? '') === 'link') ? 'Payment ID (pay_…) or UTR' : 'UTR / reference number') : 'Transaction hash (TxID)' }}</label>
         <input class="input mono" name="user_reference" value="{{ old('user_reference') }}" required autocomplete="off" inputmode="{{ $buy ? 'text' : 'text' }}"
                placeholder="{{ $buy ? '12-digit UTR from your bank / UPI app' : 'Paste the transaction hash' }}">
       </div>

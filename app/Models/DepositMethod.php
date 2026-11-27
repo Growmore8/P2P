@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 /** Where clients PAY fiat for buy orders (per currency / country). */
 class DepositMethod extends Model
 {
-    public const TYPES = ['upi' => 'UPI', 'bank' => 'Bank transfer', 'wallet' => 'Mobile wallet', 'other' => 'Other'];
+    public const TYPES = ['upi' => 'UPI', 'bank' => 'Bank transfer', 'wallet' => 'Mobile wallet', 'link' => 'Payment link', 'other' => 'Other'];
 
     protected $fillable = [
-        'type', 'currency', 'countries', 'title', 'upi_id', 'qr_image', 'account_holder', 'account_number', 'ifsc', 'bank_name',
+        'type', 'currency', 'countries', 'title', 'upi_id', 'pay_url', 'qr_image', 'account_holder', 'account_number', 'ifsc', 'bank_name',
         'instructions', 'min_amount', 'max_amount', 'is_active', 'sort',
     ];
 
@@ -54,12 +54,13 @@ class DepositMethod extends Model
             'upi' => 'PhonePe, GPay, Paytm, etc.',
             'bank' => 'Pay via bank transfer',
             'wallet' => 'Pay from your mobile wallet',
+            'link' => 'Pay online — UPI, card or netbanking',
             default => 'See instructions after placing the order',
         };
     }
 
     public function snapshot(): array
     {
-        return $this->only(['type', 'currency', 'title', 'upi_id', 'qr_image', 'account_holder', 'account_number', 'ifsc', 'bank_name', 'instructions']);
+        return $this->only(['type', 'currency', 'title', 'upi_id', 'pay_url', 'qr_image', 'account_holder', 'account_number', 'ifsc', 'bank_name', 'instructions']);
     }
 }

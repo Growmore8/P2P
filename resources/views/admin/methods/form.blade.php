@@ -22,6 +22,8 @@
     </div>
     <div class="full"><label>Display title</label><input class="input" name="title" value="{{ old('title', $method->title) }}" placeholder="e.g. UPI (GPay / PhonePe) · Bank transfer (CEFTS) · eZ Cash" required></div>
 
+    <div data-type="link" class="full"><label>Payment link (https://…)</label><input class="input" name="pay_url" value="{{ old('pay_url', $method->pay_url) }}" placeholder="https://razorpay.me/@yourbusiness">
+      <span class="hint">Clients open this link, pay the exact order amount, then paste the payment ID (e.g. pay_…) as their reference.</span></div>
     <div data-type="upi"><label>UPI ID</label><input class="input" name="upi_id" value="{{ old('upi_id', $method->upi_id) }}" placeholder="business@okbank"></div>
     <div data-type="upi wallet"><label>QR code image (optional)</label><input class="input" type="file" name="qr" accept="image/*">
       <span class="hint">UPI: if empty, a QR with the exact amount is generated automatically.</span>

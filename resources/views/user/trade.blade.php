@@ -107,7 +107,7 @@
         <label class="sheet-opt">
           <input type="radio" form="tradeFormProxy" name="deposit_method_id_ui" value="{{ $m->id }}" data-target="deposit_method_id" @checked(old('deposit_method_id', $loop->first ? $m->id : null) == $m->id)>
           <span data-label style="display:flex;gap:12px;align-items:center;flex:1">
-            <span class="pr-ico">{{ ['upi' => '📲', 'bank' => '🏦', 'wallet' => '👛'][$m->type] ?? '💳' }}</span>
+            <span class="pr-ico">{{ ['upi' => '📲', 'bank' => '🏦', 'wallet' => '👛', 'link' => '🔗'][$m->type] ?? '💳' }}</span>
             <span class="pr-main"><b>{{ $m->title }}</b><small>{{ $m->subtitle() }}@if ((float) $m->max_amount > 0) · up to {{ money($m->max_amount, $m->currency, 0) }}@endif</small></span>
           </span>
           @if ($loop->first)<span class="tag-ok">Recommended</span>@endif

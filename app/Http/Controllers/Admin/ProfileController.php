@@ -43,7 +43,7 @@ class ProfileController extends Controller
         $u = $request->user();
         $data = $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', 'different:current_password', Password::min(10)->letters()->mixedCase()->numbers()],
+            'password' => ['required', 'confirmed', 'different:current_password', Password::min(8)->letters()->numbers()],
         ], [
             'current_password.current_password' => 'Your current password is incorrect.',
             'password.different' => 'The new password must be different from the current one.',

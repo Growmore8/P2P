@@ -630,3 +630,5 @@ a.stat:hover{border-color:var(--brand)}
 }
 .post .thumb-img{display:block;width:calc(100% + 16px);height:auto;aspect-ratio:800/420;object-fit:cover;border-radius:12px;margin:-8px -8px 18px}
 .cw-panel{padding:0}
+.o-steps-mini{margin:6px 0 4px 18px;font-size:13.5px;color:var(--muted);display:grid;gap:4px}
+.o-steps-mini b{color:var(--text)}
