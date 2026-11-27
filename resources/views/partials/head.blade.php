@@ -4,7 +4,7 @@
 <title>@yield('title', 'SRM Fintech Solutions') | SRM Fintech Solutions</title>
 @php
   $metaTitle = trim(View::yieldContent('title', 'SRM Fintech Solutions')) . ' | SRM Fintech Solutions';
-  $metaDesc = trim(View::yieldContent('description', 'SRM Fintech Solutions — KYC-verified P2P desk to buy & sell USDT with local payment methods. Now live in India (UPI, IMPS, bank transfer); more regions coming soon.'));
+  $metaDesc = trim(View::yieldContent('description', 'SRM Fintech Solutions — KYC-verified P2P desk to buy & sell USDT with local payment methods. Trusted local payment methods; more regions coming soon.'));
 @endphp
 <meta name="description" content="{{ $metaDesc }}">
 <link rel="canonical" href="{{ url()->current() }}">

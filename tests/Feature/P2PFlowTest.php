@@ -619,15 +619,15 @@ class P2PFlowTest extends TestCase
         // Visitor on a Sri Lankan network → +94 pre-selected, and a "not available" notice (LKR not active)
         $this->withHeader('CF-IPCountry', 'LK')->get('/login')->assertOk()->assertSee('name="country" value="LK"', false)->assertSee('+94');
         $this->withHeader('CF-IPCountry', 'LK')->get('/register')->assertOk()->assertSee('name="country" value="LK"', false);
-        $this->withHeader('CF-IPCountry', 'LK')->get('/')->assertOk()->assertSee('Not available in Sri Lanka yet');
+        $this->withHeader('CF-IPCountry', 'LK')->get('/')->assertOk()->assertSee('Currently not available in your region')->assertDontSee('India only');
 
         // Indian visitor → India, no notice (INR is active)
         $this->withHeader('CF-IPCountry', 'IN')->get('/login')->assertSee('name="country" value="IN"', false);
-        $this->withHeader('CF-IPCountry', 'IN')->get('/')->assertDontSee('Not available in');
+        $this->withHeader('CF-IPCountry', 'IN')->get('/')->assertDontSee('Currently not available in your region');
 
         // Unknown / local network → India by default, no notice
         $this->get('/login')->assertSee('name="country" value="IN"', false);
-        $this->get('/')->assertDontSee('Not available in')->assertSee('Buy &amp; Sell USDT P2P | SRM Fintech Solutions', false)->assertSee('og:image', false);
+        $this->get('/')->assertDontSee('Currently not available in your region')->assertSee('Buy &amp; Sell USDT P2P | SRM Fintech Solutions', false)->assertSee('og:image', false);
     }
 
     public function test_website_chat_bot_answers_and_admin_reply_reaches_visitor(): void

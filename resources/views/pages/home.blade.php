@@ -7,7 +7,7 @@
   <div class="container hero-grid">
     <div>
       <h1><span>Buy &amp; sell USDT</span><br>the simple, verified way</h1>
-      <p class="lead">Buy and sell USDT with local payment methods — clear rates, KYC-verified customers, live order tracking and real human support. Now live in India with UPI, IMPS &amp; bank transfer; more regions coming soon.</p>
+      <p class="lead">Buy and sell USDT with local payment methods — clear rates, KYC-verified customers, live order tracking and real human support. Pay and get paid with trusted local methods; more regions coming soon.</p>
       <div class="hero-actions">
         <a href="{{ route('trade', ['side' => 'buy']) }}" class="btn btn-primary">Buy USDT →</a>
         <a href="{{ route('trade', ['side' => 'sell']) }}" class="btn btn-ghost">Sell USDT</a>
@@ -21,7 +21,7 @@
     <div>
       @if ($region && ! $region['served'])
         <div class="region-note"><img src="https://flagcdn.com/w40/{{ strtolower($region['code']) }}.png" alt="" width="22" height="22">
-          <div><b>Not available in {{ $region['name'] }} yet</b><small>Our P2P desk is currently live in India only. You can still create an account and verify — we'll notify you when your region opens.</small></div></div>
+          <div><b>Currently not available in your region</b><small>You can still create an account and verify — we'll notify you as soon as trading opens in your region.</small></div></div>
       @endif
       @include('partials.calc', ['mode' => 'widget'])
       @if ($activity->isNotEmpty())

@@ -99,7 +99,7 @@
         if (!res.ok) {
           var failed = body.querySelector('.cw-msg.me:last-child'); if (failed) failed.remove();
           if (!form.message.value) form.message.value = text;
-          err.textContent = res.status === 429 ? 'You're sending messages too fast — please wait a minute and try again.'
+          err.textContent = res.status === 429 ? 'Too many messages — please wait a minute and try again.'
             : (res.d.errors ? Object.values(res.d.errors)[0][0] : (res.d.message || 'Could not send. Please try again.'));
           return;
         }
