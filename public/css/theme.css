@@ -986,3 +986,13 @@ body.modal-on{overflow:hidden}
   .modal-form .type-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-height:760px){ .modal-box.modal-form{padding:14px 18px} .modal-form .mf-grid{gap:8px 10px;margin-bottom:8px} }
+/* Wallet edit row + network settings rows */
+.wl-edit-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px 12px}
+.wl-edit-row .input{flex:1;min-width:260px;padding:9px 12px;font-size:14px}
+.wl-edit-row .addr-check{flex-basis:100%;margin:0}
+.wl-edit-row .check{margin:0}
+.net-set{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px}
+.net-set .check{margin:0;font-size:13.5px}
+.net-fee-inline{display:inline-flex;align-items:center;gap:6px;margin:0!important;font-size:13px;color:var(--muted)}
+.net-fee-inline .input{width:80px;padding:7px 10px;font-size:14px}
+@media (max-width:560px){ .net-set .wl-main{flex-basis:100%;order:2} }

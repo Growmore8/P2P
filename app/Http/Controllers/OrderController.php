@@ -108,14 +108,18 @@ class OrderController extends Controller
             }
             $attrs += ['wallet_address' => $wallet, 'deposit_method_id' => $method->id, 'deposit_snapshot' => $method->snapshot()];
         } else {
-            if (! $network->deposit_address) {
+            if (! $network->wallets()->where('is_active', true)->exists()) {
                 throw ValidationException::withMessages(['network' => 'Selling on this network is not available right now.']);
             }
             $account = $user->bankAccounts()->where('currency', $currency->code)->find($data['bank_account_id']);
             if (! $account) {
                 throw ValidationException::withMessages(['bank_account_id' => 'Choose a valid payout account.']);
             }
-            $attrs += ['deposit_address' => $network->deposit_address, 'payout_snapshot' => $account->snapshot()];
+            $address = $network->nextWalletAddress(); // active addresses take turns
+            if (! $address) {
+                throw ValidationException::withMessages(['network' => 'Selling on this network is not available right now.']);
+            }
+            $attrs += ['deposit_address' => $address, 'payout_snapshot' => $account->snapshot()];
         }
 
         $order = DB::transaction(function () use ($user, $attrs) {

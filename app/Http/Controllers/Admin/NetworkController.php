@@ -10,7 +10,7 @@ class NetworkController extends Controller
 {
     public function index()
     {
-        return view('admin.networks', ['networks' => Network::ordered()->get()]);
+        return view('admin.networks', ['networks' => Network::ordered()->with('wallets')->get()]);
     }
 
     public function store(Request $request)
@@ -35,7 +35,10 @@ class NetworkController extends Controller
 
     public function update(Request $request, Network $network)
     {
-        $network->update($this->validated($request, $network));
+        $data = $this->validated($request, $network);
+        unset($data['deposit_address']); // addresses are managed as wallets (several per network)
+        $network->update($data);
+        $network->syncDepositAddress();
 
         return back()->with('success', "{$network->code} updated.");
     }
@@ -56,7 +59,7 @@ class NetworkController extends Controller
         $request->merge(['deposit_address' => preg_replace('/\s+/', '', (string) $request->input('deposit_address')) ?: null]);
         $data = $request->validate([
             'code' => $network ? ['prohibited'] : ['required', 'string', 'max:20', 'alpha_num', 'unique:networks,code'],
-            'name' => ['required', 'string', 'max:60'],
+            'name' => [$network ? 'sometimes' : 'required', 'string', 'max:60'], // edit form keeps the existing name
             'fee' => ['required', 'numeric', 'min:0', 'max:1000'],
             'deposit_address' => ['nullable', 'string', 'max:120'],
             'address_regex' => ['nullable', 'string', 'max:120'],

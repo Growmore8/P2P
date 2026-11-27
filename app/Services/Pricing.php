@@ -27,10 +27,11 @@ class Pricing
             'trading_enabled' => (bool) Setting::get('trading_enabled'),
             'currency' => $default?->code,
             'currencies' => $currencies->mapWithKeys(fn ($c) => [$c->code => $c->toPricing()])->all(),
-            'networks' => Network::ordered()->get(['code', 'name', 'fee', 'buy_enabled', 'sell_enabled'])
+            'networks' => Network::ordered()->get(['code', 'name', 'fee', 'buy_enabled', 'sell_enabled', 'deposit_address'])
                 ->map(fn ($n) => [
                     'code' => $n->code, 'name' => $n->name, 'fee' => (float) $n->fee,
-                    'buy' => $n->buy_enabled, 'sell' => $n->sell_enabled,
+                    // Selling needs at least one active deposit address (deposit_address mirrors the first active wallet).
+                    'buy' => $n->buy_enabled, 'sell' => $n->sell_enabled && (bool) $n->deposit_address,
                 ])->values()->all(),
         ];
     }

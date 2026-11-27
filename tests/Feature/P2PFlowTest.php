@@ -32,7 +32,7 @@ class P2PFlowTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->admin = User::where('is_admin', true)->first();
         DepositMethod::query()->update(['is_active' => true]);
-        Network::where('code', 'TRC20')->update(['deposit_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345']);
+        Network::where('code', 'TRC20')->first()->wallets()->create(['address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'is_active' => true]);
     }
 
     /** The 6-digit code from the last OTP email sent to this address (mail is faked in tests). */
@@ -573,22 +573,40 @@ class P2PFlowTest extends TestCase
         $this->actingAs($this->admin)->delete("/admin/currencies/{$inr->id}")->assertSessionHas('error');
         $this->assertDatabaseHas('currencies', ['code' => 'INR']);
 
-        // Wallet address must match the network's format; spaces from copy-paste are removed
+        // Wallets: several addresses per network, checked against the network's format, spaces removed
         $trc = Network::where('code', 'TRC20')->first();
-        $base = ['name' => $trc->name, 'fee' => 1, 'sort' => 1, 'address_regex' => $trc->address_regex, 'buy_enabled' => '1', 'sell_enabled' => '1'];
-        $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", $base + ['deposit_address' => '0x1234567890abcdef1234567890abcdef12345678'])->assertSessionHasErrors('deposit_address');
-        $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", $base + ['deposit_address' => " TXYZabcdefghijkmnopqrstuvwxyz\n12345 "])->assertSessionHasNoErrors();
-        $this->assertSame('TXYZabcdefghijkmnopqrstuvwxyz12345', $trc->fresh()->deposit_address);
-        $this->actingAs($this->admin)->get('/admin/networks')->assertOk()->assertSee('TXYZabcdefghijkmnopqrstuvwxyz12345')->assertSee('Add crypto wallet');
+        $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'TRC20', 'address' => '0x1234567890abcdef1234567890abcdef12345678', 'active' => '1'])->assertSessionHasErrors('address');
+        $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'TRC20', 'address' => " TABCabcdefghijkmnopqrstuvwxyz
+12345 ", 'active' => '1'])->assertSessionHasNoErrors();
+        $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'TRC20', 'address' => 'TABCabcdefghijkmnopqrstuvwxyz12345', 'active' => '1'])->assertSessionHasErrors('address'); // duplicate
+        $this->assertSame(2, $trc->wallets()->count()); // the one from setUp + the new one
+        $this->actingAs($this->admin)->get('/admin/networks')->assertOk()->assertSee('TABCabcdefghijkmnopqrstuvwxyz12345')->assertSee('Add crypto wallet')->assertSee('2 active addresses');
 
-        // Add wallet pop-up offers only TRC20 / BEP20 / ERC20; picking one fills name / fee / format; a wrong address is refused
+        // New sell orders take turns between the active addresses
+        $a = $trc->nextWalletAddress(); $b = $trc->nextWalletAddress(); $c = $trc->nextWalletAddress();
+        $this->assertNotSame($a, $b);
+        $this->assertSame($a, $c);
+
+        // Inactive addresses are skipped; with none active, selling pauses
+        $w = $trc->wallets()->where('address', 'TABCabcdefghijkmnopqrstuvwxyz12345')->first();
+        $this->actingAs($this->admin)->put("/admin/wallets/{$w->id}", ['address' => $w->address])->assertSessionHasNoErrors(); // Active unticked
+        $this->assertFalse($w->fresh()->is_active);
+        $this->assertSame('TXYZabcdefghijkmnopqrstuvwxyz12345', $trc->nextWalletAddress());
+        $trc->wallets()->update(['is_active' => false]);
+        $this->assertNull($trc->fresh()->nextWalletAddress());
+        $this->actingAs($this->admin)->delete("/admin/wallets/{$w->id}")->assertSessionHas('success');
+        $this->assertDatabaseMissing('network_wallets', ['id' => $w->id]);
+
+        // Network settings keep name / format; the add pop-up offers TRC20 / BEP20 / ERC20 and creates the network if needed
+        $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", ['fee' => 2, 'buy_enabled' => '1', 'sell_enabled' => '1'])->assertSessionHasNoErrors();
+        $this->assertSame([$trc->name, $trc->address_regex, 2.0], [$trc->fresh()->name, $trc->fresh()->address_regex, (float) $trc->fresh()->fee]);
         Network::where('code', 'ERC20')->delete();
         $this->actingAs($this->admin)->get('/admin/networks')->assertSee('<option value="ERC20"', false)->assertDontSee('<option value="SOL"', false);
-        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'ERC20', 'deposit_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'active' => '1'])->assertSessionHasErrors('deposit_address');
-        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'ERC20', 'deposit_address' => '0x5ED5C7248EB00A478918eaE5c5b574354607a7E6', 'active' => '1'])->assertSessionHasNoErrors();
+        $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'ERC20', 'address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'active' => '1'])->assertSessionHasErrors('address');
+        $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'ERC20', 'address' => '0x5ED5C7248EB00A478918eaE5c5b574354607a7E6', 'active' => '1'])->assertSessionHasNoErrors();
         $erc = Network::where('code', 'ERC20')->first();
-        $this->assertSame(['Ethereum (ERC20)', true, true, 5.0], [$erc->name, (bool) $erc->buy_enabled, (bool) $erc->sell_enabled, (float) $erc->fee]);
-        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'BEP20', 'deposit_address' => '0x5ED5C7248EB00A478918eaE5c5b574354607a7E6', 'active' => '0'])->assertSessionHasErrors('code'); // already exists
+        $this->assertSame(['Ethereum (ERC20)', 5.0, '0x5ED5C7248EB00A478918eaE5c5b574354607a7E6'], [$erc->name, (float) $erc->fee, $erc->deposit_address]);
+        $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'SOL', 'address' => 'x', 'active' => '1'])->assertSessionHasErrors('code');
     }
 
     public function test_admin_can_lock_and_unlock_client_from_list(): void

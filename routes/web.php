@@ -161,6 +161,9 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::resource('methods', Admin\DepositMethodController::class)->except('show');
 
     Route::get('/networks', [Admin\NetworkController::class, 'index'])->name('networks.index');
+    Route::post('/wallets', [Admin\WalletController::class, 'store'])->name('wallets.store');
+    Route::put('/wallets/{wallet}', [Admin\WalletController::class, 'update'])->name('wallets.update');
+    Route::delete('/wallets/{wallet}', [Admin\WalletController::class, 'destroy'])->name('wallets.destroy');
     Route::post('/networks', [Admin\NetworkController::class, 'store'])->name('networks.store');
     Route::put('/networks/{network}', [Admin\NetworkController::class, 'update'])->name('networks.update');
     Route::delete('/networks/{network}', [Admin\NetworkController::class, 'destroy'])->name('networks.destroy');
