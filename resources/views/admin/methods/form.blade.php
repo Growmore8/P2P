@@ -30,6 +30,7 @@
         @endforeach
       </div>
     </div>
+    @unless ($method->exists)<div class="full">@include('admin.partials.method-presets', ['list' => 'pay'])</div>@endunless
     <div class="full"><label>Display title</label><input class="input" name="title" value="{{ old('title', $method->title) }}" placeholder="e.g. UPI (GPay / PhonePe) · Bank transfer (CEFTS) · eZ Cash" required></div>
 
     <div data-type="link" class="full"><label>Payment link (https://…)</label><input class="input" name="pay_url" value="{{ old('pay_url', $method->pay_url) }}" placeholder="https://razorpay.me/@yourbusiness">

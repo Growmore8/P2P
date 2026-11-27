@@ -15,9 +15,22 @@ class NetworkController extends Controller
 
     public function store(Request $request)
     {
-        Network::create($this->validated($request));
+        // From the "Add wallet" pop-up: pick a known network → name, fee and address format are filled in.
+        $code = strtoupper((string) $request->input('code'));
+        if ($preset = config("networks.{$code}")) {
+            $request->merge([
+                'code' => $code,
+                'name' => $request->input('name') ?: $preset['name'],
+                'fee' => $request->input('fee') ?? $preset['fee'],
+                'address_regex' => $request->input('address_regex') ?: $preset['regex'],
+            ]);
+        }
+        if ($request->has('active')) {
+            $request->merge(['buy_enabled' => $request->boolean('active'), 'sell_enabled' => $request->boolean('active')]);
+        }
+        $n = Network::create($this->validated($request));
 
-        return back()->with('success', 'Network added.');
+        return redirect()->route('admin.networks.index')->with('success', "{$n->code} wallet added.");
     }
 
     public function update(Request $request, Network $network)
@@ -62,7 +75,7 @@ class NetworkController extends Controller
         if (isset($data['code'])) {
             $data['code'] = strtoupper($data['code']);
         }
-        $data['sort'] = $data['sort'] ?? 0;
+        $data['sort'] = $data['sort'] ?? ($network ? $network->sort : (int) Network::max('sort') + 1);
         $data['buy_enabled'] = $request->boolean('buy_enabled');
         $data['sell_enabled'] = $request->boolean('sell_enabled');
 

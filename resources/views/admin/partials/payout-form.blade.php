@@ -15,6 +15,7 @@
     </div>
     <div><label>Title shown to clients</label><input class="input" name="title" value="{{ $m->title }}" placeholder="e.g. Bank transfer (CEFTS)" required></div>
   </div>
+  @unless ($m->exists)@include('admin.partials.method-presets', ['list' => 'receive'])@endunless
   <div class="form-grid">
     <div><label>Short note (optional)</label><input class="input" name="instructions" value="{{ $m->instructions }}" placeholder="e.g. Account must be in your own name"></div>
     <div style="display:flex;gap:16px;align-items:end">

@@ -579,7 +579,13 @@ class P2PFlowTest extends TestCase
         $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", $base + ['deposit_address' => '0x1234567890abcdef1234567890abcdef12345678'])->assertSessionHasErrors('deposit_address');
         $this->actingAs($this->admin)->put("/admin/networks/{$trc->id}", $base + ['deposit_address' => " TXYZabcdefghijkmnopqrstuvwxyz\n12345 "])->assertSessionHasNoErrors();
         $this->assertSame('TXYZabcdefghijkmnopqrstuvwxyz12345', $trc->fresh()->deposit_address);
-        $this->actingAs($this->admin)->get('/admin/networks')->assertOk()->assertSee('✓ Sell ready')->assertSee('TXYZab');
+        $this->actingAs($this->admin)->get('/admin/networks')->assertOk()->assertSee('TXYZabcdefghijkmnopqrstuvwxyz12345')->assertSee('Add crypto wallet');
+
+        // Add wallet pop-up: pick SOL → name / fee / format filled in; a wrong address is refused
+        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'SOL', 'deposit_address' => '0xnot-a-solana-address', 'active' => '1'])->assertSessionHasErrors('deposit_address');
+        $this->actingAs($this->admin)->post('/admin/networks', ['code' => 'SOL', 'deposit_address' => '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV', 'active' => '1'])->assertSessionHasNoErrors();
+        $sol = Network::where('code', 'SOL')->first();
+        $this->assertSame(['Solana (SPL)', true, true], [$sol->name, (bool) $sol->buy_enabled, (bool) $sol->sell_enabled]);
     }
 
     public function test_admin_can_lock_and_unlock_client_from_list(): void
