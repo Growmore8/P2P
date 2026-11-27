@@ -61,7 +61,7 @@
   <div class="container">
     <div class="sec-head reveal"><span class="eyebrow">How it works</span><h2>Four steps. No guesswork.</h2></div>
     <div class="steps">
-      <div class="step reveal"><h4>Sign up &amp; KYC</h4><p>Create an account and upload your PAN, Aadhaar and selfie. Our team verifies it.</p></div>
+      <div class="step reveal"><h4>Sign up &amp; KYC</h4><p>Create an account and upload the front and back of your PAN or Aadhaar card. Our team verifies it.</p></div>
       <div class="step reveal"><h4>Place an order</h4><p>Choose Buy or Sell, the amount and network. The rate is locked for your order.</p></div>
       <div class="step reveal"><h4>Pay / Send</h4><p>Pay INR to our listed deposit method, or send USDT to our wallet — then submit the UTR / tx hash.</p></div>
       <div class="step reveal"><h4>Receive</h4><p>We verify and release USDT to your wallet, or INR to your bank / UPI.</p></div>

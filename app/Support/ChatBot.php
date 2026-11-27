@@ -30,7 +30,7 @@ class ChatBot
             return "Today's desk rates:\n{$lines}\nThe rate is locked when you place an order.";
         }
         if ($has(['kyc', 'verify', 'verification', 'document', 'pan', 'aadhaar', 'passport'])) {
-            return "Verification has 3 levels:\n1) Identity — PAN + Aadhaar (or passport/ID) and a selfie\n2) Video — a short selfie video reading a statement\n3) EDD — income / source-of-funds documents\nEach level raises your monthly limit. Start from Profile → Verification after signing up.";
+            return "Verification has 3 levels:\n1) Identity — front and back of one ID card (PAN or Aadhaar; passport or national ID abroad)\n2) Video — a short selfie video reading a statement\n3) EDD — income / source-of-funds documents\nEach level raises your monthly limit. Start from Profile → Verification after signing up.";
         }
         if ($has(['limit', 'maximum', 'minimum', 'max ', 'min '])) {
             $c = Currency::active()->first();

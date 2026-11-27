@@ -26,7 +26,7 @@
     <h3>Information we collect</h3>
     <ul>
       <li>Contact details you provide: name, phone number, email address.</li>
-      <li>KYC information required for digital asset transactions: PAN, Aadhaar (only the last 4 digits of the number are stored), document images, a selfie, address, bank / UPI details and wallet addresses.</li>
+      <li>KYC information required for digital asset transactions: PAN, Aadhaar (only the last 4 digits of the number are stored), document images, a short verification video (for higher limits), address, bank / UPI details and wallet addresses.</li>
       <li>Transaction records: amounts, rates, dates, payment references and blockchain transaction hashes.</li>
     </ul>
     <h3>How we use it</h3>

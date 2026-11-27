@@ -97,19 +97,22 @@ class P2PFlowTest extends TestCase
 
         $img = fn () => UploadedFile::fake()->createWithContent('doc.png', self::png());
         $this->post('/kyc', [
-            'full_name' => 'Ravi Kumar', 'dob' => '1990-01-01', 'pan_number' => 'abcde1234f', 'aadhaar_number' => '234567891234',
+            'full_name' => 'Ravi Kumar', 'dob' => '1990-01-01', 'id_number' => '2345 6789 1234',
             'address' => '1 Main St', 'city' => 'Dharmapuri', 'state' => 'Tamil Nadu', 'pincode' => '636701',
-            'pan_image' => $img(), 'aadhaar_front' => $img(), 'aadhaar_back' => $img(), 'selfie' => $img(), 'consent' => '1',
+            'pan_image' => $img(), 'aadhaar_front' => $img(), 'consent' => '1',
             'video' => self::video(), 'video_consent' => '1',
         ])->assertRedirect('/kyc/verifying')->assertSessionHasNoErrors();
 
         $kyc = KycSubmission::first();
-        $this->assertCount(4, $kyc->checks); // PAN, Aadhaar front/back, selfie (video is Level 2)
+        $this->assertCount(2, $kyc->checks); // ID card front + back only (video is Level 2)
         $agents = collect($kyc->checks)->pluck('agent');
         $this->assertSame($agents->count(), $agents->unique()->count(), 'each document gets a different team name');
-        $this->get('/kyc/verifying')->assertOk()->assertSee('Aadhaar — Front')->assertSee($agents[0]);
-        $this->assertSame('ABCDE1234F', $kyc->pan_number);
-        $this->assertSame('1234', $kyc->aadhaar_last4);
+        $this->get('/kyc/verifying')->assertOk()->assertSee('Aadhaar card — Front')->assertSee($agents[0]);
+        $this->assertSame('aadhaar', $kyc->id_type);         // detected from the 12-digit number
+        $this->assertNull($kyc->pan_number);
+        $this->assertSame('1234', $kyc->aadhaar_last4);      // full Aadhaar never stored
+        $this->assertSame('', $kyc->selfie);
+        $this->assertSame(['pan_image' => 'Aadhaar card — front', 'aadhaar_front' => 'Aadhaar card — back'], $kyc->docLabels());
         $this->assertSame('pending', $user->fresh()->kyc_status);
 
         // another customer cannot view the documents
@@ -142,17 +145,17 @@ class P2PFlowTest extends TestCase
             'password' => 'Passw0rd!', 'password_confirmation' => 'Passw0rd!', 'terms' => '1', 'risk' => '1', 'age' => '1',
         ])->assertSessionHasErrors('phone');
 
-        $this->actingAs($user)->get('/kyc')->assertOk()->assertSee('Selfie holding your ID')->assertDontSee('Proof of address')->assertDontSee('Aadhaar number');
+        $this->actingAs($user)->get('/kyc')->assertOk()->assertSee('ID card — front')->assertDontSee('Selfie')->assertDontSee('Proof of address')->assertDontSee('Aadhaar number');
 
         $img = fn () => UploadedFile::fake()->createWithContent('doc.png', self::png());
         $this->actingAs($user)->post('/kyc', [
-            'full_name' => 'Sajeenthan', 'dob' => '1992-03-03', 'id_type' => 'passport', 'id_number' => 'n1234567',
+            'full_name' => 'Sajeenthan', 'dob' => '1992-03-03', 'id_number' => 'n1234567',
             'address' => '5 Galle Rd', 'city' => 'Colombo', 'pincode' => '00300',
             'pan_image' => $img(), 'selfie' => $img(), 'consent' => '1', 'video' => self::video(), 'video_consent' => '1',
         ])->assertRedirect('/kyc/verifying')->assertSessionHasNoErrors();
 
         $kyc = KycSubmission::first();
-        $this->assertSame('passport', $kyc->id_type);
+        $this->assertSame('id_document', $kyc->id_type); // passport: back side not needed
         $this->assertSame('N1234567', $kyc->id_number);
         $this->assertNull($kyc->pan_number);
 

@@ -82,14 +82,14 @@
         <h3 style="margin-bottom:10px">Checklist</h3>
         <ul class="timeline" style="padding-left:0">
           @if ($kyc->isIndian())
-            <li style="list-style:none;padding-left:0">☐ Name matches on PAN, Aadhaar and form</li>
+            <li style="list-style:none;padding-left:0">☐ Name and number on the card match the form</li>
             <li style="list-style:none;padding-left:0">☐ PAN number matches the image</li>
             <li style="list-style:none;padding-left:0">☐ Aadhaar last 4 digits match ({{ $kyc->aadhaar_last4 }})</li>
           @else
             <li style="list-style:none;padding-left:0">☐ Name matches on ID and form</li>
             <li style="list-style:none;padding-left:0">☐ ID number matches the image and ID is not expired</li>
           @endif
-          <li style="list-style:none;padding-left:0">☐ Selfie face matches the ID photo</li>
+          @if ($kyc->selfie)<li style="list-style:none;padding-left:0">☐ Selfie face matches the ID photo</li>@else<li style="list-style:none;padding-left:0">☐ Front and back belong to the same card and are not edited</li>@endif
           <li style="list-style:none;padding-left:0">☐ Age 18+ and documents not edited</li>
         </ul>
         <form method="POST" action="{{ route('admin.kyc.approve', $kyc) }}" data-confirm="Approve this KYC?" style="margin:10px 0 18px">

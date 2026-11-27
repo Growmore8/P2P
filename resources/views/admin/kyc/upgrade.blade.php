@@ -59,7 +59,7 @@
         @if ($up->reject_reason)<dt>Reason</dt><dd class="red">{{ $up->reject_reason }}</dd>@endif
       </dl>
       @if ($k && $k->selfie)
-        <p class="muted" style="font-size:12.5px;margin-top:10px">Compare with the identity selfie:</p>
+        <p class="muted" style="font-size:12.5px;margin-top:10px">Compare the face with the ID card photo:</p>
         <a href="{{ route('admin.kyc.show', $k) }}" class="green" style="font-size:13.5px;font-weight:700">Open Level 1 documents →</a>
       @endif
     </div>
@@ -68,7 +68,7 @@
       <div class="box">
         <h3 style="margin-bottom:10px">Checklist</h3>
         @if ($up->level === \App\Models\KycUpgrade::VIDEO)
-          <p class="vreq">☐ Same person as the identity selfie / ID photo</p>
+          <p class="vreq">☐ Same person as the ID card photo</p>
           <p class="vreq">☐ Reads the full statement with their own name</p>
           <p class="vreq">☐ Live person (moving, natural) — not a photo or replay</p>
           <p class="vreq">☐ No one else prompting or helping</p>

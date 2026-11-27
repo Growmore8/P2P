@@ -30,10 +30,17 @@ class KycSubmission extends Model
         'selfie' => 'Selfie holding ID',
     ];
 
+    /** Level 1 for Indian clients: one card, front and back. */
+    public const ID_TYPES_IN = [
+        'pan_card' => 'PAN card',
+        'aadhaar' => 'Aadhaar card',
+    ];
+
     public const ID_TYPES = [
         'passport' => 'Passport',
         'national_id' => 'National ID card',
         'driving_licence' => 'Driving licence',
+        'id_document' => 'ID card',
     ];
 
     protected function casts(): array
@@ -43,17 +50,32 @@ class KycSubmission extends Model
 
     public function isIndian(): bool
     {
-        return $this->id_type === 'pan_aadhaar';
+        return in_array($this->id_type, ['pan_aadhaar', 'pan_card', 'aadhaar'], true);
+    }
+
+    /** Older submissions used PAN + Aadhaar + selfie (4 files); new ones use one card, front and back. */
+    public function isLegacy(): bool
+    {
+        return $this->id_type === 'pan_aadhaar' || (bool) $this->selfie;
     }
 
     public function docLabels(): array
     {
-        return $this->isIndian() ? self::DOCS : self::DOCS_INTL;
+        if ($this->isLegacy()) {
+            return $this->id_type === 'pan_aadhaar' ? self::DOCS : self::DOCS_INTL;
+        }
+        $t = $this->idTypeLabel();
+
+        return ['pan_image' => "{$t} — front", 'aadhaar_front' => "{$t} — back"];
     }
 
     public function idTypeLabel(): string
     {
-        return $this->isIndian() ? 'PAN + Aadhaar' : (self::ID_TYPES[$this->id_type] ?? $this->id_type);
+        return match (true) {
+            $this->id_type === 'pan_aadhaar' => 'PAN + Aadhaar',
+            isset(self::ID_TYPES_IN[$this->id_type]) => self::ID_TYPES_IN[$this->id_type],
+            default => self::ID_TYPES[$this->id_type] ?? (string) $this->id_type,
+        };
     }
 
     public function countryName(): string
@@ -64,6 +86,9 @@ class KycSubmission extends Model
     /** Masked primary ID for customer-facing screens. */
     public function maskedId(): string
     {
+        if ($this->id_type === 'aadhaar') {
+            return 'XXXX XXXX ' . $this->aadhaar_last4;
+        }
         $v = $this->isIndian() ? (string) $this->pan_number : (string) $this->id_number;
 
         return strlen($v) > 4 ? str_repeat('X', strlen($v) - 4) . substr($v, -4) : $v;

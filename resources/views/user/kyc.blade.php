@@ -54,18 +54,14 @@
     <div class="box">
       <div class="box-head"><h3>1. Personal details</h3><span class="muted" style="font-size:13px">Country: <b>{{ $user->countryName() }}</b> · must match your ID</span></div>
       <div class="form-grid">
-        <div><label>Full name (as per {{ $india ? 'PAN' : 'ID document' }})</label><input class="input" name="full_name" value="{{ old('full_name', $user->name) }}" required></div>
+        <div><label>Full name (as per your ID card)</label><input class="input" name="full_name" value="{{ old('full_name', $user->name) }}" required></div>
         <div><label>Date of birth</label><input class="input" type="date" name="dob" value="{{ old('dob') }}" max="{{ now()->subYears(18)->format('Y-m-d') }}" required></div>
         @if ($india)
-          <div><label>PAN number</label><input class="input" name="pan_number" value="{{ old('pan_number') }}" maxlength="10" style="text-transform:uppercase" placeholder="ABCDE1234F" required></div>
-          <div><label>Aadhaar number</label><input class="input" name="aadhaar_number" inputmode="numeric" maxlength="12" placeholder="12 digits" required><span class="hint">Only the last 4 digits are stored.</span></div>
+          <div><label>PAN or Aadhaar number</label><input class="input" name="id_number" value="{{ old('id_number') }}" maxlength="14" style="text-transform:uppercase" placeholder="ABCDE1234F or 12-digit Aadhaar" required>
+            <span class="hint">Use the number of the card you upload. For Aadhaar, only the last 4 digits are stored.</span></div>
         @else
-          <div><label>ID document type</label>
-            <select class="input" name="id_type" required>
-              @foreach (\App\Models\KycSubmission::ID_TYPES as $k => $l)<option value="{{ $k }}" @selected(old('id_type') === $k)>{{ $l }}</option>@endforeach
-            </select>
-          </div>
-          <div><label>Document number</label><input class="input" name="id_number" value="{{ old('id_number') }}" maxlength="30" style="text-transform:uppercase" required></div>
+          <div><label>ID / passport number</label><input class="input" name="id_number" value="{{ old('id_number') }}" maxlength="30" style="text-transform:uppercase" required>
+            <span class="hint">Passport, national ID card or driving licence.</span></div>
         @endif
         <div class="full"><label>Address</label><input class="input" name="address" value="{{ old('address') }}" required></div>
       </div>
@@ -78,27 +74,21 @@
     <div class="box">
       <div class="box-head"><h3>2. Documents</h3><span class="muted" style="font-size:13px">JPG, PNG, WEBP or PDF · max 5 MB each</span></div>
       <div class="form-grid">
-        @if ($india)
-          <div><label>PAN card</label>
-            <label class="o-upload"><input type="file" name="pan_image" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
-          <div><label>Selfie holding your PAN card</label>
-            <label class="o-upload"><input type="file" name="selfie" accept="image/*" capture="user" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo · max 5 MB</small></span></label></div>
-          <div><label>Aadhaar — front</label>
-            <label class="o-upload"><input type="file" name="aadhaar_front" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
-          <div><label>Aadhaar — back</label>
-            <label class="o-upload"><input type="file" name="aadhaar_back" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
-        @else
-          <div><label>ID document — front / photo page</label>
-            <label class="o-upload"><input type="file" name="pan_image" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
-          <div><label>ID document — back (if any)</label>
-            <label class="o-upload"><input type="file" name="aadhaar_front" accept="image/*,.pdf" data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label><span class="hint">Not needed for passports.</span></div>
-          <div><label>Selfie holding your ID</label>
-            <label class="o-upload"><input type="file" name="selfie" accept="image/*" capture="user" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo · max 5 MB</small></span></label></div>
-        @endif
+        <div class="id-slot"><label>ID card — front</label>
+          <label class="o-upload"><input type="file" name="pan_image" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label>
+          <button type="button" class="cam-btn" data-camera-for="pan_image">📷 Take a photo instead</button>
+          <input type="file" accept="image/*" capture="environment" hidden data-camera="pan_image">
+        </div>
+        <div class="id-slot"><label>ID card — back</label>
+          <label class="o-upload"><input type="file" name="aadhaar_front" accept="image/*,.pdf" @required($india) data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label>
+          <button type="button" class="cam-btn" data-camera-for="aadhaar_front">📷 Take a photo instead</button>
+          <input type="file" accept="image/*" capture="environment" hidden data-camera="aadhaar_front">
+          @unless ($india)<span class="hint">Not needed for passports.</span>@endunless
+        </div>
       </div>
       <div class="notice" style="margin-top:18px">
-        @if ($india) Tip: You may mask the first 8 digits of your Aadhaar number on the uploaded image. @endif
-        Make sure all details are clear and readable.
+        Make sure all four corners of the card are visible and the details are clear and readable.
+        @if ($india) If you upload Aadhaar, you may mask the first 8 digits of the number on the image. @endif
       </div>
     </div>
     <div class="box">
@@ -109,12 +99,25 @@
 @endif
 @push('scripts')
 <script>
-  document.querySelectorAll('[data-upload]').forEach(function (up) {
-    up.addEventListener('change', function () {
-      var box = up.closest('.o-upload'), l = box.querySelector('[data-upload-label]');
-      if (up.files[0]) { l.innerHTML = '✓ ' + up.files[0].name.replace(/[<>&"]/g, '') + ' <small>Tap to change</small>'; box.classList.add('has-file'); }
+(function () {
+  function showFile(input) {
+    var box = input.closest('.o-upload'), l = box.querySelector('[data-upload-label]');
+    if (input.files[0]) { l.innerHTML = '✓ ' + input.files[0].name.replace(/[<>&"]/g, '') + ' <small>Tap to change</small>'; box.classList.add('has-file'); }
+  }
+  document.querySelectorAll('[data-upload]').forEach(function (up) { up.addEventListener('change', function () { showFile(up); }); });
+
+  // "Take a photo": open the camera, then put the photo into the normal upload field.
+  document.querySelectorAll('[data-camera-for]').forEach(function (btn) {
+    var cam = document.querySelector('[data-camera="' + btn.dataset.cameraFor + '"]');
+    var main = document.querySelector('input[name="' + btn.dataset.cameraFor + '"]');
+    btn.addEventListener('click', function () { cam.click(); });
+    cam.addEventListener('change', function () {
+      if (!cam.files[0]) return;
+      try { var dt = new DataTransfer(); dt.items.add(cam.files[0]); main.files = dt.files; showFile(main); } catch (e) {}
     });
   });
+
+})();
 </script>
 @endpush
 @endsection
