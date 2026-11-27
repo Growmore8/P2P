@@ -6,6 +6,7 @@
       <select class="input" name="currency" required>
         @foreach (\App\Models\Currency::orderBy('sort')->get() as $c)<option value="{{ $c->code }}" @selected($m->currency === $c->code)>{{ $c->code }} — {{ $c->name }}</option>@endforeach
       </select>
+      <span class="hint">More currencies: add them in <a class="green" href="{{ route('admin.currencies.index') }}#add">Rates &amp; currencies</a>.</span>
     </div>
     <div><label>Type</label>
       <select class="input" name="type" required>

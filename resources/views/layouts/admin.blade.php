@@ -20,10 +20,11 @@
     @if ($badge['kyc'])<span class="count">{{ $badge['kyc'] }}</span>@endif</a>
 
   <div class="nav-title">Payments</div>
-  <a href="{{ route('admin.currencies.index') }}" class="{{ request()->routeIs('admin.currencies.*') ? 'active' : '' }}"><span class="ico">💱</span> Currencies &amp; Rates</a>
-  <a href="{{ route('admin.methods.index') }}" class="{{ request()->routeIs('admin.methods.*') ? 'active' : '' }}"><span class="ico">⬇</span> Deposit Methods</a>
-  <a href="{{ route('admin.payout-methods.index') }}" class="{{ request()->routeIs('admin.payout-methods.*') ? 'active' : '' }}"><span class="ico">⬆</span> Receive Methods</a>
-  <a href="{{ route('admin.networks.index') }}" class="{{ request()->routeIs('admin.networks.*') ? 'active' : '' }}"><span class="ico">⛓</span> Networks &amp; Wallets</a>
+  <a href="{{ route('admin.payments') }}" class="{{ request()->routeIs('admin.payments') ? 'active' : '' }}"><span class="ico">✅</span> Payment setup</a>
+  <a href="{{ route('admin.currencies.index') }}" class="{{ request()->routeIs('admin.currencies.*') ? 'active' : '' }}"><span class="ico">💱</span> Rates &amp; currencies</a>
+  <a href="{{ route('admin.methods.index') }}" class="{{ request()->routeIs('admin.methods.*') ? 'active' : '' }}"><span class="ico">⬇</span> How clients pay you</a>
+  <a href="{{ route('admin.payout-methods.index') }}" class="{{ request()->routeIs('admin.payout-methods.*') ? 'active' : '' }}"><span class="ico">⬆</span> How you pay clients</a>
+  <a href="{{ route('admin.networks.index') }}" class="{{ request()->routeIs('admin.networks.*') ? 'active' : '' }}"><span class="ico">⛓</span> Your USDT wallets</a>
 
   <div class="nav-title">System</div>
   <a href="{{ route('admin.history') }}" class="{{ request()->routeIs('admin.history') ? 'active' : '' }}"><span class="ico">🕘</span> History</a>

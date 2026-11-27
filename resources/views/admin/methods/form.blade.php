@@ -1,6 +1,6 @@
 @extends('layouts.admin')
-@section('title', $method->exists ? 'Edit Deposit Method' : 'Add Deposit Method')
-@section('heading', $method->exists ? 'Edit Deposit Method' : 'Add Deposit Method')
+@section('title', $method->exists ? 'Edit way clients pay you' : 'Add a way clients pay you')
+@section('heading', $method->exists ? 'Edit way clients pay you' : 'Add a way clients pay you')
 
 @section('content')
 @php $cur = old('currency', $method->currency ?? 'INR'); @endphp
@@ -14,11 +14,21 @@
       <select name="currency" class="input" required>
         @foreach (\App\Models\Currency::orderBy('sort')->get() as $c)<option value="{{ $c->code }}" @selected($cur === $c->code)>{{ $c->code }} — {{ $c->name }}{{ $c->is_active ? '' : ' (inactive)' }}</option>@endforeach
       </select>
+      <span class="hint">Need another currency? Add it first in <a class="green" href="{{ route('admin.currencies.index') }}#add">Rates &amp; currencies</a> (it can stay inactive until you're ready).</span>
     </div>
-    <div><label>Type</label>
-      <select name="type" class="input" data-type-toggle>
-        @foreach (\App\Models\DepositMethod::TYPES as $k => $l)<option value="{{ $k }}" @selected(old('type', $method->type) === $k)>{{ $l }}</option>@endforeach
+    <div class="full"><label>How will clients pay?</label>
+      @php
+        $typeCards = ['upi' => ['📱', 'UPI', 'GPay, PhonePe, Paytm — QR made automatically'], 'bank' => ['🏦', 'Bank transfer', 'Account number + IFSC / SWIFT'], 'wallet' => ['👛', 'Mobile wallet', 'eZ Cash, M-Pesa, bKash…'], 'link' => ['🔗', 'Payment link', 'Razorpay.me or similar link'], 'other' => ['✏️', 'Other', 'Write your own instructions']];
+        $curType = old('type', $method->type ?: 'upi');
+      @endphp
+      <select name="type" class="input" data-type-toggle data-type-select style="display:none">
+        @foreach (\App\Models\DepositMethod::TYPES as $k => $l)<option value="{{ $k }}" @selected($curType === $k)>{{ $l }}</option>@endforeach
       </select>
+      <div class="type-cards">
+        @foreach ($typeCards as $k => [$ico, $l, $d])
+          <button type="button" class="type-card {{ $curType === $k ? 'on' : '' }}" data-pick-type="{{ $k }}"><span class="tc-ico">{{ $ico }}</span><b>{{ $l }}</b><small>{{ $d }}</small></button>
+        @endforeach
+      </div>
     </div>
     <div class="full"><label>Display title</label><input class="input" name="title" value="{{ old('title', $method->title) }}" placeholder="e.g. UPI (GPay / PhonePe) · Bank transfer (CEFTS) · eZ Cash" required></div>
 
@@ -44,4 +54,14 @@
   </div>
   <button class="btn btn-primary">Save</button>
 </form>
+<script>
+document.querySelectorAll('[data-pick-type]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var sel = document.querySelector('[data-type-select]');
+    sel.value = b.dataset.pickType;
+    sel.dispatchEvent(new Event('change'));
+    document.querySelectorAll('[data-pick-type]').forEach(function (x) { x.classList.toggle('on', x === b); });
+  });
+});
+</script>
 @endsection

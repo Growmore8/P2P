@@ -1,8 +1,9 @@
 @extends('layouts.admin')
-@section('title', 'Networks & Wallets')
-@section('heading', 'Networks & Wallets')
+@section('title', 'Your USDT wallets')
+@section('heading', 'Your USDT wallets')
 
 @section('content')
+<p class="muted" style="margin:-4px 0 14px"><a class="green" href="{{ route('admin.payments') }}">← Payment setup</a> · Your wallet addresses — clients send USDT here when they <b>sell</b>.</p>
 <div class="alert alert-info">For <b>sell</b> orders, customers send USDT to the deposit address you set here. A network without a deposit address cannot accept sell orders. The <b>fee</b> is deducted from USDT on <b>buy</b> orders.</div>
 
 @foreach ($networks as $n)

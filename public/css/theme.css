@@ -632,3 +632,37 @@ a.stat:hover{border-color:var(--brand)}
 .cw-panel{padding:0}
 .o-steps-mini{margin:6px 0 4px 18px;font-size:13.5px;color:var(--muted);display:grid;gap:4px}
 .o-steps-mini b{color:var(--text)}
+/* admin: country checkboxes stay on one line inside forms */
+.form label.cbox{display:flex;align-items:center;gap:8px;margin:0;font-size:13.5px;color:var(--text)}
+
+/* ===== Admin: payment setup ===== */
+.pay-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.pay-step{position:relative;display:flex;flex-direction:column;gap:4px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);text-decoration:none;transition:border-color .15s,transform .15s}
+.pay-step:hover{border-color:var(--brand);transform:translateY(-2px)}
+.pay-step .ps-n{position:absolute;top:12px;right:14px;width:22px;height:22px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:800;display:grid;place-items:center}
+.pay-step .ps-ico{font-size:22px}
+.pay-step b{font-size:15px}
+.pay-step small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.pay-cur.is-off{opacity:.75}
+.pay-code{display:grid;place-items:center;min-width:56px;height:44px;padding:0 8px;border-radius:12px;background:var(--brand-soft);color:var(--brand);font-weight:800;letter-spacing:.5px}
+.pay-checks{display:grid;gap:8px}
+.pay-check{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.pay-check .pc-ico{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px}
+.pay-check.ok .pc-ico{background:#dcfce7;color:#166534}
+.pay-check.bad{border-color:rgba(239,68,68,.35)}
+.pay-check.bad .pc-ico{background:#fee2e2;color:#b91c1c}
+.pay-check.opt .pc-ico{background:var(--bg-2);color:var(--muted)}
+.pay-check .pc-body{flex:1;min-width:0;display:flex;flex-direction:column}
+.pay-check .pc-body b{font-size:14px}
+.pay-check .pc-body small{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.type-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.type-card{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);text-align:left;cursor:pointer;font:inherit}
+.type-card:hover{border-color:var(--brand)}
+.type-card.on{border-color:var(--brand);background:var(--brand-soft)}
+.type-card .tc-ico{font-size:22px}
+.type-card b{font-size:14px}
+.type-card small{color:var(--muted);font-size:11.5px;line-height:1.35}
+.flash-target{animation:flashT 2s ease}
+@keyframes flashT{0%,40%{box-shadow:0 0 0 3px var(--brand)}100%{box-shadow:none}}
+@media (max-width:900px){.pay-flow{grid-template-columns:repeat(2,1fr)}.type-cards{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.pay-flow{grid-template-columns:1fr}.pay-check{flex-wrap:wrap}.pay-check .pc-body small{white-space:normal}}

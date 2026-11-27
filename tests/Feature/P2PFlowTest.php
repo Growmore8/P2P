@@ -426,6 +426,20 @@ class P2PFlowTest extends TestCase
         $this->assertDatabaseHas('activity_logs', ['action' => 'payout_method.created']);
     }
 
+    public function test_payment_setup_page_shows_readiness_per_currency(): void
+    {
+        \App\Models\Currency::create(['code' => 'NPR', 'name' => 'Nepalese Rupee', 'symbol' => 'Rs ', 'buy_rate' => 0, 'sell_rate' => 0,
+            'tds_percent' => 0, 'min_amount' => 0, 'max_amount' => 0, 'is_active' => false, 'sort' => 9]);
+        $this->get('/admin/payments')->assertRedirect();
+        $this->actingAs($this->admin)->get('/admin/payments')->assertOk()
+            ->assertSee('Payment setup')->assertSee('INR')->assertSee('Nepalese Rupee')
+            ->assertSee('Buying not ready')->assertSee('Switched off');
+        foreach (['/admin/currencies', '/admin/methods', '/admin/methods/create', '/admin/networks'] as $url) {
+            $this->actingAs($this->admin)->get($url)->assertOk()->assertSee('Payment setup');
+        }
+        $this->actingAs($this->admin)->get('/admin/currencies')->assertSee('data-cur-pick', false)->assertSee('id="cur-INR"', false);
+    }
+
     public function test_duplicate_email_cannot_register_again(): void
     {
         $u = $this->customer();

@@ -108,6 +108,7 @@ Route::middleware(['auth', 'active', 'email.verified', 'consent'])->group(functi
 Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/payments', [Admin\PaymentSetupController::class, 'index'])->name('payments');
     Route::get('/currencies', [Admin\CurrencyController::class, 'index'])->name('currencies.index');
     Route::post('/currencies', [Admin\CurrencyController::class, 'store'])->name('currencies.store');
     Route::put('/currencies/{currency}', [Admin\CurrencyController::class, 'update'])->name('currencies.update');

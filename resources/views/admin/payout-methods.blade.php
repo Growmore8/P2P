@@ -1,8 +1,9 @@
 @extends('layouts.admin')
-@section('title', 'Receive Methods')
-@section('heading', 'Receive Methods')
+@section('title', 'How you pay clients')
+@section('heading', 'How you pay clients')
 
 @section('content')
+<p class="muted" style="margin:-4px 0 14px"><a class="green" href="{{ route('admin.payments') }}">← Payment setup</a> · The account types clients can add so you can pay them when they <b>sell</b> USDT.</p>
 <div class="alert alert-info"><b>Receive methods</b> are the ways clients can get paid when they <b>sell</b> USDT (UPI, bank account, mobile wallet). Clients only see the methods for their own currency and country when adding a payout account.</div>
 
 <div class="box">
