@@ -33,7 +33,8 @@ class KycController extends Controller
             'pincode' => $india ? ['required', 'digits:6'] : ['required', 'regex:/^[A-Za-z0-9 \-]{3,12}$/'],
             'pan_image' => $file,
             'aadhaar_front' => $india ? $file : ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
-            'aadhaar_back' => $file,
+            // International: no proof of address at Level 1 (it's asked at Level 3 · EDD).
+            'aadhaar_back' => $india ? $file : ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
             'selfie' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'consent' => ['accepted'],
         ];
@@ -47,7 +48,7 @@ class KycController extends Controller
             'aadhaar_number.regex' => 'Enter a valid 12-digit Aadhaar number.',
             'id_number.regex' => 'Enter a valid document number (letters, numbers and dashes only).',
             'pincode.regex' => 'Enter a valid postal code.',
-            'aadhaar_back.required' => $india ? 'Upload the back of your Aadhaar.' : 'Upload a proof of address.',
+            'aadhaar_back.required' => 'Upload the back of your Aadhaar.',
         ]);
 
         $paths = [];
@@ -60,7 +61,7 @@ class KycController extends Controller
         $checks = $this->runChecks($request, $paths, $india);
 
         DB::transaction(function () use ($user, $data, $paths, $india, $checks) {
-            $user->kycSubmissions()->create(array_merge(['aadhaar_front' => ''], $paths, [
+            $user->kycSubmissions()->create(array_merge(['aadhaar_front' => '', 'aadhaar_back' => ''], $paths, [
                 'checks' => $checks,
                 'country' => $user->country,
                 'id_type' => $india ? 'pan_aadhaar' : $data['id_type'],

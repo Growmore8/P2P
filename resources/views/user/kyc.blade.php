@@ -79,15 +79,21 @@
       <div class="box-head"><h3>2. Documents</h3><span class="muted" style="font-size:13px">JPG, PNG, WEBP or PDF · max 5 MB each</span></div>
       <div class="form-grid">
         @if ($india)
-          <div><label>PAN card</label><input class="input" type="file" name="pan_image" accept="image/*,.pdf" required></div>
-          <div><label>Selfie holding your PAN card</label><input class="input" type="file" name="selfie" accept="image/*" capture="user" required></div>
-          <div><label>Aadhaar — front</label><input class="input" type="file" name="aadhaar_front" accept="image/*,.pdf" required></div>
-          <div><label>Aadhaar — back</label><input class="input" type="file" name="aadhaar_back" accept="image/*,.pdf" required></div>
+          <div><label>PAN card</label>
+            <label class="o-upload"><input type="file" name="pan_image" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
+          <div><label>Selfie holding your PAN card</label>
+            <label class="o-upload"><input type="file" name="selfie" accept="image/*" capture="user" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo · max 5 MB</small></span></label></div>
+          <div><label>Aadhaar — front</label>
+            <label class="o-upload"><input type="file" name="aadhaar_front" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
+          <div><label>Aadhaar — back</label>
+            <label class="o-upload"><input type="file" name="aadhaar_back" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
         @else
-          <div><label>ID document — front / photo page</label><input class="input" type="file" name="pan_image" accept="image/*,.pdf" required></div>
-          <div><label>ID document — back (if any)</label><input class="input" type="file" name="aadhaar_front" accept="image/*,.pdf"><span class="hint">Not needed for passports.</span></div>
-          <div><label>Proof of address</label><input class="input" type="file" name="aadhaar_back" accept="image/*,.pdf" required><span class="hint">Utility bill or bank statement, less than 3 months old.</span></div>
-          <div><label>Selfie holding your ID</label><input class="input" type="file" name="selfie" accept="image/*" capture="user" required></div>
+          <div><label>ID document — front / photo page</label>
+            <label class="o-upload"><input type="file" name="pan_image" accept="image/*,.pdf" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label></div>
+          <div><label>ID document — back (if any)</label>
+            <label class="o-upload"><input type="file" name="aadhaar_front" accept="image/*,.pdf" data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo or PDF · max 5 MB</small></span></label><span class="hint">Not needed for passports.</span></div>
+          <div><label>Selfie holding your ID</label>
+            <label class="o-upload"><input type="file" name="selfie" accept="image/*" capture="user" required data-upload><span class="o-upload-ico">⬆</span><span data-upload-label>Tap to upload <small>Photo · max 5 MB</small></span></label></div>
         @endif
       </div>
       <div class="notice" style="margin-top:18px">
@@ -101,5 +107,15 @@
     </div>
   </form>
 @endif
+@push('scripts')
+<script>
+  document.querySelectorAll('[data-upload]').forEach(function (up) {
+    up.addEventListener('change', function () {
+      var box = up.closest('.o-upload'), l = box.querySelector('[data-upload-label]');
+      if (up.files[0]) { l.innerHTML = '✓ ' + up.files[0].name.replace(/[<>&"]/g, '') + ' <small>Tap to change</small>'; box.classList.add('has-file'); }
+    });
+  });
+</script>
+@endpush
 @endsection
 

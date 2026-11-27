@@ -18,7 +18,7 @@ class KycUpgrade extends Model
     ];
 
     public const EDD_FILES = [
-        'bank_statement' => 'Bank statement (last 6 months)',
+        'bank_statement' => 'Bank statement (last 6 months, showing your address)',
         'income_proof' => 'Income proof (ITR / salary slip / business proof)',
         'extra_doc' => 'Additional document',
     ];

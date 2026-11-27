@@ -85,9 +85,8 @@
             <li style="list-style:none;padding-left:0">☐ PAN number matches the image</li>
             <li style="list-style:none;padding-left:0">☐ Aadhaar last 4 digits match ({{ $kyc->aadhaar_last4 }})</li>
           @else
-            <li style="list-style:none;padding-left:0">☐ Name matches on ID, proof of address and form</li>
+            <li style="list-style:none;padding-left:0">☐ Name matches on ID and form</li>
             <li style="list-style:none;padding-left:0">☐ ID number matches the image and ID is not expired</li>
-            <li style="list-style:none;padding-left:0">☐ Address proof is recent (under 3 months) and matches</li>
           @endif
           <li style="list-style:none;padding-left:0">☐ Selfie face matches the ID photo</li>
           <li style="list-style:none;padding-left:0">☐ Age 18+ and documents not edited</li>

@@ -137,13 +137,13 @@ class P2PFlowTest extends TestCase
             'password' => 'Passw0rd!', 'password_confirmation' => 'Passw0rd!', 'terms' => '1', 'risk' => '1', 'age' => '1',
         ])->assertSessionHasErrors('phone');
 
-        $this->actingAs($user)->get('/kyc')->assertOk()->assertSee('Proof of address')->assertDontSee('Aadhaar number');
+        $this->actingAs($user)->get('/kyc')->assertOk()->assertSee('Selfie holding your ID')->assertDontSee('Proof of address')->assertDontSee('Aadhaar number');
 
         $img = fn () => UploadedFile::fake()->createWithContent('doc.png', self::png());
         $this->actingAs($user)->post('/kyc', [
             'full_name' => 'Sajeenthan', 'dob' => '1992-03-03', 'id_type' => 'passport', 'id_number' => 'n1234567',
             'address' => '5 Galle Rd', 'city' => 'Colombo', 'pincode' => '00300',
-            'pan_image' => $img(), 'aadhaar_back' => $img(), 'selfie' => $img(), 'consent' => '1', 'video' => self::video(), 'video_consent' => '1',
+            'pan_image' => $img(), 'selfie' => $img(), 'consent' => '1', 'video' => self::video(), 'video_consent' => '1',
         ])->assertRedirect('/kyc/verifying')->assertSessionHasNoErrors();
 
         $kyc = KycSubmission::first();
