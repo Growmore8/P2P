@@ -10,6 +10,10 @@
     <a href="{{ route('admin.orders.index', ['side' => 'buy']) }}" class="{{ $isOrders && $side === 'buy' && ! $rv ? 'active' : '' }}"><span class="ico">⇣</span> Buy Orders</a>
     <a href="{{ route('admin.orders.index', ['side' => 'sell']) }}" class="{{ $isOrders && $side === 'sell' && ! $rv ? 'active' : '' }}"><span class="ico">⇡</span> Sell Orders</a>
     <a href="{{ route('admin.orders.index') }}" class="{{ $isOrders && ! $side && ! $rv ? 'active' : '' }}"><span class="ico">⇄</span> All Orders</a>
+    <div class="nav-title">Clients</div>
+    <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><span class="ico">👥</span> Client history</a>
+    <div class="nav-title">Rates</div>
+    <a href="{{ route('admin.rates') }}" class="{{ request()->routeIs('admin.rates') ? 'active' : '' }}"><span class="ico">💱</span> Buy &amp; sell rates</a>
     <div class="nav-title">Account</div>
     <a href="{{ route('admin.profile') }}" class="{{ request()->routeIs('admin.profile') ? 'active' : '' }}"><span class="ico">🔐</span> My account</a>
   @else
@@ -32,6 +36,7 @@
 
   <div class="nav-title">Payments</div>
   <a href="{{ route('admin.payments') }}" class="{{ request()->routeIs('admin.payments') ? 'active' : '' }}"><span class="ico">✅</span> Payment setup</a>
+  <a href="{{ route('admin.rates') }}" class="{{ request()->routeIs('admin.rates') ? 'active' : '' }}"><span class="ico">⚡</span> Quick rates</a>
   <a href="{{ route('admin.currencies.index') }}" class="{{ request()->routeIs('admin.currencies.*') ? 'active' : '' }}"><span class="ico">💱</span> Rates &amp; currencies</a>
   <a href="{{ route('admin.methods.index') }}" class="{{ request()->routeIs('admin.methods.*') ? 'active' : '' }}"><span class="ico">⬇</span> How clients pay you</a>
   <a href="{{ route('admin.payout-methods.index') }}" class="{{ request()->routeIs('admin.payout-methods.*') ? 'active' : '' }}"><span class="ico">⬆</span> How you pay clients</a>

@@ -640,12 +640,28 @@ class P2PFlowTest extends TestCase
         $this->actingAs($mgr)->get('/admin/orders')->assertDontSee($u->phone)->assertSee($u->maskedPhone());
         $this->actingAs($mgr)->get('/admin/orders?q=' . urlencode($u->email))->assertDontSee('SRMREV01');
         $this->actingAs($this->admin)->get('/admin/orders/SRMREV01')->assertSee($u->email)->assertSee($u->phone);
-        foreach (['/admin', '/admin/currencies', '/admin/users', '/admin/kyc', '/admin/settings', '/admin/managers'] as $url) {
+        foreach (['/admin', '/admin/currencies', '/admin/kyc', '/admin/settings', '/admin/managers', '/admin/methods', '/admin/networks'] as $url) {
             $this->actingAs($mgr)->get($url)->assertRedirect('/admin/orders');
         }
         $this->actingAs($mgr)->post('/admin/orders/SRMREV01/accept')->assertForbidden();
         $this->actingAs($mgr)->post('/admin/orders/SRMREV01/complete', ['admin_reference' => '0x1'])->assertForbidden();
         $this->assertSame(Order::SUBMITTED, $order->fresh()->status);
+
+        // Client history: visible to managers, read-only, phone / email / ID masked
+        $this->actingAs($mgr)->get('/admin/users')->assertOk()->assertSee($u->maskedPhone())->assertDontSee($u->phone)->assertDontSee($u->email)->assertDontSee('Delete account');
+        $this->actingAs($mgr)->get("/admin/users/{$u->id}")->assertOk()->assertSee('SRMREV01')->assertSee($u->maskedEmail())->assertDontSee($u->email)->assertDontSee('Deactivate account')->assertDontSee('Payout accounts');
+        $this->actingAs($mgr)->get('/admin/users?q=' . urlencode($u->email))->assertDontSee($u->maskedEmail());
+        $this->actingAs($mgr)->post("/admin/users/{$u->id}/block")->assertForbidden();
+
+        // Rates: managers can change buy / sell; admin sees who changed it
+        $inr = \App\Models\Currency::where('code', 'INR')->first();
+        $this->actingAs($mgr)->get('/admin/rates')->assertOk()->assertSee('Indian Rupee');
+        $this->actingAs($mgr)->put("/admin/rates/{$inr->id}", ['buy_rate' => 94, 'sell_rate' => 95])->assertSessionHasErrors('sell_rate');
+        $this->actingAs($mgr)->put("/admin/rates/{$inr->id}", ['buy_rate' => 94, 'sell_rate' => 91.5])->assertSessionHas('success');
+        $this->assertSame([94.0, 91.5, $mgr->id], [(float) $inr->fresh()->buy_rate, (float) $inr->fresh()->sell_rate, $inr->fresh()->rates_updated_by]);
+        $this->assertDatabaseHas('activity_logs', ['action' => 'currency.rates']);
+        $this->actingAs($this->admin)->get('/admin/rates')->assertSee('by <b>Meena Manager</b>', false);
+        $this->actingAs($mgr)->put("/admin/currencies/{$inr->id}", ['buy_rate' => 1, 'sell_rate' => 1, 'tds_percent' => 0, 'min_amount' => 0, 'max_amount' => 0])->assertForbidden();
 
         // "Not received" needs a note; "received" marks it reviewed
         $this->actingAs($mgr)->post('/admin/orders/SRMREV01/review', ['result' => 'not_received'])->assertSessionHasErrors('review_note');

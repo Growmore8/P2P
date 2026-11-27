@@ -56,6 +56,9 @@ class CurrencyController extends Controller
     {
         $old = "{$currency->buy_rate}/{$currency->sell_rate}";
         $currency->update($this->validated($request, $currency));
+        if ($currency->wasChanged(['buy_rate', 'sell_rate'])) {
+            $currency->forceFill(['rates_updated_by' => $request->user()->id, 'rates_updated_at' => now()])->saveQuietly();
+        }
         ActivityLog::log('currency.updated', "Updated {$currency->code}: rates {$old} → {$currency->buy_rate}/{$currency->sell_rate}" . ($currency->is_active ? '' : ' (disabled)'), $currency);
 
         return back()->with('success', "{$currency->code} saved.");

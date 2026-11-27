@@ -17,7 +17,7 @@ class Currency extends Model
         return [
             'is_active' => 'boolean',
             'buy_rate' => 'float', 'sell_rate' => 'float', 'min_amount' => 'float', 'max_amount' => 'float',
-            'level_limits' => 'array', 'tds_percent' => 'float',
+            'level_limits' => 'array', 'tds_percent' => 'float', 'rates_updated_at' => 'datetime',
         ];
     }
 
@@ -66,6 +66,12 @@ class Currency extends Model
         $step = 10 ** (floor(log10($v)) - 1);
 
         return round($v / $step) * $step;
+    }
+
+    /** Admin or manager who last changed the buy / sell rate. */
+    public function ratesUpdater(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rates_updated_by');
     }
 
     public function scopeActive($q)

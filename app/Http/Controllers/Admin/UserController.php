@@ -21,8 +21,9 @@ class UserController extends Controller
             ->when($request->query('state') === 'locked', fn ($q) => $q->where('status', 'blocked'))
             ->when($request->query('state') === 'deleted', fn ($q) => $q->where('status', 'deleted'), fn ($q) => $q->where('status', '!=', 'deleted'))
             ->when($request->query('country'), fn ($q, $c) => $q->where('country', $c))
-            ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w
-                ->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")))
+            ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $request->user()->is_admin
+                ? $w->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")
+                : $w->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))))
             ->latest()->paginate(25)->withQueryString();
 
         return view('admin.users.index', ['users' => $users]);

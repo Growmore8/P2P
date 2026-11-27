@@ -112,6 +112,8 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/payments', [Admin\PaymentSetupController::class, 'index'])->name('payments');
+    Route::get('/rates', [Admin\RateController::class, 'index'])->name('rates');
+    Route::put('/rates/{currency}', [Admin\RateController::class, 'update'])->name('rates.update');
     Route::get('/currencies', [Admin\CurrencyController::class, 'index'])->name('currencies.index');
     Route::get('/currencies/suggest/{code}', [Admin\CurrencyController::class, 'suggest'])->middleware('throttle:30,1')->name('currencies.suggest');
     Route::post('/currencies', [Admin\CurrencyController::class, 'store'])->name('currencies.store');

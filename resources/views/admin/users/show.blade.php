@@ -3,6 +3,7 @@
 @section('heading', $u->name)
 
 @section('content')
+@php $isAdmin = auth()->user()->is_admin; @endphp
 <a href="{{ route('admin.users.index') }}" class="muted" style="font-size:14px">← Back to clients</a>
 <div class="split" style="margin-top:14px">
   <div>
@@ -13,8 +14,8 @@
     <div class="box">
       <h3 style="margin-bottom:14px">KYC history</h3>
       @forelse ($u->kycSubmissions as $k)
-        <a href="{{ route('admin.kyc.show', $k) }}" class="order-item" style="margin-bottom:8px">
-          <span><b>{{ $k->full_name }}</b> · <span class="mono">{{ $k->pan_number ?? $k->id_number }}</span><span class="sub muted" style="display:block;font-size:12.5px">{{ $k->created_at->format('d M Y') }} @if ($k->reject_reason)· {{ $k->reject_reason }}@endif</span></span>
+        <a href="{{ $isAdmin ? route('admin.kyc.show', $k) : '#' }}" class="order-item" style="margin-bottom:8px" @unless ($isAdmin) onclick="return false" @endunless>
+          <span><b>{{ $k->full_name }}</b> · <span class="mono">{{ $isAdmin ? ($k->pan_number ?? $k->id_number) : $k->maskedId() }}</span><span class="sub muted" style="display:block;font-size:12.5px">{{ $k->created_at->format('d M Y') }} @if ($k->reject_reason)· {{ $k->reject_reason }}@endif</span></span>
           <span class="badge {{ ['approved' => 'ok', 'rejected' => 'bad'][$k->status] ?? 'warn' }}">{{ $k->status }}</span>
         </a>
       @empty
@@ -27,15 +28,15 @@
       <h3 style="margin-bottom:14px">Profile</h3>
       <dl class="kv" style="grid-template-columns:100px 1fr">
         <dt>Client ID</dt><dd class="mono"><b>{{ $u->client_id }}</b></dd>
-        <dt>Email</dt><dd>{{ $u->email }}</dd>
-        <dt>Phone</dt><dd>{{ $u->phone }}</dd>
+        <dt>Email</dt><dd class="{{ $isAdmin ? '' : 'mono' }}">{{ $isAdmin ? $u->email : $u->maskedEmail() }}</dd>
+        <dt>Phone</dt><dd class="{{ $isAdmin ? '' : 'mono' }}">{{ $isAdmin ? $u->phone : $u->maskedPhone() }}</dd>
         <dt>Country</dt><dd><img src="https://flagcdn.com/w20/{{ strtolower($u->country) }}.png" alt="" width="18" height="13" style="vertical-align:middle"> {{ $u->countryName() }} · {{ $u->currencyCode() }}</dd>
         <dt>KYC</dt><dd>{{ $u->kyc_status }}</dd>
         <dt>Status</dt><dd><span class="badge {{ $u->isBlocked() ? 'bad' : 'ok' }}">{{ $u->status }}</span></dd>
         <dt>Joined</dt><dd>{{ $u->created_at->format('d M Y') }}</dd>
         <dt>Last login</dt><dd>{{ $u->last_login_at?->diffForHumans() ?? '—' }}</dd>
       </dl>
-      @unless ($u->is_admin)
+      @if (! $u->is_admin && $isAdmin)
         @unless ($u->isDeleted())<form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Activate this account? The client can log in again.' : 'Deactivate this account? The client will be logged out and cannot log in.' }}" style="margin-top:16px">
           @csrf <button class="btn {{ $u->isBlocked() ? 'btn-primary' : 'btn-danger' }} btn-block btn-sm">{{ $u->isBlocked() ? 'Activate account' : 'Deactivate account' }}</button>
         </form>@endunless
@@ -55,8 +56,9 @@
             @csrf @method('DELETE') <button class="btn btn-ghost btn-block btn-sm" style="color:#b91c1c">🗑 Delete account permanently</button>
           </form>
         @endif
-      @endunless
+      @endif
     </div>
+    @if ($isAdmin)
     <div class="box">
       <h3 style="margin-bottom:14px">Payout accounts</h3>
       @forelse ($u->bankAccounts as $a)
@@ -76,6 +78,7 @@
       @endforelse
       @if ($u->consents->count() > 15)<a class="green" style="font-size:13px" href="{{ route('admin.history', ['tab' => 'consents', 'q' => $u->email]) }}">View all {{ $u->consents->count() }} →</a>@endif
     </div>
+    @endif
   </div>
 </div>
 @endsection

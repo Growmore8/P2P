@@ -3,17 +3,18 @@
 @section('heading', 'Clients')
 
 @section('content')
+@php $isAdmin = auth()->user()->is_admin; @endphp
 <div class="tabs-line">
   @foreach (['' => 'All', 'none' => 'No KYC', 'pending' => 'KYC pending', 'approved' => 'Verified', 'rejected' => 'KYC rejected'] as $k => $l)
     <a href="{{ route('admin.users.index', array_filter(['kyc' => $k, 'q' => request('q')])) }}" class="{{ (string) request('kyc') === (string) $k ? 'active' : '' }}">{{ $l }}</a>
   @endforeach
-  <a href="{{ route('admin.users.index', ['state' => 'locked']) }}" class="{{ request('state') === 'locked' ? 'active' : '' }}">Inactive</a>
-  <a href="{{ route('admin.users.index', ['state' => 'deleted']) }}" class="{{ request('state') === 'deleted' ? 'active' : '' }}">Deleted</a>
+  @if ($isAdmin)<a href="{{ route('admin.users.index', ['state' => 'locked']) }}" class="{{ request('state') === 'locked' ? 'active' : '' }}">Inactive</a>
+  <a href="{{ route('admin.users.index', ['state' => 'deleted']) }}" class="{{ request('state') === 'deleted' ? 'active' : '' }}">Deleted</a>@endif
 </div>
 <div class="box">
   <form class="searchbar" method="GET" style="margin-bottom:16px">
     @if (request('kyc'))<input type="hidden" name="kyc" value="{{ request('kyc') }}">@endif
-    <input class="input" name="q" value="{{ request('q') }}" placeholder="Name, email, phone or client ID…">
+    <input class="input" name="q" value="{{ request('q') }}" placeholder="{{ $isAdmin ? 'Name, email, phone or client ID…' : 'Name or client ID…' }}">
     <select class="input" name="country" style="max-width:200px" onchange="this.form.submit()">
       <option value="">All countries</option>
       @foreach (config('countries') as $code => [$cname]) <option value="{{ $code }}" @selected(request('country') === $code)>{{ $cname }}</option> @endforeach
@@ -25,8 +26,8 @@
     <tbody>
     @forelse ($users as $u)
       <tr class="row-link" onclick="location.href='{{ route('admin.users.show', $u) }}'">
-        <td><b>{{ $u->name }}</b> @if ($u->is_admin)<span class="badge info">Admin</span>@endif @if (! $u->is_admin && ! $u->email_verified_at)<span class="badge warn">Email not verified</span>@endif<span class="sub"><span class="mono cid">{{ $u->client_id }}</span> · {{ $u->email }}</span></td>
-        <td>{{ $u->phone }}<span class="sub">{{ $u->countryName() }}</span></td>
+        <td><b>{{ $u->name }}</b> @if ($u->is_admin)<span class="badge info">Admin</span>@endif @if (! $u->is_admin && ! $u->email_verified_at)<span class="badge warn">Email not verified</span>@endif<span class="sub"><span class="mono cid">{{ $u->client_id }}</span> · {{ $isAdmin ? $u->email : $u->maskedEmail() }}</span></td>
+        <td>{{ $isAdmin ? $u->phone : $u->maskedPhone() }}<span class="sub">{{ $u->countryName() }}</span></td>
         <td><span class="badge {{ ['approved' => 'ok', 'rejected' => 'bad', 'pending' => 'warn'][$u->kyc_status] ?? '' }}">{{ $u->kyc_status }}</span></td>
         <td>{{ $u->orders_count }}</td>
         <td><span class="badge {{ $u->isBlocked() ? 'bad' : 'ok' }}">{{ $u->isDeleted() ? 'Deleted' : ($u->isBlocked() ? 'Inactive' : 'Active') }}</span></td>
@@ -35,6 +36,7 @@
           <div class="icon-actions">
             <a href="{{ route('admin.users.show', $u) }}" class="icon-btn" title="View client" aria-label="View client">
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+            @if ($isAdmin)
             <form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Activate ' . $u->name . '? They can log in again.' : 'Deactivate ' . $u->name . '? They will be logged out and cannot log in.' }}">
               @csrf
               @if ($u->isBlocked())
@@ -60,6 +62,7 @@
                 @csrf @method('DELETE')
                 <button class="icon-btn bad" title="Delete account (orders are kept for records)" aria-label="Delete account"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
               </form>
+            @endif
             @endif
           </div>
         </td>

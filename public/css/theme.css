@@ -1025,3 +1025,11 @@ body.modal-on{overflow:hidden}
 :root[data-theme="dark"] .sd-ico.is-danger{background:rgba(239,68,68,.16);color:#f87171}
 .sd-actions .btn-danger{background:#dc2626;border-color:#dc2626;color:#fff}
 .sd-actions .btn-danger:hover:not(:disabled){background:#b91c1c}
+/* ===== Quick rates ===== */
+.rate-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px}
+.rate-in{display:inline-flex;align-items:center;gap:6px;margin:0!important;font-size:13px;color:var(--muted);font-weight:600}
+.rate-in .input{width:120px;padding:8px 10px;font-size:15px;font-weight:700}
+.rate-margin{font-size:13px;color:var(--muted);min-width:110px}
+.rate-margin b{color:#16a34a}
+.rate-margin b.neg{color:#dc2626}
+@media (max-width:640px){ .rate-row .wl-main{flex-basis:100%;order:2} .rate-in .input{width:100px} }
