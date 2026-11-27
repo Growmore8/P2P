@@ -93,10 +93,16 @@
     add({ from: 'visitor', body: text });            // optimistic
     var tmpLast = last; form.message.value = ''; form.message.style.height = 'auto';
     fetch(root.dataset.send, { method: 'POST', body: fd, credentials: 'same-origin', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf } })
-      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
       .then(function (res) {
         sending = false;
-        if (!res.ok) { err.textContent = res.d.errors ? Object.values(res.d.errors)[0][0] : (res.d.message || 'Could not send. Please try again.'); return; }
+        if (!res.ok) {
+          var failed = body.querySelector('.cw-msg.me:last-child'); if (failed) failed.remove();
+          if (!form.message.value) form.message.value = text;
+          err.textContent = res.status === 429 ? 'You're sending messages too fast — please wait a minute and try again.'
+            : (res.d.errors ? Object.values(res.d.errors)[0][0] : (res.d.message || 'Could not send. Please try again.'));
+          return;
+        }
         // replace the optimistic bubble with the server's copy
         var mine = body.querySelector('.cw-msg.me:last-child'); if (mine) mine.remove();
         last = tmpLast; (res.d.messages || []).forEach(add);

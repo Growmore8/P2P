@@ -22,7 +22,7 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/p2p', [PageController::class, 'p2p'])->name('p2p');
 Route::get('/activity.json', [PageController::class, 'activityFeed'])->middleware('throttle:60,1')->name('activity.feed');
 Route::get('/chat/poll', [ChatController::class, 'poll'])->middleware('throttle:120,1')->name('chat.poll');
-Route::post('/chat/send', [ChatController::class, 'send'])->middleware('throttle:12,1')->name('chat.send');
+Route::post('/chat/send', [ChatController::class, 'send'])->middleware('throttle:40,1')->name('chat.send');
 foreach (['services', 'about', 'insights', 'contact', 'legal'] as $p) {
     Route::get('/' . $p, [PageController::class, 'page'])->defaults('view', $p)->name($p);
 }
