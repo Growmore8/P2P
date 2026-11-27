@@ -210,7 +210,7 @@ class P2PFlowTest extends TestCase
             ->assertRedirect('/account/security');
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewPass123', $u->fresh()->password));
 
-        Currency::where('code', 'INR')->first()->update(['level_limits' => ['1' => [15000, 15000], '2' => [500000, 500000], '3' => [2000000, 2000000]]]);
+        config(['limits.base.1' => [15000, 15000]]);
         $order = fn ($amt) => $this->actingAs($u)->post('/trade', ['side' => 'buy', 'network' => 'TRC20', 'amount' => $amt,
             'wallet_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'deposit_method_id' => DepositMethod::first()->id, 'confirm' => '1']);
         $order('10000')->assertSessionHasNoErrors();
@@ -453,13 +453,14 @@ class P2PFlowTest extends TestCase
 
         // Monthly limits are typed on INR only; other currencies convert by rate and round to a clean figure.
         $inr = \App\Models\Currency::where('code', 'INR')->first();
-        $inr->update(['buy_rate' => 93.5, 'level_limits' => ['1' => [50000, 50000], '2' => [500000, 500000], '3' => [0, 0]]]);
+        $inr->update(['buy_rate' => 93.5]);
+        config(['limits.base.3' => [0, 0]]);
         $aed->update(['buy_rate' => 3.8]);
         $this->assertEquals(2000, $aed->fresh()->limitFor(1, 'buy'));    // 50,000 × 3.8 / 93.5 ≈ 2,032 → 2,000
         $this->assertEquals(20000, $aed->fresh()->limitFor(2, 'sell'));  // ≈ 20,321 → 20,000
         $this->assertEquals(0, $aed->fresh()->limitFor(3, 'buy'));       // no limit stays no limit
         $this->assertEquals(50000, $inr->fresh()->limitFor(1, 'buy'));
-        $this->actingAs($this->admin)->get('/admin/currencies')->assertSee('set automatically from the INR limits')->assertSee('AED 2,000');
+        $this->actingAs($this->admin)->get('/admin/currencies')->assertSee('converted from INR')->assertSee('AED 2,000')->assertDontSee('name="limits[1][buy]"', false);
     }
 
     public function test_duplicate_email_cannot_register_again(): void

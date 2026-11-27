@@ -25,7 +25,7 @@
     </div>
     @include('admin.partials.level-limits', ['c' => $c])
     <div class="actions"><button class="btn btn-primary btn-sm">Save {{ $c->code }}</button>
-      <span class="muted" style="font-size:12.5px;align-self:center">Spread: {{ $c->symbol }}{{ number_format($c->buy_rate - $c->sell_rate, 2) }} per USDT</span></div>
+      <span class="muted" style="font-size:12.5px;align-self:center">Your margin: <b>{{ $c->symbol }}{{ number_format($c->buy_rate - $c->sell_rate, 2) }}</b> per USDT (buy rate − sell rate)</span></div>
   </form>
 @endforeach
 

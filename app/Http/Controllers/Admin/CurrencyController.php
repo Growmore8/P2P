@@ -49,20 +49,9 @@ class CurrencyController extends Controller
             'sell_rate' => ['required', 'numeric', 'gt:0', 'lte:buy_rate'],
             'min_amount' => ['required', 'numeric', 'min:0'],
             'max_amount' => ['required', 'numeric', 'min:0'],
-            'limits' => ['nullable', 'array'],
-            'limits.*.buy' => ['required_with:limits', 'numeric', 'min:0'],
-            'limits.*.sell' => ['required_with:limits', 'numeric', 'min:0'],
             'tds_percent' => ['required', 'numeric', 'min:0', 'max:30'],
             'sort' => ['nullable', 'integer', 'min:0'],
         ], ['sell_rate.lte' => 'Sell rate should not be higher than the buy rate.']);
-        // Monthly limits are typed only for the base currency (INR); others follow it by exchange rate.
-        $isBase = ($currency?->code ?? $data['code'] ?? null) === Currency::BASE;
-        if ($isBase && ! empty($data['limits'])) {
-            $data['level_limits'] = collect([1, 2, 3])->mapWithKeys(fn ($l) => [(string) $l => [
-                (float) ($data['limits'][$l]['buy'] ?? 0), (float) ($data['limits'][$l]['sell'] ?? 0),
-            ]])->all();
-        }
-        unset($data['limits']);
         $data['is_active'] = $request->boolean('is_active');
         // Name and symbol come from config/currency_meta.php — no need to type them.
         $code = $currency?->code ?? $data['code'];

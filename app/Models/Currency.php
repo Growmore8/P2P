@@ -52,7 +52,7 @@ class Currency extends Model
 
             return $baseLimit > 0 ? self::nice($baseLimit * $this->buy_rate / $base->buy_rate) : 0.0;
         }
-        $row = $this->level_limits[(string) min($level, 3)] ?? null;
+        $row = config('limits.base.' . min($level, 3));
 
         return (float) ($row[$side === 'buy' ? 0 : 1] ?? 0);
     }
