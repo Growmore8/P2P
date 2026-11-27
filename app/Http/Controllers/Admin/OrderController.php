@@ -83,6 +83,12 @@ class OrderController extends Controller
             return true;
         });
 
+        // Let the client know when the order is finished either way.
+        if ($ok && in_array($to, [Order::COMPLETED, Order::REJECTED], true)) {
+            $fresh = $order->fresh('user');
+            \App\Support\Notify::mail($fresh->user->email, new \App\Mail\OrderStatusMail($fresh));
+        }
+
         return $ok
             ? back()->with('success', "Order {$order->order_no} → " . Order::LABELS[$to])
             : back()->with('error', 'Order status changed in the meantime. Refresh and try again.');

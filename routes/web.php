@@ -166,6 +166,7 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [Admin\UserController::class, 'show'])->name('users.show');
     Route::post('/users/{user}/block', [Admin\UserController::class, 'toggleBlock'])->name('users.block');
+    Route::delete('/users/{user}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
 
     Route::get('/settings', [Admin\SettingController::class, 'edit'])->name('settings');
     Route::put('/settings', [Admin\SettingController::class, 'update'])->name('settings.update');

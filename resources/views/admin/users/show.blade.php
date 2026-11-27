@@ -39,6 +39,13 @@
         <form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Activate this account? The client can log in again.' : 'Deactivate this account? The client will be logged out and cannot log in.' }}" style="margin-top:16px">
           @csrf <button class="btn {{ $u->isBlocked() ? 'btn-primary' : 'btn-danger' }} btn-block btn-sm">{{ $u->isBlocked() ? 'Activate account' : 'Deactivate account' }}</button>
         </form>
+        @if ($u->orders()->exists())
+          <p class="muted" style="font-size:12.5px;margin-top:10px">This client has orders, so the account can't be deleted (records must be kept). Deactivate it instead.</p>
+        @else
+          <form method="POST" action="{{ route('admin.users.destroy', $u) }}" data-confirm="Delete this account permanently? KYC documents are deleted too. This cannot be undone." style="margin-top:10px">
+            @csrf @method('DELETE') <button class="btn btn-ghost btn-block btn-sm" style="color:#b91c1c">🗑 Delete account permanently</button>
+          </form>
+        @endif
       @endunless
     </div>
     <div class="box">

@@ -525,6 +525,41 @@ class P2PFlowTest extends TestCase
         $this->actingAs($this->admin)->get('/admin/users?state=locked')->assertDontSee($u->email);
     }
 
+    public function test_admin_can_delete_client_without_orders_only(): void
+    {
+        $spam = $this->customer();
+        $trader = $this->customer();
+        $trader->orders()->create(['order_no' => 'SRMKEEP1', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
+            'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::COMPLETED, 'completed_at' => now()]);
+
+        $this->actingAs($this->admin)->get('/admin/users')->assertSee('Delete account')->assertSee('Deactivate instead');
+        $this->actingAs($this->admin)->delete("/admin/users/{$spam->id}")->assertRedirect('/admin/users')->assertSessionHas('success');
+        $this->assertDatabaseMissing('users', ['id' => $spam->id]);
+        $this->assertDatabaseHas('activity_logs', ['action' => 'user.deleted']);
+
+        $this->actingAs($this->admin)->delete("/admin/users/{$trader->id}")->assertSessionHas('error');
+        $this->assertDatabaseHas('users', ['id' => $trader->id]);
+        $this->assertDatabaseHas('orders', ['order_no' => 'SRMKEEP1']);
+        $this->actingAs($this->admin)->delete("/admin/users/{$this->admin->id}")->assertSessionHas('error');
+        $this->actingAs($trader)->delete("/admin/users/{$trader->id}")->assertForbidden();
+    }
+
+    public function test_waiting_page_tracker_and_status_emails(): void
+    {
+        $u = $this->customer();
+        $this->actingAs($u)->post('/trade', ['side' => 'buy', 'network' => 'TRC20', 'amount' => '5000',
+            'wallet_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345', 'deposit_method_id' => DepositMethod::first()->id, 'confirm' => '1']);
+        $order = Order::latest('id')->first();
+        $this->actingAs($u)->post("/orders/{$order->order_no}/payment", ['user_reference' => 'UTR987654321',
+            'user_proof' => UploadedFile::fake()->createWithContent('s.png', self::png())]);
+        $this->actingAs($u)->get("/orders/{$order->order_no}")->assertSee('Verifying your payment')->assertSee('Purchasing USDT')->assertSee('Sending USDT');
+
+        $this->actingAs($this->admin)->post("/admin/orders/{$order->order_no}/accept");
+        $this->actingAs($u)->get("/orders/{$order->order_no}")->assertSee('Sending your USDT');
+        $this->actingAs($this->admin)->post("/admin/orders/{$order->order_no}/complete", ['admin_reference' => '0xabc123'])->assertSessionHas('success');
+        Mail::assertSent(\App\Mail\OrderStatusMail::class, fn ($m) => $m->hasTo($u->email) && $m->order->status === Order::COMPLETED);
+    }
+
     public function test_duplicate_email_cannot_register_again(): void
     {
         $u = $this->customer();

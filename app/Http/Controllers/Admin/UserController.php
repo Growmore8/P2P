@@ -7,6 +7,8 @@ use App\Models\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -45,5 +47,31 @@ class UserController extends Controller
         ActivityLog::log('user.' . $user->status, "Client {$user->email} set to {$user->status}", $user);
 
         return back()->with('success', $user->name . ($user->isBlocked() ? ' is now inactive and cannot log in.' : ' is now active.'));
+    }
+
+    /**
+     * Permanently delete a client who has never placed an order (spam / unused sign-ups).
+     * Clients with orders are kept for record-keeping (AML rules) — deactivate them instead.
+     */
+    public function destroy(Request $request, User $user)
+    {
+        if ($user->is_admin) {
+            return back()->with('error', 'Admin accounts cannot be deleted here.');
+        }
+        if ($user->orders()->exists()) {
+            return back()->with('error', "{$user->name} has orders, so the account must be kept for records. Deactivate it instead.");
+        }
+
+        $label = "{$user->name} ({$user->client_id}, {$user->email})";
+        DB::transaction(function () use ($user) {
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+            $user->delete(); // KYC, consents, bank accounts and tickets are removed with it
+        });
+        foreach (["kyc/{$user->id}", "tickets/{$user->id}", "proofs/{$user->id}"] as $dir) {
+            Storage::disk('local')->deleteDirectory($dir);
+        }
+        ActivityLog::log('user.deleted', "Deleted client {$label}");
+
+        return redirect()->route('admin.users.index')->with('success', "{$user->name}'s account was deleted permanently.");
     }
 }

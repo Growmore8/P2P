@@ -126,15 +126,34 @@
     </form>
   </section>
 
-{{-- ================= Waiting for admin ================= --}}
+{{-- ================= Waiting for SRM to verify (Onramp-style tracker) ================= --}}
 @elseif (in_array($order->status, ['payment_submitted', 'processing']))
-  <div class="o-state">
-    <div class="o-state-ico info">⏳</div>
-    <h3>{{ $order->status === 'processing' ? 'Payment verified — processing' : 'Verifying your ' . ($buy ? 'payment' : 'transfer') }}</h3>
-    <p>{{ $order->status === 'processing'
-          ? ($buy ? 'We are sending USDT to your wallet.' : 'We are sending ' . $order->money($order->payout_fiat) . ' to your account.')
-          : 'This usually takes ' . $settings['avg_completion'] . '. This page refreshes automatically.' }}</p>
-    <div class="o-row" style="margin-top:14px;text-align:left"><span>Your reference</span><b class="mono">{{ $order->user_reference }}</b></div>
+  @php
+    $processing = $order->status === 'processing';
+    $track = $buy ? ['Verifying payment', 'Purchasing USDT', 'Sending USDT'] : ['Verifying USDT', 'Processing payout', 'Sending payout'];
+    $active = $processing ? ($buy ? 2 : 1) : 0;
+    $title = $processing ? ($buy ? 'Sending your USDT' : 'Sending your payout') : ($buy ? 'Verifying your payment' : 'Verifying your USDT');
+    $line = $processing
+        ? ($buy ? number_format($order->usdt_amount, 2) . ' USDT is on its way to your wallet.' : $order->money($order->payout_fiat) . ' is on its way to your account.')
+        : 'Expected waiting time ≈ ' . $settings['avg_completion'] . '. You can leave this page — we will email you when it is done.';
+  @endphp
+  <div class="o-wait" aria-live="polite">
+    <ol class="ow-track">
+      @foreach ($track as $i => $label)
+        <li class="{{ $i < $active ? 'done' : ($i === $active ? 'active' : '') }}"><span class="ow-dot">{{ $i < $active ? '✓' : '' }}</span><span>{{ $label }}</span></li>
+      @endforeach
+    </ol>
+    <div class="ow-anim {{ $processing ? 'is-send' : '' }}" aria-hidden="true">
+      @if ($processing)
+        <svg viewBox="0 0 64 64" width="72" height="72"><circle cx="32" cy="32" r="26" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="5"/><path d="M32 6a26 26 0 0 1 26 26" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M24 33l6 6 11-13" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      @else
+        <svg viewBox="0 0 64 64" width="76" height="76"><circle cx="27" cy="27" r="15" fill="none" stroke="currentColor" stroke-width="5"/><path d="M38 38l14 14" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M20 25a8 8 0 0 1 8-6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/></svg>
+      @endif
+    </div>
+    <h3>{{ $title }}</h3>
+    <p>{{ $line }}</p>
+    <div class="ow-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="o-row" style="margin-top:16px;text-align:left"><span>Your reference</span><b class="mono">{{ $order->user_reference }}</b></div>
   </div>
 
 {{-- ================= Completed ================= --}}
