@@ -36,11 +36,20 @@
         <dt>Last login</dt><dd>{{ $u->last_login_at?->diffForHumans() ?? '—' }}</dd>
       </dl>
       @unless ($u->is_admin)
-        <form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Activate this account? The client can log in again.' : 'Deactivate this account? The client will be logged out and cannot log in.' }}" style="margin-top:16px">
+        @unless ($u->isDeleted())<form method="POST" action="{{ route('admin.users.block', $u) }}" data-confirm="{{ $u->isBlocked() ? 'Activate this account? The client can log in again.' : 'Deactivate this account? The client will be logged out and cannot log in.' }}" style="margin-top:16px">
           @csrf <button class="btn {{ $u->isBlocked() ? 'btn-primary' : 'btn-danger' }} btn-block btn-sm">{{ $u->isBlocked() ? 'Activate account' : 'Deactivate account' }}</button>
-        </form>
-        @if ($u->orders()->exists())
-          <p class="muted" style="font-size:12.5px;margin-top:10px">This client has orders, so the account can't be deleted (records must be kept). Deactivate it instead.</p>
+        </form>@endunless
+        @if ($u->isDeleted())
+          <div class="alert alert-error" style="margin-top:10px;font-size:13px">This account was deleted. Orders and KYC are kept for records.</div>
+          <form method="POST" action="{{ route('admin.users.restore', $u) }}" data-confirm="Restore this account? The client can log in again." style="margin-top:8px">
+            @csrf <button class="btn btn-primary btn-block btn-sm">↺ Restore account</button>
+          </form>
+        @elseif ($u->orders()->exists())
+          <form method="POST" action="{{ route('admin.users.destroy', $u) }}" data-type-confirm="{{ $u->client_id }}" style="margin-top:10px"
+                data-type-message="⚠ This client has {{ $u->orders()->count() }} orders. Deleting removes the account and they can't log in. Their orders and KYC are KEPT for legal records.">
+            @csrf @method('DELETE') <button class="btn btn-ghost btn-block btn-sm" style="color:#b91c1c">🗑 Delete account</button>
+          </form>
+          <p class="muted" style="font-size:12px;margin-top:6px">Has orders — deleting keeps their orders and KYC for records. You'll be asked to type the client ID.</p>
         @else
           <form method="POST" action="{{ route('admin.users.destroy', $u) }}" data-confirm="Delete this account permanently? KYC documents are deleted too. This cannot be undone." style="margin-top:10px">
             @csrf @method('DELETE') <button class="btn btn-ghost btn-block btn-sm" style="color:#b91c1c">🗑 Delete account permanently</button>

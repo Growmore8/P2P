@@ -19,6 +19,7 @@ class UserController extends Controller
             ->clients()
             ->when($request->query('kyc'), fn ($q, $k) => $q->where('kyc_status', $k))
             ->when($request->query('state') === 'locked', fn ($q) => $q->where('status', 'blocked'))
+            ->when($request->query('state') === 'deleted', fn ($q) => $q->where('status', 'deleted'), fn ($q) => $q->where('status', '!=', 'deleted'))
             ->when($request->query('country'), fn ($q, $c) => $q->where('country', $c))
             ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w
                 ->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")))
@@ -53,13 +54,31 @@ class UserController extends Controller
      * Permanently delete a client who has never placed an order (spam / unused sign-ups).
      * Clients with orders are kept for record-keeping (AML rules) — deactivate them instead.
      */
+    /** Bring back an account that was deleted but kept for records. */
+    public function restore(User $user)
+    {
+        abort_unless($user->isDeleted(), 404);
+        $user->forceFill(['status' => 'active'])->save();
+        ActivityLog::log('user.restored', "Restored client {$user->name} ({$user->client_id})", $user);
+
+        return back()->with('success', "{$user->name}'s account is active again.");
+    }
+
     public function destroy(Request $request, User $user)
     {
         if ($user->is_admin) {
             return back()->with('error', 'Admin accounts cannot be deleted here.');
         }
+        // Clients with orders: remove the account but keep orders / KYC for records (AML rules). Needs the client ID typed in.
         if ($user->orders()->exists()) {
-            return back()->with('error', "{$user->name} has orders, so the account must be kept for records. Deactivate it instead.");
+            if (strtoupper(trim((string) $request->input('confirm_id'))) !== $user->client_id) {
+                return back()->with('error', "Type the client ID {$user->client_id} exactly to delete this account.");
+            }
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+            $user->forceFill(['status' => 'deleted', 'remember_token' => null])->save();
+            ActivityLog::log('user.deleted', "Deleted client {$user->name} ({$user->client_id}, {$user->email}) — orders and KYC kept for records", $user);
+
+            return redirect()->route('admin.users.index')->with('success', "{$user->name}'s account was deleted. They can't log in; their orders and KYC are kept for records (Clients → Deleted).");
         }
 
         $label = "{$user->name} ({$user->client_id}, {$user->email})";

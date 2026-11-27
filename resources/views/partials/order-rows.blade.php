@@ -9,7 +9,7 @@
       @php $url = ($admin ?? false) ? route('admin.orders.show', $o) : route('orders.show', $o); @endphp
       <tr class="row-link" onclick="location.href='{{ $url }}'">
         <td><a href="{{ $url }}" class="mono"><b style="font-size:13.5px">{{ $o->order_no }}</b></a></td>
-        @if ($admin ?? false)<td>{{ $o->user->name }}<span class="sub">{{ $o->user->phone }}</span></td>@endif
+        @if ($admin ?? false)<td>{{ $o->user->name }}<span class="sub">{{ auth()->user()?->is_admin ? $o->user->phone : $o->user->maskedPhone() }}</span></td>@endif
         <td><span class="badge {{ $o->side }}">{{ strtoupper($o->side) }}</span> <span class="sub">{{ $o->network }}</span></td>
         <td>{{ number_format($o->usdt_amount, 2) }}</td>
         <td>{{ $o->money($o->clientFiat()) }}</td>

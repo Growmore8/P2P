@@ -188,6 +188,22 @@ class User extends Authenticatable
         return $q->where('is_admin', false)->whereNull('role');
     }
 
+    /** For managers: +91******460 */
+    public function maskedPhone(): string
+    {
+        $p = (string) $this->phone;
+
+        return strlen($p) > 6 ? substr($p, 0, 3) . str_repeat('*', max(4, strlen($p) - 6)) . substr($p, -3) : '******';
+    }
+
+    /** For managers: re*******@gmail.com */
+    public function maskedEmail(): string
+    {
+        [$local, $domain] = array_pad(explode('@', (string) $this->email, 2), 2, '');
+
+        return mb_substr($local, 0, 2) . str_repeat('*', max(4, mb_strlen($local) - 2)) . ($domain ? '@' . $domain : '');
+    }
+
     public function isOnline(): bool
     {
         return $this->last_seen_at && $this->last_seen_at->gt(now()->subMinutes(3));
@@ -195,6 +211,12 @@ class User extends Authenticatable
 
     public function isBlocked(): bool
     {
-        return $this->status === 'blocked';
+        return in_array($this->status, ['blocked', 'deleted'], true);
+    }
+
+    /** Deleted by an admin but kept for records (the client had orders). */
+    public function isDeleted(): bool
+    {
+        return $this->status === 'deleted';
     }
 }

@@ -24,7 +24,10 @@ class OrderController extends Controller
             ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w
                 ->where('order_no', 'like', "%{$s}%")->orWhere('user_reference', 'like', "%{$s}%")->orWhere('admin_reference', 'like', "%{$s}%")
                 ->orWhere('wallet_address', 'like', "%{$s}%")
-                ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%"))))
+                // Managers can't search by the client's phone / email (they're hidden from them)
+                ->orWhereHas('user', fn ($u) => $request->user()->is_admin
+                    ? $u->where('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s))
+                    : $u->where('name', 'like', "%{$s}%")->orWhere('client_id', strtoupper($s)))))
             ->latest()->paginate(25)->withQueryString();
 
         $counts = Order::selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status');

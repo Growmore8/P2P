@@ -635,6 +635,11 @@ class P2PFlowTest extends TestCase
         // Manager sees only orders; no dashboard, settings, clients, KYC; can't approve
         $this->actingAs($mgr)->get('/admin/orders?review=waiting')->assertOk()->assertSee('SRMREV01')->assertSee('Waiting for review')->assertDontSee('Rates &amp; currencies', false);
         $this->actingAs($mgr)->get('/admin/orders/SRMREV01')->assertOk()->assertSee('Payment received')->assertDontSee('Mark completed');
+        // Client's phone / email / ID are masked for managers (and not searchable by them)
+        $this->actingAs($mgr)->get('/admin/orders/SRMREV01')->assertDontSee($u->email)->assertDontSee($u->phone)->assertSee($u->maskedEmail())->assertDontSee('WhatsApp');
+        $this->actingAs($mgr)->get('/admin/orders')->assertDontSee($u->phone)->assertSee($u->maskedPhone());
+        $this->actingAs($mgr)->get('/admin/orders?q=' . urlencode($u->email))->assertDontSee('SRMREV01');
+        $this->actingAs($this->admin)->get('/admin/orders/SRMREV01')->assertSee($u->email)->assertSee($u->phone);
         foreach (['/admin', '/admin/currencies', '/admin/users', '/admin/kyc', '/admin/settings', '/admin/managers'] as $url) {
             $this->actingAs($mgr)->get($url)->assertRedirect('/admin/orders');
         }
@@ -686,14 +691,24 @@ class P2PFlowTest extends TestCase
         $trader->orders()->create(['order_no' => 'SRMKEEP1', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
             'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::COMPLETED, 'completed_at' => now()]);
 
-        $this->actingAs($this->admin)->get('/admin/users')->assertSee('Delete account')->assertSee('Deactivate instead');
+        $this->actingAs($this->admin)->get('/admin/users')->assertSee('Delete account')->assertSee('orders are kept for records');
         $this->actingAs($this->admin)->delete("/admin/users/{$spam->id}")->assertRedirect('/admin/users')->assertSessionHas('success');
         $this->assertDatabaseMissing('users', ['id' => $spam->id]);
         $this->assertDatabaseHas('activity_logs', ['action' => 'user.deleted']);
 
+        // With orders: needs the client ID typed in; the account is removed but orders / KYC are kept
         $this->actingAs($this->admin)->delete("/admin/users/{$trader->id}")->assertSessionHas('error');
-        $this->assertDatabaseHas('users', ['id' => $trader->id]);
+        $this->actingAs($this->admin)->delete("/admin/users/{$trader->id}", ['confirm_id' => 'WRONG'])->assertSessionHas('error');
+        $this->assertFalse($trader->fresh()->isDeleted());
+        $this->actingAs($this->admin)->delete("/admin/users/{$trader->id}", ['confirm_id' => strtolower($trader->client_id)])->assertSessionHas('success');
+        $this->assertTrue($trader->fresh()->isDeleted());
         $this->assertDatabaseHas('orders', ['order_no' => 'SRMKEEP1']);
+        $this->actingAs($this->admin)->get('/admin/users')->assertDontSee($trader->email);
+        $this->actingAs($this->admin)->get('/admin/users?state=deleted')->assertSee($trader->email)->assertSee('Deleted');
+        $this->actingAs($this->admin)->get('/admin/orders/SRMKEEP1')->assertOk()->assertSee('Deleted client');
+        $this->actingAs($trader->fresh())->get('/dashboard')->assertRedirect(route('login')); // can't use the account
+        $this->actingAs($this->admin)->post("/admin/users/{$trader->id}/restore")->assertSessionHas('success');
+        $this->assertFalse($trader->fresh()->isBlocked());
         $this->actingAs($this->admin)->delete("/admin/users/{$this->admin->id}")->assertSessionHas('error');
         $this->actingAs($trader)->delete("/admin/users/{$trader->id}")->assertForbidden();
     }

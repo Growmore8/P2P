@@ -156,13 +156,20 @@
     <div class="box">
       <div class="box-head"><h3>Customer</h3>@if (auth()->user()->is_admin)<a href="{{ route('admin.users.show', $u) }}" class="btn btn-ghost btn-sm">Profile</a>@endif</div>
       <dl class="kv" style="grid-template-columns:100px 1fr">
-        <dt>Name</dt><dd>{{ $u->name }}</dd>
+        <dt>Name</dt><dd>{{ $u->name }} @if ($u->isDeleted())<span class="badge bad">Deleted client</span>@endif</dd>
         <dt>Client ID</dt><dd class="mono">{{ $u->client_id }}</dd>
         <dt>KYC name</dt><dd>{{ $u->kyc?->full_name ?? '—' }}</dd>
         <dt>Country</dt><dd>{{ $u->countryName() }}</dd>
-        <dt>ID</dt><dd class="mono">{{ $u->kyc ? $u->kyc->idTypeLabel() . ': ' . ($u->kyc->pan_number ?? $u->kyc->id_number) : '—' }}</dd>
-        <dt>Phone</dt><dd>{{ $u->phone }} <a class="green" target="_blank" rel="noopener" href="https://wa.me/{{ $u->whatsappNumber() }}?text={{ rawurlencode('Regarding your SRM order ' . $order->order_no) }}">WhatsApp ↗</a></dd>
-        <dt>Email</dt><dd>{{ $u->email }}</dd>
+        @if (auth()->user()->is_admin)
+          <dt>ID</dt><dd class="mono">{{ $u->kyc ? $u->kyc->idTypeLabel() . ': ' . ($u->kyc->pan_number ?? $u->kyc->id_number) : '—' }}</dd>
+          <dt>Phone</dt><dd>{{ $u->phone }} <a class="green" target="_blank" rel="noopener" href="https://wa.me/{{ $u->whatsappNumber() }}?text={{ rawurlencode('Regarding your SRM order ' . $order->order_no) }}">WhatsApp ↗</a></dd>
+          <dt>Email</dt><dd>{{ $u->email }}</dd>
+        @else
+          {{-- Managers don't see the client's contact details or full ID number --}}
+          <dt>ID</dt><dd class="mono">{{ $u->kyc ? $u->kyc->idTypeLabel() . ': ' . $u->kyc->maskedId() : '—' }}</dd>
+          <dt>Phone</dt><dd class="mono">{{ $u->maskedPhone() }}</dd>
+          <dt>Email</dt><dd class="mono">{{ $u->maskedEmail() }}</dd>
+        @endif
         <dt>KYC</dt><dd><span class="badge {{ $u->kyc_status === 'approved' ? 'ok' : 'warn' }}">{{ $u->kyc_status }}</span></dd>
       </dl>
     </div>
