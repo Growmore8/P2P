@@ -25,7 +25,7 @@ class DashboardController extends Controller
             default => null,
         };
 
-        $clients = User::where('is_admin', false);
+        $clients = User::clients();
         $completed = Order::where('status', Order::COMPLETED)->when($from, fn ($q) => $q->where('completed_at', '>=', $from));
 
         // Per-currency money totals for the period (deposits received on buys, payouts sent on sells).
@@ -59,7 +59,7 @@ class DashboardController extends Controller
         });
 
         // Clients by country (top 8) with verified count and completed volume.
-        $countries = User::where('is_admin', false)
+        $countries = User::clients()
             ->select('country', DB::raw('count(*) as clients'), DB::raw("sum(case when kyc_status = 'approved' then 1 else 0 end) as verified"))
             ->groupBy('country')->orderByDesc('clients')->limit(8)->get();
         $volByCountry = Order::where('orders.status', Order::COMPLETED)

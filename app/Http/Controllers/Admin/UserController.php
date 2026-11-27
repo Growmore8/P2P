@@ -16,7 +16,7 @@ class UserController extends Controller
     {
         $users = User::query()
             ->withCount('orders')
-            ->where('is_admin', false)
+            ->clients()
             ->when($request->query('kyc'), fn ($q, $k) => $q->where('kyc_status', $k))
             ->when($request->query('state') === 'locked', fn ($q) => $q->where('status', 'blocked'))
             ->when($request->query('country'), fn ($q, $c) => $q->where('country', $c))

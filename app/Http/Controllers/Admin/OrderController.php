@@ -15,8 +15,10 @@ class OrderController extends Controller
     {
         Order::where('status', Order::PENDING)->where('expires_at', '<', now())->get()->each->expireIfDue();
 
-        $orders = Order::with('user')
+        $orders = Order::with(['user', 'reviewer'])
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->query('review') === 'waiting', fn ($q) => $q->where('status', Order::SUBMITTED)->whereNull('review_status'))
+            ->when($request->query('review') === 'reviewed', fn ($q) => $q->where('review_status', 'received')->whereIn('status', Order::OPEN))
             ->when($request->query('side'), fn ($q, $s) => $q->where('side', $s))
             ->when($request->query('currency'), fn ($q, $c) => $q->where('currency', $c))
             ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w
@@ -26,6 +28,8 @@ class OrderController extends Controller
             ->latest()->paginate(25)->withQueryString();
 
         $counts = Order::selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status');
+        $counts['review_waiting'] = Order::where('status', Order::SUBMITTED)->whereNull('review_status')->count();
+        $counts['review_done'] = Order::where('review_status', 'received')->whereIn('status', Order::OPEN)->count();
 
         return view('admin.orders.index', ['orders' => $orders, 'counts' => $counts]);
     }
@@ -42,6 +46,32 @@ class OrderController extends Controller
     }
 
     /** Payment / USDT received and verified → processing. */
+    /**
+     * Manager (or admin) step: confirm whether the client's payment / USDT actually arrived.
+     * The admin then approves (accept / complete) or rejects the order.
+     */
+    public function review(Request $request, Order $order)
+    {
+        $data = $request->validate([
+            'result' => ['required', 'in:received,not_received'],
+            'review_note' => ['nullable', 'string', 'max:255', 'required_if:result,not_received'],
+        ], ['review_note.required_if' => 'Add a short note about what is missing.']);
+
+        if (! in_array($order->status, [Order::SUBMITTED, Order::PROCESSING], true)) {
+            return back()->with('error', 'Only orders waiting for verification can be reviewed.');
+        }
+        $received = $data['result'] === 'received';
+        $note = trim((string) ($data['review_note'] ?? ''));
+        $order->update(['review_status' => $data['result'], 'review_note' => $note ?: null, 'reviewed_by' => $request->user()->id, 'reviewed_at' => now()]);
+        $who = ($request->user()->is_admin ? 'Admin' : 'Manager') . ' ' . $request->user()->name;
+        $what = $order->isBuy() ? 'payment' : 'USDT';
+        $order->logs()->create(['status' => $order->status, 'actor_id' => $request->user()->id,
+            'note' => "{$who} reviewed: {$what} " . ($received ? 'received' : 'NOT received') . ($note ? " — {$note}" : '')]);
+        ActivityLog::log('order.reviewed', "Order {$order->order_no} reviewed by {$who}: " . ($received ? 'received' : 'not received'), $order);
+
+        return back()->with('success', $received ? "Marked as reviewed — {$what} received. The admin can now approve it." : "Marked as {$what} not received. The admin has been told.");
+    }
+
     public function accept(Request $request, Order $order)
     {
         $request->validate(['note' => ['nullable', 'string', 'max:255']]);

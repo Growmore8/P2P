@@ -103,9 +103,12 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['password' => 'Your account has been suspended. Please contact support.']);
         }
 
-        $user->forceFill(['last_login_at' => now()])->save();
-        if ($user->is_admin) {
-            \App\Models\ActivityLog::log('admin.login', "Admin {$user->email} logged in", $user);
+        $user->forceFill(['last_login_at' => now(), 'last_seen_at' => now(), 'last_login_ip' => $request->ip()])->save();
+        if ($user->isStaff()) {
+            \App\Models\ActivityLog::log(($user->is_admin ? 'admin' : 'manager') . '.login', ($user->is_admin ? 'Admin' : 'Manager') . " {$user->email} logged in from {$request->ip()}", $user);
+        }
+        if ($user->isManager()) {
+            return redirect()->route('admin.orders.index', ['review' => 'waiting']);
         }
 
         return redirect()->intended($user->is_admin ? route('admin.dashboard') : route('dashboard'));

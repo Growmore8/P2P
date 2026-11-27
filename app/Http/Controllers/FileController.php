@@ -34,7 +34,7 @@ class FileController extends Controller
 
     public function proof(Request $request, Order $order)
     {
-        abort_unless($request->user()->is_admin || $request->user()->id === $order->user_id, 403);
+        abort_unless($request->user()->isStaff() || $request->user()->id === $order->user_id, 403);
 
         return $this->serve($order->user_proof);
     }
@@ -53,7 +53,7 @@ class FileController extends Controller
 
     public function orderQr(Request $request, Order $order)
     {
-        abort_unless($request->user()->is_admin || $request->user()->id === $order->user_id, 403);
+        abort_unless($request->user()->isStaff() || $request->user()->id === $order->user_id, 403);
 
         return $this->serve($order->deposit_snapshot['qr_image'] ?? null);
     }

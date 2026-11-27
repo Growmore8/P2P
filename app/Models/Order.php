@@ -32,7 +32,7 @@ class Order extends Model
         'order_no', 'user_id', 'side', 'network', 'currency', 'rate', 'fiat_amount', 'usdt_amount', 'fee_usdt', 'tds_amount',
         'payout_fiat', 'status', 'wallet_address', 'deposit_method_id', 'deposit_snapshot', 'deposit_address',
         'payout_snapshot', 'user_reference', 'user_proof', 'admin_reference', 'reject_reason', 'expires_at',
-        'paid_at', 'completed_at',
+        'paid_at', 'completed_at', 'review_status', 'review_note', 'reviewed_by', 'reviewed_at',
     ];
 
     protected function casts(): array
@@ -43,6 +43,7 @@ class Order extends Model
             'expires_at' => 'datetime',
             'paid_at' => 'datetime',
             'completed_at' => 'datetime',
+            'reviewed_at' => 'datetime',
             'rate' => 'decimal:2',
             'fiat_amount' => 'decimal:2',
             'usdt_amount' => 'decimal:2',
@@ -60,6 +61,21 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /** Manager review: payment checked as received / not received (null = waiting). */
+    public function reviewLabel(): string
+    {
+        return match ($this->review_status) {
+            'received' => 'Reviewed — payment received',
+            'not_received' => 'Payment not received',
+            default => 'Waiting for review',
+        };
     }
 
     public function logs(): HasMany

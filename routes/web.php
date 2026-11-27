@@ -150,6 +150,7 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
 
     Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/review', [Admin\OrderController::class, 'review'])->name('orders.review');
     Route::post('/orders/{order}/accept', [Admin\OrderController::class, 'accept'])->name('orders.accept');
     Route::post('/orders/{order}/complete', [Admin\OrderController::class, 'complete'])->name('orders.complete');
     Route::post('/orders/{order}/reject', [Admin\OrderController::class, 'reject'])->name('orders.reject');
@@ -168,6 +169,11 @@ Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')-
     Route::put('/networks/{network}', [Admin\NetworkController::class, 'update'])->name('networks.update');
     Route::delete('/networks/{network}', [Admin\NetworkController::class, 'destroy'])->name('networks.destroy');
 
+    Route::get('/managers', [Admin\ManagerController::class, 'index'])->name('managers.index');
+    Route::post('/managers', [Admin\ManagerController::class, 'store'])->name('managers.store');
+    Route::post('/managers/{manager}/toggle', [Admin\ManagerController::class, 'toggle'])->name('managers.toggle');
+    Route::put('/managers/{manager}/password', [Admin\ManagerController::class, 'password'])->name('managers.password');
+    Route::delete('/managers/{manager}', [Admin\ManagerController::class, 'destroy'])->name('managers.destroy');
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [Admin\UserController::class, 'show'])->name('users.show');
     Route::post('/users/{user}/block', [Admin\UserController::class, 'toggleBlock'])->name('users.block');

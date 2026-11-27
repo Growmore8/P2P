@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('badge', [
                 'kyc' => KycSubmission::where('status', 'pending')->count() + \App\Models\KycUpgrade::where('status', 'pending')->count(),
                 'orders' => Order::where('status', Order::SUBMITTED)->count(),
+                'review' => Order::where('status', Order::SUBMITTED)->whereNull('review_status')->count(),
                 'tickets' => \App\Models\Ticket::where('status', \App\Models\Ticket::OPEN)->count(),
                 'chats' => \App\Models\ChatConversation::where('unread_admin', '>', 0)->count(),
             ]);

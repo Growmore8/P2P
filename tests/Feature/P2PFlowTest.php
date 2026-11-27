@@ -609,6 +609,64 @@ class P2PFlowTest extends TestCase
         $this->actingAs($this->admin)->post('/admin/wallets', ['code' => 'SOL', 'address' => 'x', 'active' => '1'])->assertSessionHasErrors('code');
     }
 
+    public function test_manager_reviews_payment_and_admin_approves(): void
+    {
+        // Admin adds a manager
+        $this->actingAs($this->admin)->post('/admin/managers', ['_modal' => 'add', 'name' => 'Meena Manager', 'email' => 'Meena@SRM.test',
+            'phone' => '+91 98765 11111', 'password' => 'Review123'])->assertSessionHasNoErrors();
+        $mgr = User::where('email', 'meena@srm.test')->first();
+        $this->assertTrue($mgr->isManager());
+        $this->assertFalse($mgr->is_admin);
+        $this->actingAs($this->admin)->get('/admin/managers')->assertSee('meena@srm.test'); // (shows the "added" message)
+        $this->actingAs($this->admin)->get('/admin/users')->assertDontSee('meena@srm.test'); // not in the client list
+        auth()->logout();
+
+        // Manager logs in → lands on "waiting for review"; last login time + IP recorded
+        $this->post('/login/identify', ['identifier' => 'meena@srm.test', 'country' => 'IN'])->assertRedirect(route('login.password'));
+        $this->post('/login', ['password' => 'Review123'])->assertRedirect(route('admin.orders.index', ['review' => 'waiting']));
+        $this->assertNotNull($mgr->fresh()->last_login_ip);
+        $this->assertNotNull($mgr->fresh()->last_seen_at);
+
+        // A client submits a payment
+        $u = $this->customer();
+        $order = $u->orders()->create(['order_no' => 'SRMREV01', 'side' => 'buy', 'network' => 'TRC20', 'currency' => 'INR', 'rate' => 93.5,
+            'fiat_amount' => 9350, 'usdt_amount' => 99, 'status' => Order::SUBMITTED, 'user_reference' => 'UTR555666777', 'wallet_address' => 'TXYZabcdefghijkmnopqrstuvwxyz12345']);
+
+        // Manager sees only orders; no dashboard, settings, clients, KYC; can't approve
+        $this->actingAs($mgr)->get('/admin/orders?review=waiting')->assertOk()->assertSee('SRMREV01')->assertSee('Waiting for review')->assertDontSee('Rates &amp; currencies', false);
+        $this->actingAs($mgr)->get('/admin/orders/SRMREV01')->assertOk()->assertSee('Payment received')->assertDontSee('Mark completed');
+        foreach (['/admin', '/admin/currencies', '/admin/users', '/admin/kyc', '/admin/settings', '/admin/managers'] as $url) {
+            $this->actingAs($mgr)->get($url)->assertRedirect('/admin/orders');
+        }
+        $this->actingAs($mgr)->post('/admin/orders/SRMREV01/accept')->assertForbidden();
+        $this->actingAs($mgr)->post('/admin/orders/SRMREV01/complete', ['admin_reference' => '0x1'])->assertForbidden();
+        $this->assertSame(Order::SUBMITTED, $order->fresh()->status);
+
+        // "Not received" needs a note; "received" marks it reviewed
+        $this->actingAs($mgr)->post('/admin/orders/SRMREV01/review', ['result' => 'not_received'])->assertSessionHasErrors('review_note');
+        $this->actingAs($mgr)->post('/admin/orders/SRMREV01/review', ['result' => 'received'])->assertSessionHas('success');
+        $order->refresh();
+        $this->assertSame(['received', $mgr->id], [$order->review_status, $order->reviewed_by]);
+        $this->assertDatabaseHas('order_logs', ['order_id' => $order->id, 'note' => 'Manager Meena Manager reviewed: payment received']);
+
+        // Admin sees it under "Reviewed — ready to approve" and approves
+        $this->actingAs($this->admin)->get('/admin/orders?review=reviewed')->assertSee('SRMREV01')->assertSee('✓ Reviewed');
+        $this->actingAs($this->admin)->get('/admin/orders/SRMREV01')->assertSee('Reviewed — payment received')->assertSee('Meena Manager');
+        $this->actingAs($this->admin)->post('/admin/orders/SRMREV01/complete', ['admin_reference' => '0xabc'])->assertSessionHas('success');
+        $this->assertSame(Order::COMPLETED, $order->fresh()->status);
+
+        // Managers page: last seen / IP shown; deactivate blocks login; delete keeps the review
+        $this->actingAs($this->admin)->get('/admin/managers')->assertOk()->assertSee('Meena Manager')->assertSee('1 review')->assertSee($mgr->fresh()->last_login_ip);
+        $this->actingAs($this->admin)->post("/admin/managers/{$mgr->id}/toggle")->assertSessionHas('success');
+        $this->assertTrue($mgr->fresh()->isBlocked());
+        $this->actingAs($mgr->fresh())->get('/admin/orders')->assertRedirect(); // logged out by the active check
+        $this->actingAs($this->admin)->put("/admin/managers/{$mgr->id}/password", ['password' => 'short'])->assertSessionHasErrors('password');
+        $this->actingAs($this->admin)->delete("/admin/managers/{$u->id}")->assertNotFound(); // clients can't be removed here
+        $this->actingAs($this->admin)->delete("/admin/managers/{$mgr->id}")->assertSessionHas('success');
+        $this->assertNull($order->fresh()->reviewed_by);
+        $this->assertSame('received', $order->fresh()->review_status);
+    }
+
     public function test_admin_can_lock_and_unlock_client_from_list(): void
     {
         $u = $this->customer();

@@ -136,6 +136,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'last_seen_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'kyc_level' => 'integer',
@@ -165,6 +166,31 @@ class User extends Authenticatable
     public function isKycApproved(): bool
     {
         return $this->kyc_status === 'approved';
+    }
+
+    /** Managers check that payments arrived and mark orders "Reviewed"; admins approve. */
+    public const MANAGER = 'manager';
+
+    public function isManager(): bool
+    {
+        return $this->role === self::MANAGER && ! $this->is_admin;
+    }
+
+    /** Admin or manager — can open the staff panel. */
+    public function isStaff(): bool
+    {
+        return $this->is_admin || $this->isManager();
+    }
+
+    /** Clients only (no admins, no managers). */
+    public function scopeClients($q)
+    {
+        return $q->where('is_admin', false)->whereNull('role');
+    }
+
+    public function isOnline(): bool
+    {
+        return $this->last_seen_at && $this->last_seen_at->gt(now()->subMinutes(3));
     }
 
     public function isBlocked(): bool

@@ -18,8 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'consent' => \App\Http\Middleware\EnsureConsent::class,
             'email.verified' => \App\Http\Middleware\EnsureEmailVerified::class,
         ]);
+        $middleware->web(append: [\App\Http\Middleware\TouchLastSeen::class]);
         $middleware->redirectGuestsTo('/login');
-        $middleware->redirectUsersTo(fn ($request) => $request->user()?->is_admin ? '/admin' : '/dashboard');
+        $middleware->redirectUsersTo(fn ($request) => $request->user()?->is_admin ? '/admin' : ($request->user()?->isManager() ? '/admin/orders' : '/dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

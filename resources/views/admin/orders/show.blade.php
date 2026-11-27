@@ -78,9 +78,37 @@
       @endif
     </div>
 
-    @if ($order->isOpen())
+    {{-- ===== Step 1: manager checks the payment arrived ===== --}}
+    @php $staffIsAdmin = auth()->user()->is_admin; $what = $buy ? $order->currency . ' payment' : 'USDT'; @endphp
+    @if (in_array($order->status, ['payment_submitted', 'processing']) || $order->review_status)
+    <div class="box review-box review-{{ $order->review_status ?? 'waiting' }}">
+      <div class="box-head" style="margin-bottom:8px"><h3>Payment review</h3>
+        <span class="badge {{ ['received' => 'ok', 'not_received' => 'bad'][$order->review_status] ?? 'warn' }}">{{ $order->reviewLabel() }}</span></div>
+      @if ($order->review_status)
+        <p class="muted" style="font-size:13.5px;margin:0 0 10px">By <b>{{ $order->reviewer?->name ?? 'removed user' }}</b> · {{ $order->reviewed_at?->format('d M, h:i A') }}@if ($order->review_note) · “{{ $order->review_note }}”@endif</p>
+      @else
+        <p class="muted" style="font-size:13.5px;margin:0 0 10px">Check your {{ $buy ? 'bank / UPI app for the ' . $order->money($order->fiat_amount) . ' payment (amount, reference ' . $order->user_reference . ', sender name)' : 'wallet for ' . number_format($order->usdt_amount, 2) . ' USDT on ' . $order->network . ' (tx ' . \Illuminate\Support\Str::limit((string) $order->user_reference, 18) . ')' }}, then mark it below.</p>
+      @endif
+      @if (in_array($order->status, ['payment_submitted', 'processing']))
+        <form method="POST" action="{{ route('admin.orders.review', $order) }}" class="form review-form">
+          @csrf
+          <input class="input" name="review_note" value="{{ old('review_note') }}" placeholder="Note (required if not received)">
+          <button name="result" value="received" class="btn btn-primary" onclick="return confirm('Confirm the {{ $what }} has arrived in the account?')">✓ {{ $buy ? 'Payment received' : 'USDT received' }}</button>
+          <button name="result" value="not_received" class="btn btn-danger">✕ Not received</button>
+        </form>
+      @endif
+      @unless ($staffIsAdmin)
+        <p class="hint" style="margin-top:8px">After you mark it reviewed, the admin approves and completes the order.</p>
+      @endunless
+    </div>
+    @endif
+
+    @if ($order->isOpen() && $staffIsAdmin)
     <div class="box">
       <h3 style="margin-bottom:14px">Actions</h3>
+      @if ($order->status === 'payment_submitted' && $order->review_status !== 'received')
+        <div class="alert {{ $order->review_status === 'not_received' ? 'alert-error' : 'alert-info' }}" style="margin-bottom:14px">{{ $order->review_status === 'not_received' ? '⚠ The manager marked this as NOT received.' : '⏳ Not reviewed by a manager yet.' }} Approve only after you have confirmed the {{ $what }} yourself.</div>
+      @endif
       @if ($order->status === 'payment_submitted')
         <form method="POST" action="{{ route('admin.orders.accept', $order) }}" class="form" style="margin-bottom:18px" data-confirm="Confirm you have verified the {{ $buy ? 'INR payment in your bank' : 'USDT deposit on-chain' }}?">
           @csrf
@@ -126,7 +154,7 @@
 
   <div>
     <div class="box">
-      <div class="box-head"><h3>Customer</h3><a href="{{ route('admin.users.show', $u) }}" class="btn btn-ghost btn-sm">Profile</a></div>
+      <div class="box-head"><h3>Customer</h3>@if (auth()->user()->is_admin)<a href="{{ route('admin.users.show', $u) }}" class="btn btn-ghost btn-sm">Profile</a>@endif</div>
       <dl class="kv" style="grid-template-columns:100px 1fr">
         <dt>Name</dt><dd>{{ $u->name }}</dd>
         <dt>Client ID</dt><dd class="mono">{{ $u->client_id }}</dd>

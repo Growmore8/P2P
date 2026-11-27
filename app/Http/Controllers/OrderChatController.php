@@ -65,7 +65,7 @@ class OrderChatController extends Controller
     private function authorizeAccess(Request $request, Order $order): bool
     {
         $user = $request->user();
-        $staff = $user->is_admin && $request->routeIs('admin.*');
+        $staff = $user->isStaff() && $request->routeIs('admin.*');
         abort_unless($staff || $order->user_id === $user->id, 404);
 
         return $staff;
